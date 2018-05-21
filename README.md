@@ -16,7 +16,7 @@
 <br>
 
 # Pulse
-phData Application Health Service
+Hadoop log aggregation, alerting, and lifecycle management
 
 ## Pulse Features
 
@@ -31,10 +31,17 @@ phData Application Health Service
 - Email and web hook integrations
 	
 ### Log Lifecycle Management
-- Built in rotation of logs. Keep logs for as long as you need them and not longer.
+- Built in rotation of logs. 
+  - Keep logs for as long as you need them
+  - Automatically rotate new log indexes after a configured time period
 
 ### Dashboarding
-- Integration with existing dashboards for rich UIs. Works with Banana, Hue Search, and Arcadia Data
+- Integration with existing dashboards for rich UIs. 
+
+Works with 
+- Banana
+- Hue Search
+- Arcadia Data
 
 ### Hadoop Native
 - Pulse uses Solr for document indexing and search and can be deployed on your Hadoop cluster
@@ -77,21 +84,21 @@ See the [Log Appender README](./log-appender/README.md) for more details.
 Pulse can be installed as a Cloudera CSD (Custom Service Descriptor). See [CSD](./cloudera-integration/csd/README.md) 
 and [PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.
 
-*** Installing the CSD:
+***Installing the CSD***
 
 1. Download the latest CSD jar []()
 2. Place the jar in your Cloudera Manager CSD directory, usually `/opt/cloudera/csd`
 3. Modify the ownership of the jar `chown cloudera-scm: /opt/cloudera/csd/pulse-<version>.jar`
 4. Restart Cloudera Manager to install the jar
 
-*** Installing the Parcel:
+***Installing the Parcel***
 
 1. Download the parcel and parcel.sha from []()
 2. Place the parcel in the parcel-repo directory, usuall `/opt/cloudera/parcel-repo`
 3. In Cloudera Manager, navigate to the Parcels page and click 'Check for new Parcels' button
 4. Find the Pulse parcel, deploy and activate it
 
-*** Installing the service:
+***Installing the service***
 
 Pulse can be installed through the "Add New Service" button for your cluster.
 
@@ -101,7 +108,7 @@ The wizard will ask you for:
 - `smtp address`: The hostname of your smpt server
 - `smtp port`: The port of your smtp server
 
-*** Deploying config
+***Deploying config***
 Pulse has two configuration files, `collection-roller.yml` and `alert-engine.yml`
 
 Both of these configs are deployed via safety valves. [Alert Engine Example](./example-configs/collection-roller/collection-roller.yml) and [Collection Roller Example](./example-configs/alert-engine/alert-engine.yml)
@@ -120,25 +127,18 @@ Remove the `.template` suffix from these two files under the local directory.
 
 Change the kerberos keyTab and principal in `jaas.conf` to your own (you need to create one if you don't have it already)
 
-Start to run the project manually from the project root, run:
-
-```bash
-$ make package
-$ make -j3 run
-```
-
 Run individual components:
 ```bash
-$ make run-collection-roller
-$ make run-log-collector
-$ make run-alert-engine
+$ local/run-collection-roller
+$ local/run-log-collector
+$ local/run-alert-engine
 ```
 
 to run all components. Note `j3` is necessary to run all components, each running on their own thread. If `j3` is
 left out, then only one component will run.
 
 ## Running tests
-Run all tests from the project root with this command:
+Run all tests from the project root:
 
 ```bash
 $ make test
