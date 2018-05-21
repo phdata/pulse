@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "name": "PULSE",
+  "version": "{{ version }}",
+  "extraVersionInfo": {
+    "fullVersion": "{{ version }}",
+    "baseVersion": "{{ version }}",
+    "patchCount": "0"
+  },
+  "depends": "CDH (>= 5.2), CDH (<< 6.0)",
+  "setActiveSymlink": true,
+  "scripts": {
+    "defines": "pulse_parcel_env.sh"
+  },
+  "packages": [
+    {
+      "name": "PULSE",
+      "version": "{{ version }}"
+    }
+  ],
+  "components": [
+    {
+      "name": "PULSE",
+      "version": "{{ version }}",
+      "pkg_version": "{{ version }}"
+    }
+  ],
+  "provides": [
+    "pulse"
+  ],
+  "users": {
+    "pulse": {
+      "longname": "phData Application Monitoring Suite",
+      "home": "/var/lib/pulse",
+      "shell": "/sbin/nologin",
+      "extra_groups": []
+    }
+  },
+  "groups": [
+    "pulse"
+  ]
+}

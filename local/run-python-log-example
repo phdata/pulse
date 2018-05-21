@@ -1,0 +1,3 @@
+#!/bin/bash
+set -x
+python3 appenders/python/logger_example.py

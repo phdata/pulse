@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </layout>
+        <target>System.err</target>
+    </appender>
+    <logger name="org.apache.zookeeper" level="WARN"
+            additivity="false">
+        <appender-ref ref="STDERR"/>
+    </logger>
+    <logger name="org.apache.hadoop" level="WARN"
+            additivity="false">
+        <appender-ref ref="STDERR"/>
+    </logger>
+    <logger name="org.apache.solr" level="WARN"
+            additivity="false">
+        <appender-ref ref="STDERR"/>
+    </logger>
+    <logger name="org.apache.zookeeper" level="WARN"
+            additivity="false">
+        <appender-ref ref="STDERR"/>
+    </logger>
+    <logger name="io.phdata" level="TRACE"
+            additivity="false">
+        <appender-ref ref="STDERR"/>
+    </logger>
+    <logger name="org.apache.solr.core.JmxMonitoredMap" level="ERROR"
+            additivity="false">
+        <appender-ref ref="STDERR"/>
+    </logger>
+    <root level="info">
+        <appender-ref ref="STDERR"/>
+    </root>
+</configuration>

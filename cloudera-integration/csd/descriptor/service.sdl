@@ -1,0 +1,291 @@
+{
+  "name": "PULSE",
+  "label": "Pulse",
+  "description": "Pulse Application Log Monitoring",
+  "icon" : "images/glass.png",
+  "version": "{{ version }}",
+  "runAs": {
+    "user": "pulse",
+    "group": "pulse"
+  },
+  "serviceDependencies": [
+    {
+      "name": "ZOOKEEPER",
+      "required": "true"
+    },
+    {
+      "name": "SOLR",
+      "required": "true"
+    }
+  ],
+  "parcel" : {
+    "requiredTags" : [ "pulse" ],
+    "repoUrl" : "http://s3.amazonaws.com/parcels"
+  },
+  "roles": [
+    {
+      "name": "LOG_COLLECTOR",
+      "label": "Log Collector",
+      "pluralLabel": "Logging Collectors",
+      "inExpressWizard": true,
+      "parameters": [
+        {
+          "name": "port",
+          "label": "log collector listening port",
+          "description": "log collector web server port number",
+          "required": "true",
+          "type": "port",
+          "default": 9001
+        },
+        {
+          "name" : "log.collector.max.heapsize",
+          "label" : "Java Heap Size of Log Collector in Bytes",
+          "description" : "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in bytes.",
+          "required" : "true",
+          "type" : "memory",
+          "unit" : "bytes",
+          "min" : 67108864,
+          "default" : 2147483648
+        }
+      ],
+      "topology": {
+        "minInstances": "1",
+        "maxInstances": "10"
+      },
+      "startRunner": {
+        "program": "scripts/control.sh",
+        "args": [
+          "start_log_collector"
+        ],
+        "environmentVariables": {
+          "WEBSERVER_PORT": "${port}",
+          "LOG_COLLECTOR_MAX_HEAP": "${log.collector.max.heapsize}"
+        }
+      },
+      "configWriter": {
+        "auxConfigGenerators" : [
+        {
+          "filename" : "application.conf",
+          "sourceFilename" : "aux/application.conf"
+        }
+      ]},
+      "kerberos": "true",
+      "kerberosPrincipals": [
+        {
+          "name": "PULSE_PRINCIPAL",
+          "primary": "pulse",
+          "instance": "${host}"
+        },
+        {
+          "name": "PULSE_HTTP_PRINCIPAL",
+          "primary": "HTTP",
+          "instance": "${host}"
+        }
+      ],
+      "logging" : {
+        "dir" : "/var/log/pulse",
+        "filename" : "log-collector.log",
+        "modifiable" : true,
+        "configName" : "log.dir",
+        "loggingType" : "logback",
+        "additionalConfigs" : [
+
+        ]
+      }
+    },
+    {
+      "name": "COLLECTION_ROLLER",
+      "label": "Collection Roller",
+      "pluralLabel": "Collection Roller",
+      "inExpressWizard": true,
+      "parameters": [
+        {
+          "name": "collection.roller.configuration.file",
+          "label": "collection roller configuration file",
+          "description": "path to yaml collection roller configuration",
+          "default": "collection-roller.yml",
+          "required": "true",
+          "type": "path",
+          "pathType": "localDataFile"
+        },
+        {
+          "name" : "collection.roller.max.heapsize",
+          "label" : "Java Heap Size of Collection Roller in Bytes",
+          "description" : "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in bytes.",
+          "required" : "true",
+          "type" : "memory",
+          "unit" : "bytes",
+          "min" : 67108864,
+          "default" : 2147483648
+        }
+      ],
+      "topology": {
+        "minInstances": "1",
+        "maxInstances": "1"
+      },
+      "startRunner": {
+        "program": "scripts/control.sh",
+        "args": [
+          "start_collection_roller"
+        ],
+        "environmentVariables": {
+          "COLLECTION_ROLLER_CONFIG": "${collection.roller.configuration.file}",
+          "COLLECTION_ROLLER_MAX_HEAP": "${collection.roller.max.heapsize}"
+        }
+      },
+      "kerberos": "true",
+      "kerberosPrincipals": [
+        {
+          "name": "PULSE_PRINCIPAL",
+          "primary": "pulse",
+          "instance": "${host}"
+        },
+        {
+          "name": "PULSE_HTTP_PRINCIPAL",
+          "primary": "HTTP",
+          "instance": "${host}"
+        }
+      ],
+      "configWriter": {
+      "auxConfigGenerators" : [
+        {
+          "filename" : "collection-roller.yml",
+          "sourceFilename" : "aux/collection-roller.yml"
+        }
+      ]},
+      "logging" : {
+        "dir" : "/var/log/pulse",
+        "filename" : "collection-roller.log",
+        "modifiable" : true,
+        "configName" : "log.dir",
+        "loggingType" : "logback",
+        "additionalConfigs" : [
+
+        ]
+      }
+    },
+    {
+      "name": "ALERT_ENGINE",
+      "label": "Alert Engine",
+      "pluralLabel": "Alert Engines",
+      "inExpressWizard": true,
+      "parameters": [
+        {
+          "name": "alert.engine.configuration.file",
+          "label": "alert engine configuration file",
+          "description": "path to yaml alert engine configuration",
+          "default": "alert-engine.yml",
+          "required": "true",
+          "type": "string"
+        },
+        {
+          "name": "smtp.user",
+          "label": "smtp user name",
+          "description": "smtp server username",
+          "required": "false",
+          "default": "",
+          "configurableInWizard": true,
+          "type": "string"
+        },
+        {
+          "name": "smtp.server.address",
+          "label": "smtp server address",
+          "description": "smtp server address for alerts",
+          "default": "",
+          "required": "false",
+          "configurableInWizard": true,
+          "type": "string"
+        },
+        {
+          "name": "smtp.port",
+          "label": "smtp port",
+          "description": "smtp listening port",
+          "default": "25",
+          "required": "false",
+          "configurableInWizard": true,
+          "type": "string"
+        },
+        {
+          "name": "smtp.password",
+          "label": "smtp password",
+          "description": "smtp server authentication password",
+          "default": "",
+          "required": "false",
+          "configurableInWizard": true,
+          "type": "password"
+        },
+        {
+          "name": "smtp.tls",
+          "label": "smtp tls",
+          "description": "smtp tls enabled indicator",
+          "default": false,
+          "required": "false",
+          "type": "boolean"
+        },
+        {
+          "name" : "alert.engine.max.heapsize",
+          "label" : "Java Heap Size of Alert Engine in Bytes",
+          "description" : "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in bytes.",
+          "required" : "true",
+          "type" : "memory",
+          "unit" : "bytes",
+          "min" : 67108864,
+          "default" : 2147483648
+        }
+      ],
+      "topology": {
+        "minInstances": "1",
+        "maxInstances": "1"
+      },
+      "startRunner": {
+        "program": "scripts/control.sh",
+        "args": [
+          "start_alert_engine"
+        ],
+        "environmentVariables": {
+          "ALERT_ENGINE_CONFIG": "${alert.engine.configuration.file}",
+          "SMTP_USER": "${smtp.user}",
+          "SMTP_PASSWORD": "${smtp.password}",
+          "SMTP_SERVER": "${smtp.server.address}",
+          "SMTP_PORT": "${smtp.port}",
+          "SMTP_TLS": "${smtp.tls}",
+          "ALERT_ENGINE_MAX_HEAP": "${alert.engine.max.heapsize}"
+        }
+      },
+      "kerberos": "true",
+      "kerberosPrincipals": [
+        {
+          "name": "PULSE_PRINCIPAL",
+          "primary": "pulse",
+          "instance": "${host}"
+        },
+        {
+          "name": "PULSE_HTTP_PRINCIPAL",
+          "primary": "HTTP",
+          "instance": "${host}"
+        }
+      ],
+      "configWriter" : {
+      "auxConfigGenerators" : [
+        {
+          "filename" : "silenced-applications.txt",
+          "sourceFilename" : "aux/silenced-applications.txt"
+        },
+        {
+          "filename" : "alert-engine.yml",
+          "sourceFilename" : "aux/alert-engine.yml"
+        }
+      ]},
+      "logging" : {
+        "dir" : "/var/log/pulse",
+        "filename" : "alert-engine.log",
+        "modifiable" : true,
+        "configName" : "log.dir",
+        "loggingType" : "logback",
+        "additionalConfigs" : [
+
+        ]
+      }
+    }
+  ]
+}

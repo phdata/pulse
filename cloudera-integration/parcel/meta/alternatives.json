@@ -1,0 +1,8 @@
+{
+  "conf": {
+    "destination": "/etc/pulse",
+    "source": "conf",
+    "priority": 10,
+    "isDirectory": true
+  }
+}

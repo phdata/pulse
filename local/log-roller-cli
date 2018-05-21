@@ -1,0 +1,18 @@
+#!/bin/bash
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$( dirname "$SOURCE" )"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+
+source $BIN_DIR/env.sh
+pwd
+java -Dsun.security.krb5.debug=false -Djava.security.auth.login.config=$JAAS_CONF \
+    -cp "target/lib/*" io.phdata.pulse.collectionroller.CollectionRollerMain \
+    --conf $CWD/config.yml \
+    --zk-hosts "$ZK_QUORUM_SOLR" \
+    $@
