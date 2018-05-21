@@ -2,5 +2,5 @@ language: scala
 scala:
   - 2.11.8
 script:
-  - sbt -mem 4096 test
-  - sbt -mem 4096 assembly
+  - "sbt -mem 4096 test"
+  - "sbt -mem 4096 assembly"
