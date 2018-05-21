@@ -1,7 +1,7 @@
 ![Travis Build Tag](https://travis-ci.org/phdata/pulse.svg?branch=master)
 
 <p align="center">
-  <img src="logo.png" alt="logo.png" />
+  <img src="logo.png" alt="logo.png" length="200" width="200" />
 
 
   <h3 align="center"></h3>
