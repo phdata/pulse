@@ -1,6 +1,8 @@
 language: scala
 scala:
   - 2.11.8
+env:
+  SBT_OPTS="-Xmx4096M"
 script:
-  - "sbt -mem 4096 test"
-  - "sbt -mem 4096 assembly"
+  - sbt test
+  - sbt assembly
