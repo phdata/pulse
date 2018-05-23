@@ -77,7 +77,8 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
         val threshold = alertRule.resultThreshold.getOrElse(0)
 
         if (threshold == -1 && results.isEmpty) {
-          logger.info(s"Alert triggered for $applicationName on alert $alertRule")
+          logger.info(
+            s"Alert triggered for $applicationName on alert $alertRule at no results found condition")
           Some(TriggeredAlert(alertRule, applicationName, results))
         } else if (results.lengthCompare(threshold) > 0) {
           logger.info(s"Alert triggered for $applicationName on alert $alertRule")
