@@ -30,12 +30,12 @@ object NotificationFormatter {
     if (num > 1) {
       docs = s"""
                 |Application ${alert.applicationName}
-                |${num} alerts triggered:
+                |Displaying ${num} results of ${alert.rowcount} total found.
            """.stripMargin
     } else {
       docs = s"""
                 |Application ${alert.applicationName}
-                |${num} alert triggered:
+                |Displaying ${num} result of ${alert.rowcount} total found.
            """.stripMargin
     }
     alert.documents.foreach { d =>
