@@ -65,7 +65,128 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
                Some("Exception in thread main"),
                None))
 
+    val document2 = DocumentConversion.toSolrDocument(
+      LogEvent(Some("id2"),
+               "ERROR",
+               "1972-01-01T22:00:00Z",
+               "ERROR2",
+               "message2",
+               "thread2 oxb",
+               Some("Exception in thread main2"),
+               None))
+
+    val document3 = DocumentConversion.toSolrDocument(
+      LogEvent(Some("id3"),
+               "ERROR",
+               "1973-01-01T00:00:33Z",
+               "ERROR",
+               "message3",
+               "thread3 oxb",
+               Some("Exception in thread main3"),
+               None))
+
+    val document4 = DocumentConversion.toSolrDocument(
+      LogEvent(Some("id4"),
+               "ERROR",
+               "1973-01-01T00:00:33Z",
+               "ERROR",
+               "message3",
+               "thread3 oxb",
+               Some("Exception in thread main3"),
+               None))
+
+    val document5 = DocumentConversion.toSolrDocument(
+      LogEvent(Some("id5"),
+               "ERROR",
+               "1973-01-01T00:00:33Z",
+               "ERROR",
+               "message3",
+               "thread3 oxb",
+               Some("Exception in thread main3"),
+               None))
+
+    val document6 = DocumentConversion.toSolrDocument(
+      LogEvent(Some("id6"),
+               "ERROR",
+               "1973-01-01T00:00:33Z",
+               "ERROR",
+               "message3",
+               "thread3 oxb",
+               Some("Exception in thread main3"),
+               None))
+
+    val document7 = DocumentConversion.toSolrDocument(
+      LogEvent(Some("id7"),
+               "ERROR",
+               "1973-01-01T00:00:33Z",
+               "ERROR",
+               "message3",
+               "thread3 oxb",
+               Some("Exception in thread main3"),
+               None))
+
+    val document8 = DocumentConversion.toSolrDocument(
+      LogEvent(Some("id8"),
+               "ERROR",
+               "1973-01-01T00:00:33Z",
+               "ERROR",
+               "message3",
+               "thread3 oxb",
+               Some("Exception in thread main3"),
+               None))
+
+    val document9 = DocumentConversion.toSolrDocument(
+      LogEvent(Some("id9"),
+               "ERROR",
+               "1973-01-01T00:00:33Z",
+               "ERROR",
+               "message3",
+               "thread3 oxb",
+               Some("Exception in thread main3"),
+               None))
+
+    val document10 = DocumentConversion.toSolrDocument(
+      LogEvent(Some("id10"),
+               "ERROR",
+               "1973-01-01T00:00:33Z",
+               "ERROR",
+               "message3",
+               "thread3 oxb",
+               Some("Exception in thread main3"),
+               None))
+
+    val document11 = DocumentConversion.toSolrDocument(
+      LogEvent(Some("id11"),
+               "ERROR",
+               "1973-01-01T00:00:33Z",
+               "ERROR",
+               "message3",
+               "thread3 oxb",
+               Some("Exception in thread main3"),
+               None))
+
+    val document12 = DocumentConversion.toSolrDocument(
+      LogEvent(Some("id12"),
+               "ERROR",
+               "1973-01-01T00:00:33Z",
+               "ERROR",
+               "message3",
+               "thread3 oxb",
+               Some("Exception in thread main3"),
+               None))
+
     solrClient.add(document)
+    solrClient.add(document2)
+    solrClient.add(document3)
+    solrClient.add(document4)
+    solrClient.add(document5)
+    solrClient.add(document6)
+    solrClient.add(document7)
+    solrClient.add(document8)
+    solrClient.add(document9)
+    solrClient.add(document10)
+    solrClient.add(document11)
+    solrClient.add(document12)
 
     solrClient.commit(true, true, true)
     // unset the default collection so we are sure it is being set in the request
@@ -114,7 +235,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(null, new NotificationServiceFactory(mailNotificationService, null))
 
-    val triggeredalert  = TriggeredAlert(alertrule, "Spark", null)
+    val triggeredalert  = TriggeredAlert(alertrule, "Spark", null, 1)
     val app             = Application("a", List(alertrule), Some(List(mailAlertProfile)), None)
     val triggeredAlerts = List(triggeredalert)
 
@@ -131,7 +252,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(null, new NotificationServiceFactory(null, slackNotificationService))
 
-    val triggeredalert  = TriggeredAlert(alertrule, "Spark", null)
+    val triggeredalert  = TriggeredAlert(alertrule, "Spark", null, 1)
     val app             = Application("a", List(alertrule), None, Some(List(slackAlertProfile)))
     val triggeredAlerts = List(triggeredalert)
 
@@ -168,8 +289,8 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
         |  """.stripMargin
     val app = AlertEngineConfigParser.convert(yaml).applications.head
 
-    val triggeredAlerts = List((app, Option(TriggeredAlert(app.alertRules(0), "spark1", null))),
-                               (app, Option(TriggeredAlert(app.alertRules(1), "spark2", null))))
+    val triggeredAlerts = List((app, Option(TriggeredAlert(app.alertRules(0), "spark1", null, 1))),
+                               (app, Option(TriggeredAlert(app.alertRules(1), "spark2", null, 2))))
 
     val groupedTriggerdAlerts = engine.groupTriggeredAlerts(triggeredAlerts)
 

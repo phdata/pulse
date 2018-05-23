@@ -39,8 +39,8 @@ class MailNotificationServiceTest extends FunSuite {
   val profile  = MailAlertProfile("a", List("testing@phdata.io"))
   val profile2 = MailAlertProfile("b", List("testing1@phdata.io", "testing@phdata.io"))
 
-  val triggeredalert  = TriggeredAlert(alertrule, "Spark", Seq(doc))
-  val triggeredalert2 = TriggeredAlert(alertrule2, "PipeWrench", Seq(doc))
+  val triggeredalert  = TriggeredAlert(alertrule, "Spark", Seq(doc), 23)
+  val triggeredalert2 = TriggeredAlert(alertrule2, "PipeWrench", Seq(doc), 15)
 
   test("sending one email to an address") {
     if (new java.io.File("alert-engine/scripts/mail-password.txt").exists) {

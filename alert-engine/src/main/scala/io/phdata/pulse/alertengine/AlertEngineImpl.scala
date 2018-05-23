@@ -79,10 +79,12 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
         if (threshold == -1 && results.isEmpty) {
           logger.info(
             s"Alert triggered for $applicationName on alert $alertRule at no results found condition")
-          Some(TriggeredAlert(alertRule, applicationName, results))
+          Some(TriggeredAlert(alertRule, applicationName, results, 0))
         } else if (results.lengthCompare(threshold) > 0) {
           logger.info(s"Alert triggered for $applicationName on alert $alertRule")
-          Some(TriggeredAlert(alertRule, applicationName, results))
+          query.setRows(0)
+          val rowCount = solrServer.query(query).getResults.getNumFound
+          Some(TriggeredAlert(alertRule, applicationName, results, rowCount))
         } else {
           logger.info(s"No alert needed for $applicationName with alert $alertRule")
           None
