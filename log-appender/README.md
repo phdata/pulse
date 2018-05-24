@@ -22,19 +22,19 @@ log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
 log4j.appender.stdout.layout.ConversionPattern=%5p [%t] (%F:%L) - %m%n
 
 log4j.appender.http=io.phdata.pulse.log.HttpAppender
-log4j.appender.http.Address=http://log-collector-host/log?application=pulse-test-90
+log4j.appender.http.Address=http://edge2.valhalla.phdata.io:9015/log?application=pulse-test-100
 log4j.appender.http.layout=org.apache.log4j.core.layout.JsonLayout
 log4j.appender.http.layout.compact=false
 log4j.appender.http.layout.complete=true
 # Info messages will cause the http client to recursively call the logger 
 # when the connection to the log-collector is not available
-log4j.logger.shade.org.apache.http=ERROR
-log4j.logger.shade.org.apache.http.wire=ERROR
+log4j.logger.io.phdata.pulse.shade.org.apache.http=off
+log4j.logger.io.phdata.pulse.shade.org.apache.wire=off
 
 ```
 
 It's recommended (for now) that the logs be written to file in addition to Pulse through the http 
-appender. 
+appender. Pulse doesn't currently make any availability guarantees.
 
 Example usage:
 
