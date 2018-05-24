@@ -73,7 +73,12 @@ case $CMD in
       SMTP_PASSWORD_FLAG=""
       echo "passwiod is unset"
     fi
-    exec $JAVA_HOME/bin/java -DXmx=$ALERT_ENGINE_MAX_HEAP -Dlogback.configurationFile=$LOGBACK_CONFIG $JAVA_PROPERTIES -cp "$CLASS_PATH" io.phdata.pulse.alertengine.AlertEngineMain \
+    exec $JAVA_HOME/bin/java \
+    -DXmx=$ALERT_ENGINE_MAX_HEAP \
+    -Dlogback.configurationFile=$LOGBACK_CONFIG \
+    $JAVA_PROPERTIES \
+    $CSD_JAVA_OPTS \
+    -cp "$CLASS_PATH" io.phdata.pulse.alertengine.AlertEngineMain \
     --daemonize \
     --zk-hosts $SOLR_ZK_QUORUM \
     --smtp-server  $SMTP_SERVER  \
@@ -90,6 +95,7 @@ case $CMD in
     exec $JAVA_HOME/bin/java \
     -DXmx=$COLLECTION_ROLLER_MAX_HEAP \
     -Dlogback.configurationFile=$LOGBACK_CONFIG \
+    $CSD_JAVA_OPTS \
     $JAVA_PROPERTIES \
     -cp "$CLASS_PATH" io.phdata.pulse.collectionroller.CollectionRollerMain \
     --daemonize \
@@ -102,6 +108,7 @@ case $CMD in
     exec $JAVA_HOME/bin/java \
     -XX:+UseG1GC \
     -DXmx=$LOG_COLLECTOR_MAX_HEAP \
+    $CSD_JAVA_OPTS \
     -Dconfig.file="$AKKA_CONF" \
     -Dlogback.configurationFile=$LOGBACK_CONFIG $JAVA_PROPERTIES \
     -cp "$CLASS_PATH" io.phdata.pulse.logcollector.LogCollector \

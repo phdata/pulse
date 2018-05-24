@@ -28,6 +28,7 @@
       "label": "Log Collector",
       "pluralLabel": "Logging Collectors",
       "inExpressWizard": true,
+      "jvmBased" : "true",
       "parameters": [
         {
           "name": "port",
@@ -98,6 +99,7 @@
       "label": "Collection Roller",
       "pluralLabel": "Collection Roller",
       "inExpressWizard": true,
+      "jvmBased" : "true",
       "parameters": [
         {
           "name": "collection.roller.configuration.file",
@@ -169,6 +171,7 @@
       "label": "Alert Engine",
       "pluralLabel": "Alert Engines",
       "inExpressWizard": true,
+      "jvmBased" : "true",
       "parameters": [
         {
           "name": "alert.engine.configuration.file",
