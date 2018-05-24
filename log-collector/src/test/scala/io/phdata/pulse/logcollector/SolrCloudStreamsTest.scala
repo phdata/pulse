@@ -60,8 +60,7 @@ class SolrCloudStreamsTest extends FunSuite with BaseSolrCloudTest {
                                Some("Exception in thread main"),
                                None)
 
-  test("Test flow groups by application id, flushes after GROUP_MAX_TIME") {
-
+  ignore("Test flow groups by application id, flushes after GROUP_MAX_TIME") {
     val app1Name = TestUtil.randomIdentifier()
     val app2Name = TestUtil.randomIdentifier()
 
@@ -76,46 +75,46 @@ class SolrCloudStreamsTest extends FunSuite with BaseSolrCloudTest {
     solrService.createAlias(app2Alias, app2Collection)
 
     val testValues = Iterator((app1Name, document1), (app1Name, document2), (app2Name, document3))
+    val solrStream = streamProcessor.groupedInsert.run()
 
-    testValues.foreach(x => streamProcessor.groupedInsert.run() ! x)
+    testValues.foreach(x => solrStream ! x)
+
+    // sleep past the time documents would be flushed
+    Thread.sleep(streamProcessor.GROUP_MAX_TIME.toMillis + 5000)
 
     val app1Query = new SolrQuery("level: ERROR")
-    app1Query.add("collection", app1Alias)
-
-    // sleep a little bit past the time documents would be flushed
-    Thread.sleep(streamProcessor.GROUP_MAX_TIME.toMillis + 500)
+    app1Query.set("collection", app1Alias)
 
     val query1Result = solrClient.query(app1Query)
 
-    assertResult(2)(query1Result.getResults.getNumFound)
-
     val app2Query = new SolrQuery("level: ERROR")
-    app2Query.add("collection", app2Alias)
+    app2Query.set("collection", app2Alias)
 
     val query2Result = solrClient.query(app2Query)
 
+    assertResult(2)(query1Result.getResults.getNumFound)
     assertResult(1)(query2Result.getResults.getNumFound)
   }
 
   test("Test flow groups by application id, flushes after max documents") {
     val app1Name = TestUtil.randomIdentifier()
 
-    val app1Collection = s"${app1Name}_1"
-    val app1Alias      = s"${app1Name}_latest"
+    val collection = s"${app1Name}_1"
+    val alias      = s"${app1Name}_latest"
 
-    solrService.createCollection(app1Collection, 1, 1, TEST_CONF_NAME, null)
-    solrService.createAlias(app1Alias, app1Collection)
+    solrService.createCollection(collection, 1, 1, TEST_CONF_NAME, null)
+    solrService.createAlias(alias, collection)
 
     val testValues = List.fill(streamProcessor.GROUP_SIZE + 100)((app1Name, document1))
 
-    testValues.foreach(x => streamProcessor.groupedInsert.run() ! x)
+    val solrStream = streamProcessor.groupedInsert.run()
+
+    testValues.foreach(x => solrStream ! x)
 
     val query = new SolrQuery("level: ERROR")
-    query.add("collection", app1Alias)
+    query.set("collection", alias)
     // sleep until documents are flushed
     Thread.sleep(9000)
-
-    solrClient.setDefaultCollection(app1Collection)
 
     val queryResult = solrClient.query(query)
 
