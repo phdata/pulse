@@ -66,7 +66,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
                Some("Exception in thread main"),
                None))
 
-    val document2 = DocumentConversion.toSolrDocument(
+    val documentError = DocumentConversion.toSolrDocument(
       LogEvent(None,
                "ERROR",
                "1972-01-01T22:00:00Z",
@@ -79,7 +79,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     solrClient.add(document)
 
     for (i <- 1 to 12) {
-      solrClient.add(document2)
+      solrClient.add(documentError)
     }
 
     solrClient.commit(true, true, true)
@@ -93,13 +93,11 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
       new AlertEngineImpl(
         solrClient,
         new NotificationServiceFactory(mailNotificationService, slackNotificationService))
-    val result: TriggeredAlert = engine.triggeredAlert(TEST_COLLECTION, alert).get
+    val result = engine.triggeredAlert(TEST_COLLECTION, alert).get
     assertResult(alert)(result.rule)
     // @TODO why is this 2 instead of 1 sometimes?
     assert(result.documents.lengthCompare(0) > 0)
     assert(result.applicationName == TEST_COLLECTION)
-    //print out to see the result
-    println(NotificationFormatter.formatMessage(result))
   }
 
   test("trigger alert when threshold is set to '-1' and there are no results") {

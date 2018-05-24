@@ -43,7 +43,7 @@ class NotificationFormatterTest extends FunSuite {
 
   val triggeredalert = TriggeredAlert(alertrule, "Spark", Seq(doc), 20)
   val triggeredalert2 =
-    TriggeredAlert(alertrule, "PipeWrench", Seq(doc, doc2), 5)
+    TriggeredAlert(alertrule, "PipeWrench", Seq(doc, doc2), 15)
 
   test("subject content testing") {
     assertResult("New alert in application Spark")(
