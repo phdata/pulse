@@ -1,12 +1,17 @@
 # Collection Roller
-The collection roller will first create an application if it does not exist. An application consists
-of 
+The log collector manages log indexes for applications.
+An application for the log collector consists of:
+- timestamped collections in the format <application_name>_<unixtime_created>. The 'timestamped' 
+collections hold the actual log data.
+- an alias pointing to the newest timestamped collection called <application_name>_latest. 
+The 'latest' alias is used for any applications writing logs (like the Log Collector)
+- an alias pointing to all collections called <application>_all. The 'all' alias is used for 
+searching all collections
+
+If an application does not exist in Pulse the log collector will create the required aliases and
+indexes.
 Logs are kept for a limited amount of time (weeks or months). Logs for individual applications will
 actually be multiple collections, each covering a time period.
-- A series of collections, one created for each day the application is running (appname_date)
-- Latest collection alias (appname_latest): This alias points at a single collection that takes new log 
-messages
-- All collections alias (appname_all): This alias points at all non-retired logging collections
 
 ## Rolling
 After an application has been created, the collection roller will create new collections for each
@@ -33,7 +38,29 @@ applications:
 
 ```
 
+At minimum, the configuration needs:
+- `solrConfigSetDir`: These Solr configurations can contain customized schema.xml and solrconfig.xml.
+The `solrConfigSetDir` can contain multiple configurations. The configurations will be looped over
+and uploaded to solr each time the Collection Roller runs.
+- `applications`: A list of applications
+- The applications must contain at minimum: `name` and `solrConfigSetName`. `name` must be unique. 
+`solrConfigSetName` must correspond to the name of a solr config directory in `solrConfigSetDir`
+
+Optional configuration for applications:
+- `numCollections`: The number of collections to keep when rolling collections. The default is 7
+- `rollPeriod`: Rollperiod in days. Default is 1.
+- `shards`: Number of shards for each collection. Default is 1.
+- `replicas`: Number of replicas in each collection. Default is 1.
+
 This configuration file is passes as a CLI argument along with a list of zookeeper hosts.
 
-## Running the app
-see `scripts/run-example`
+## Running the Collection Roller
+A helper script to run the collection roller (mostly used for development) is here
+`local/run-collection-roller`
+
+To run the collection roller from the command line looks like
+
+```bash
+$ java -DXmx=2147483648 -Dlogback.configurationFile=logback.xml -Djava.security.auth.login.config=./jaas.conf -Dsun.security.krb5.debug=false -cp <path-to-collection-roller-assembly> io.phdata.pulse.collectionroller.CollectionRollerMain --daemonize --conf collection-roller.yml --zk-hosts master1.valhalla.phdata.io:2181/solr
+
+```

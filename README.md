@@ -16,38 +16,38 @@
 <br>
 
 # Pulse
-Hadoop log aggregation, alerting, and lifecycle management
 
 ## Pulse Features
 
-### Log Aggregation and Search
+***Log Aggregation and Search***
 - Add log aggregation, search, and alerts to your Java, Scala, Bash, or Python programs and scripts
 
-### Alerting
+***Alerting***
 - Flexible alerting using the Pulse Alert Engine
 - Write alerts using the full solr query syntax. Example alerts:
 	- There was an appliction Error in the last 5 minutes 
 	- My application has stopped logging messages
 - Email and web hook integrations
 	
-### Log Lifecycle Management
+***Log Lifecycle Management***
 - Built in rotation of logs. 
   - Keep logs for as long as you need them
   - Automatically rotate new log indexes after a configured time period
+  - Easily search all logs
 
-### Dashboarding
+***Dashboarding***
 - Integration with existing dashboards for rich UIs. 
 
-Works with 
+Works with:
 - Banana
 - Hue Search
 - Arcadia Data
 
-### Hadoop Native
+***Hadoop Native***
 - Pulse uses Solr for document indexing and search and can be deployed on your Hadoop cluster
 - Use existing Sentry roles to control access to log data
 
-### Cloudera Manager Integration
+***Cloudera Manager Integration***
 - Simple deployment using CSDs and Parcels
 - Manage and monitor Pulse from within Cloudera Manager
 
@@ -58,27 +58,29 @@ and [Collection Roller readme](./collection-roller/README.md) for more details.
 
 ## Components
 
-### Collection Roller
+***Collection Roller***
 The collection roller is responsible for creating solr indexes for new applications in Pulse and 
 deleting old or expired log collections. 
 
-### Alert Engine
+***Alert Engine***
 The Alert Engine is a daemon process with a set of `alertRules`. Alert rules can be configured
 to notify developers and application users when an event happens.
 
 See the [Alerting Engine README](./alert-engine/README.md) for more details and configuration
 options.
 
-### Log Collector
+***Log Collector***
 The Log Collector is an HTTP server that receives log messages as JSON and puts them into SOLR
  collections.
 
 See the [Log Collector README](./log-collector/README.md) for more details and configuration
  options.
-### Log Appender
+***Log Appender***
 An HTTP log appender for log4j 1.x that will post json messages to the log collector.
 
 See the [Log Appender README](./log-appender/README.md) for more details.
+
+There are also log appenders for Bash and Python in the 'appenders' folder
 
 ## Installation
 Pulse can be installed as a Cloudera CSD (Custom Service Descriptor). See [CSD](./cloudera-integration/csd/README.md) 
@@ -122,8 +124,8 @@ Alert Engine Advanced Configuration Snippet (Safety Valve) for alert-engine.yml`
 ## Running the application manually on a cluster
 
 Remove the `.template` suffix from these two files under the local directory.
-- `env.sh.template`
-- `jaas.conf.template`
+- `cp env.sh.template env.sh`
+- `cp jaas.conf.template jaas.conf`
 
 Change the kerberos keyTab and principal in `jaas.conf` to your own (you need to create one if you don't have it already)
 
@@ -133,9 +135,6 @@ $ local/run-collection-roller
 $ local/run-log-collector
 $ local/run-alert-engine
 ```
-
-to run all components. Note `j3` is necessary to run all components, each running on their own thread. If `j3` is
-left out, then only one component will run.
 
 ## Running tests
 Run all tests from the project root:

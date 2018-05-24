@@ -41,3 +41,14 @@ An alert rule consists of
 - threshold: if the query returns more than threshold results, an alert will be triggered. The default is 0. If the threshold is set to `-1`, the non-existence of documents with this query will trigger an alert. This is useful for tracking application uptime.
 - alertProfiles: One or many alertProfiles can be defined. For each alertProfile defined in an alert, an alertProfile needs to be defined for the application
 
+## Silenced applications
+A silenced application file can be provided `--silenced-application-file silenced-applications.txt`
+That contains one line per application that should not alert.
+
+## Running the Alert Engine
+A helper script for running the alert engine is located at `local/run-alert-engine`.
+
+Example usage of the Alert Engine:
+```bash
+java -Dlogback.configurationFile=logback.xml -Djava.security.auth.login.config=jaas.conf -cp <path-to-alert-engine-assembly> io.phdata.pulse.alertengine.AlertEngineMain --daemonize --zk-hosts master1.valhalla.phdata.io:2181/solr --smtp-server smtp.gmail.com --smtp-user user@company.com --smtp-port 25 --conf example-configs/alert-engine/alert-engine.yml --silenced-application-file silenced-applications.txt
+```
