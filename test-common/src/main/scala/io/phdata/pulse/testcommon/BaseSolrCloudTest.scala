@@ -22,9 +22,9 @@ import org.apache.solr.cloud.MiniSolrCloudCluster
 import org.scalatest.{ BeforeAndAfterAll, FunSuite }
 
 trait BaseSolrCloudTest extends FunSuite with BeforeAndAfterAll {
-  val TEST_CONF_NAME                             = "testconf"
-  var miniSolrCloudCluster: MiniSolrCloudCluster = TestUtil.miniSolrCloudCluster
-  val solrClient                                 = miniSolrCloudCluster.getSolrClient
+  val TEST_CONF_NAME       = "testconf"
+  val miniSolrCloudCluster = TestUtil.miniSolrCloudCluster
+  val solrClient           = miniSolrCloudCluster.getSolrClient
 
   override def beforeAll(): Unit =
     solrClient.uploadConfig(

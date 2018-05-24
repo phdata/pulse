@@ -112,7 +112,8 @@ class SolrCloudStreamsTest extends FunSuite with BaseSolrCloudTest {
 
     val query = new SolrQuery("level: ERROR")
     query.add("collection", app1Alias)
-    Thread.sleep(1000)
+    // sleep until documents are flushed
+    Thread.sleep(9000)
 
     solrClient.setDefaultCollection(app1Collection)
 
