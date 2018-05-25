@@ -38,9 +38,12 @@ import org.apache.solr.common.util.NamedList
 import scala.collection.JavaConversions._
 
 class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable with LazyLogging {
-  val zkClient = new SolrZkClient(zkAddress, 30000, 45000, null)
+  private val ZK_CLIENT_TIMEOUT = 30000
+  private val ZK_CLIENT_CONNECT_TIMEOUT = 30000
 
-  val manager = new ZkConfigManager(zkClient)
+  private val zkClient = new SolrZkClient(zkAddress, ZK_CLIENT_TIMEOUT, ZK_CLIENT_CONNECT_TIMEOUT, null)
+
+  private val manager = new ZkConfigManager(zkClient)
 
   def uploadConfDir(path: Path, name: String): Unit = manager.uploadConfigDir(path, name)
 
@@ -50,7 +53,7 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
                        configName: String,
                        createNodeSet: String,
                        collectionProperties: util.Map[String, String] =
-                         new util.HashMap[String, String]()) = {
+                         new util.HashMap[String, String]()): NamedList[AnyRef] = {
     val params = new ModifiableSolrParams
     params.set(CoreAdminParams.ACTION, CollectionAction.CREATE.name)
     params.set(CoreAdminParams.NAME, name)
@@ -58,8 +61,9 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
     params.set("replicationFactor", replicationFactor)
     params.set("collection.configName", configName)
 
-    if (null != createNodeSet)
+    if (null != createNodeSet) {
       params.set(CollectionAdminParams.CREATE_NODE_SET_PARAM, createNodeSet)
+    }
     if (collectionProperties != null) {
       for (property <- collectionProperties.entrySet) {
         params.set(CoreAdminParams.PROPERTY_PREFIX + property.getKey, property.getValue)
@@ -121,7 +125,7 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
     }
   }
 
-  def clusterStatus() = {
+  def clusterStatus(): NamedList[AnyRef] = {
     val params = new ModifiableSolrParams
     params.set(CoreAdminParams.ACTION, CollectionAction.CLUSTERSTATUS.name)
 
@@ -143,7 +147,7 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
     result
   }
 
-  def createAlias(name: String, collections: String*) = {
+  def createAlias(name: String, collections: String*): NamedList[AnyRef] = {
     val collectionsSeq = collections.mkString(",")
     val params         = new ModifiableSolrParams
     params.set(CoreAdminParams.ACTION, CollectionAction.CREATEALIAS.name)
@@ -157,7 +161,7 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
     makeRequest(request)
   }
 
-  def insertDocuments(collection: String, documents: Seq[SolrInputDocument]) = {
+  def insertDocuments(collection: String, documents: Seq[SolrInputDocument]): Unit = {
 
     logger.info(s"saving ${documents.length} documents to collection '$collection'")
     logger.trace(s"saving documents " + documents.mkString("\n"))
@@ -173,7 +177,7 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
     logger.info(s"saved ${documents.length} documents to collection $collection")
   }
 
-  def deleteCollection(name: String) = {
+  def deleteCollection(name: String): NamedList[AnyRef] = {
     val params = new ModifiableSolrParams
     params.set(CoreAdminParams.ACTION, CollectionAction.DELETE.name)
     params.set(CoreAdminParams.NAME, name)
@@ -186,7 +190,7 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
     makeRequest(request)
   }
 
-  def deleteAlias(name: String) = {
+  def deleteAlias(name: String): NamedList[AnyRef] = {
     val params = new ModifiableSolrParams
     params.set(CoreAdminParams.ACTION, CollectionAction.DELETEALIAS.name)
     params.set(CoreAdminParams.NAME, name)
