@@ -38,10 +38,11 @@ import org.apache.solr.common.util.NamedList
 import scala.collection.JavaConversions._
 
 class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable with LazyLogging {
-  private val ZK_CLIENT_TIMEOUT = 30000
+  private val ZK_CLIENT_TIMEOUT         = 30000
   private val ZK_CLIENT_CONNECT_TIMEOUT = 30000
 
-  private val zkClient = new SolrZkClient(zkAddress, ZK_CLIENT_TIMEOUT, ZK_CLIENT_CONNECT_TIMEOUT, null)
+  private val zkClient =
+    new SolrZkClient(zkAddress, ZK_CLIENT_TIMEOUT, ZK_CLIENT_CONNECT_TIMEOUT, null)
 
   private val manager = new ZkConfigManager(zkClient)
 

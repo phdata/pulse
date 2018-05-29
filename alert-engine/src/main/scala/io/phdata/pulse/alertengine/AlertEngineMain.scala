@@ -45,13 +45,11 @@ object AlertEngineMain extends LazyLogging {
 
     if (parsedArgs.daemonize()) {
       try {
-        val config: AlertEngineConfig = AlertEngineConfigParser.getConfig(parsedArgs.conf())
 
-        val scheduledFuture = executorService.scheduleAtFixedRate(
-          new AlertEngineTask(parsedArgs, config),
-          0L,
-          DAEMON_INTERVAL_MINUTES,
-          TimeUnit.MINUTES)
+        val scheduledFuture = executorService.scheduleAtFixedRate(new AlertEngineTask(parsedArgs),
+                                                                  0L,
+                                                                  DAEMON_INTERVAL_MINUTES,
+                                                                  TimeUnit.MINUTES)
         Runtime.getRuntime.addShutdownHook(shutDownHook(scheduledFuture))
         executorService.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
       } catch {
@@ -64,7 +62,7 @@ object AlertEngineMain extends LazyLogging {
 
       validateConfig(config)
 
-      val alertTask = new AlertEngineTask(parsedArgs, config)
+      val alertTask = new AlertEngineTask(parsedArgs)
       alertTask.run()
     }
 
@@ -105,11 +103,11 @@ object AlertEngineMain extends LazyLogging {
       List[String]()
     }
 
-  class AlertEngineTask(parsedArgs: AlertEngineCliParser, config: AlertEngineConfig)
-      extends Runnable {
+  class AlertEngineTask(parsedArgs: AlertEngineCliParser) extends Runnable {
 
     override def run(): Unit = {
       logger.info("starting Alerting Engine run")
+      val config: AlertEngineConfig = AlertEngineConfigParser.getConfig(parsedArgs.conf())
 
       val solrServer = new CloudSolrServer(parsedArgs.zkHosts())
 

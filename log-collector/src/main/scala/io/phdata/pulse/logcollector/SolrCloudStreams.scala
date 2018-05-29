@@ -19,10 +19,10 @@ package io.phdata.pulse.logcollector
 import akka.Done
 import akka.actor.ActorSystem
 import akka.stream.OverflowStrategy
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.domain.LogEvent
-import io.phdata.pulse.common.{DocumentConversion, SolrService}
+import io.phdata.pulse.common.{ DocumentConversion, SolrService }
 
 import scala.concurrent.Future
 import scala.concurrent.duration._

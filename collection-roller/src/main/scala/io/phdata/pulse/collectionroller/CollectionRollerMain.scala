@@ -33,9 +33,8 @@ object CollectionRollerMain extends LazyLogging {
 
     if (parsedArgs.daemonize()) {
       try {
-        val applicationsConfig: CollectionRollerConfig = ConfigParser.getConfig(parsedArgs.conf())
         val scheduledFuture = executorService.scheduleAtFixedRate(
-          new CollectionRollerTask(applicationsConfig, parsedArgs),
+          new CollectionRollerTask(parsedArgs),
           0L,
           DAEMON_INTERVAL_MINUTES,
           TimeUnit.MINUTES)
@@ -53,7 +52,7 @@ object CollectionRollerMain extends LazyLogging {
       listApplications(parsedArgs)
     } else {
       val applicationsConfig   = ConfigParser.getConfig(parsedArgs.conf())
-      val collectionRollerTask = new CollectionRollerTask(applicationsConfig, parsedArgs)
+      val collectionRollerTask = new CollectionRollerTask(parsedArgs)
       collectionRollerTask.run()
     }
 
@@ -111,13 +110,11 @@ object CollectionRollerMain extends LazyLogging {
     logger.info("ending Collection Roller Delete App")
   }
 
-  class CollectionRollerTask(config: CollectionRollerConfig,
-                             parsedArgs: CollectionRollerCliArgsParser)
-      extends Runnable {
-
-    logger.debug(s"parsed config $config")
+  class CollectionRollerTask(parsedArgs: CollectionRollerCliArgsParser) extends Runnable {
 
     override def run(): Unit = {
+      val config = ConfigParser.getConfig(parsedArgs.conf())
+
       val (solr, solrService, collectionRoller) = createServices(parsedArgs)
 
       try {
