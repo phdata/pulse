@@ -2,7 +2,7 @@
   "name": "PULSE",
   "label": "Pulse",
   "description": "Pulse Application Log Monitoring",
-  "icon" : "images/glass.png",
+  "icon" : "images/pulse.png",
   "version": "{{ version }}",
   "runAs": {
     "user": "pulse",
