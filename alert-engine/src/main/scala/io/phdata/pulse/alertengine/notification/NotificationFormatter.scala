@@ -25,18 +25,20 @@ object NotificationFormatter {
   }
 
   def formatMessage(alert: TriggeredAlert): String = {
-    var docs = ""
+    var docs = "Pulse Alert Triggered \n"
     val num  = alert.documents.length
     if (num > 1) {
-      docs = s"""
-                |Application ${alert.applicationName}
-                |${num} alerts triggered:
-           """.stripMargin
+      docs = docs.concat(s"""
+                |  Application: ${alert.applicationName}
+                |  Query: ${alert.rule.query}
+                |  Displaying ${num} results of ${alert.rowcount} total found.
+           """.stripMargin)
     } else {
-      docs = s"""
-                |Application ${alert.applicationName}
-                |${num} alert triggered:
-           """.stripMargin
+      docs = docs.concat(s"""
+                |  Application: ${alert.applicationName}
+                |  Query: ${alert.rule.query}
+                |  Displaying ${num} result of ${alert.rowcount} total found.
+           """.stripMargin)
     }
     alert.documents.foreach { d =>
       val id         = d.get("id")
@@ -47,13 +49,13 @@ object NotificationFormatter {
       val threadName = d.get("threadName")
       val throwable  = d.get("throwable")
       docs = docs.concat(s"""
-                            |    ID: $id
-                            |    Category: $category
-                            |    Timestamp: $timestamp
-                            |    Level: $level
-                            |    Message: $msg
-                            |    Thread Name: $threadName
-                            |    Throwable Exception: $throwable
+                            |      ID: $id
+                            |      Category: $category
+                            |      Timestamp: $timestamp
+                            |      Level: $level
+                            |      Message: $msg
+                            |      Thread Name: $threadName
+                            |      Throwable Exception: $throwable
            """.stripMargin)
     }
     docs

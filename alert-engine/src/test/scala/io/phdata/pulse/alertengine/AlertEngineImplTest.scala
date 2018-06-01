@@ -20,6 +20,7 @@ import java.io.File
 
 import io.phdata.pulse.alertengine.notification.{
   MailNotificationService,
+  NotificationFormatter,
   NotificationServiceFactory,
   SlackNotificationService
 }
@@ -57,7 +58,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
 
     val document = DocumentConversion.toSolrDocument(
       LogEvent(Some("id"),
-               "ERROR",
+               "ALERT",
                "1970-01-01T00:00:00Z",
                "ERROR",
                "message",
@@ -65,7 +66,21 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
                Some("Exception in thread main"),
                None))
 
+    val documentError = DocumentConversion.toSolrDocument(
+      LogEvent(None,
+               "ERROR",
+               "1972-01-01T22:00:00Z",
+               "ERROR2",
+               "message2",
+               "thread2 oxb",
+               Some("Exception in thread main2"),
+               None))
+
     solrClient.add(document)
+
+    for (i <- 1 to 12) {
+      solrClient.add(documentError)
+    }
 
     solrClient.commit(true, true, true)
     // unset the default collection so we are sure it is being set in the request
@@ -83,6 +98,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     // @TODO why is this 2 instead of 1 sometimes?
     assert(result.documents.lengthCompare(0) > 0)
     assert(result.applicationName == TEST_COLLECTION)
+    assert(result.rowcount == 12)
   }
 
   test("trigger alert when threshold is set to '-1' and there are no results") {
@@ -93,7 +109,6 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
         new NotificationServiceFactory(mailNotificationService, slackNotificationService))
     val result = engine.triggeredAlert(TEST_COLLECTION, alert).get
     assertResult(alert)(result.rule)
-
     assert(result.documents.isEmpty)
     assert(result.applicationName == TEST_COLLECTION)
   }
@@ -114,7 +129,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(null, new NotificationServiceFactory(mailNotificationService, null))
 
-    val triggeredalert  = TriggeredAlert(alertrule, "Spark", null)
+    val triggeredalert  = TriggeredAlert(alertrule, "Spark", null, 1)
     val app             = Application("a", List(alertrule), Some(List(mailAlertProfile)), None)
     val triggeredAlerts = List(triggeredalert)
 
@@ -131,7 +146,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(null, new NotificationServiceFactory(null, slackNotificationService))
 
-    val triggeredalert  = TriggeredAlert(alertrule, "Spark", null)
+    val triggeredalert  = TriggeredAlert(alertrule, "Spark", null, 1)
     val app             = Application("a", List(alertrule), None, Some(List(slackAlertProfile)))
     val triggeredAlerts = List(triggeredalert)
 
@@ -166,10 +181,12 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
         |    addresses:
         |    - test@phdata.io
         |  """.stripMargin
+
     val app = AlertEngineConfigParser.convert(yaml).applications.head
 
-    val triggeredAlerts = List((app, Option(TriggeredAlert(app.alertRules(0), "spark1", null))),
-                               (app, Option(TriggeredAlert(app.alertRules(1), "spark2", null))))
+    val triggeredAlerts =
+      List((app, Option(TriggeredAlert(app.alertRules(0), "spark1", null, 1))),
+           (app, Option(TriggeredAlert(app.alertRules(1), "spark2", null, 2))))
 
     val groupedTriggerdAlerts = engine.groupTriggeredAlerts(triggeredAlerts)
 

@@ -28,7 +28,7 @@ object NotificationMain extends LazyLogging {
     val service =
       new MailNotificationService(args(0), args(1).toLong, args(3), password, args(2).toBoolean)
     val triggeredAlert =
-      TriggeredAlert(AlertRule("query", 1, None, List()), "", Seq())
+      TriggeredAlert(AlertRule("query", 1, None, List()), "", Seq(), 1)
     val mailProfile = MailAlertProfile("b", List(args(5)))
     service.notify(Seq(triggeredAlert), mailProfile)
   }

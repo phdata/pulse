@@ -40,8 +40,8 @@ class SlackNotificationServiceTest extends FunSuite {
   val alertrule  = AlertRule("query0000000000", 10, Some(0), List("a", "slack"))
   val alertrule2 = AlertRule("query222222", 20, Some(0), List("a", "slack"))
 
-  val triggeredalert  = TriggeredAlert(alertrule, "Spark", Seq(doc))
-  val triggeredalert2 = TriggeredAlert(alertrule2, "PipeWrench", Seq(doc))
+  val triggeredalert  = TriggeredAlert(alertrule, "Spark", Seq(doc), 12)
+  val triggeredalert2 = TriggeredAlert(alertrule2, "PipeWrench", Seq(doc), 14)
 
   test("sending a triggered alert to a slack profile") {
     if (slackUrlFile.exists) {
