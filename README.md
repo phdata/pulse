@@ -90,13 +90,13 @@ and [PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.
 
 1. Download the latest CSD jar []()
 2. Place the jar in your Cloudera Manager CSD directory, usually `/opt/cloudera/csd`
-3. Modify the ownership of the jar `chown cloudera-scm: /opt/cloudera/csd/pulse-<version>.jar`
+3. Modify the ownership of the jar `chown cloudera-scm:cloudera-scm /opt/cloudera/csd/pulse-<version>.jar`
 4. Restart Cloudera Manager to install the jar
 
 ***Installing the Parcel***
 
 1. Download the parcel and parcel.sha from []()
-2. Place the parcel in the parcel-repo directory, usuall `/opt/cloudera/parcel-repo`
+2. Place the parcel in the parcel-repo directory, usually `/opt/cloudera/parcel-repo`
 3. In Cloudera Manager, navigate to the Parcels page and click 'Check for new Parcels' button
 4. Find the Pulse parcel, deploy and activate it
 
