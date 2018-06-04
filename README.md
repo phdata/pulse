@@ -105,7 +105,7 @@ and [PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.
 Pulse can be installed through the "Add New Service" button for your cluster.
 
 The wizard will ask you for:
-- `smpt user`: This will be the 'from' address for alerts
+- `smtp user`: This will be the 'from' address for alerts
 - `smtp password`: This is only necessary if your smtp server uses authentication
 - `smtp address`: The hostname of your smpt server
 - `smtp port`: The port of your smtp server
