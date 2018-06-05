@@ -31,59 +31,43 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
     val firstTime  = ZonedDateTime.now()
     val secondTime = firstTime.plusMinutes(6)
 
-    AlertsDb.markChecked(alert, secondTime)
+    AlertsDb.markChecked("app1", alert, secondTime)
 
-    assertResult(false)(AlertsDb.shouldCheck(alert, secondTime))
+    assertResult(false)(AlertsDb.shouldCheck("app1", alert, secondTime))
   }
 
   test("notify on an unseen alert") {
     val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
     val now   = ZonedDateTime.now()
 
-    assertResult(true)(AlertsDb.shouldCheck(alert, now))
+    assertResult(true)(AlertsDb.shouldCheck("app1", alert, now))
   }
 
   test("don't notify inside alert window") {
     val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
     val now   = ZonedDateTime.now()
 
-    AlertsDb.markChecked(alert, now)
+    AlertsDb.markChecked("app1", alert, now)
 
-    assertResult(false)(AlertsDb.shouldCheck(alert, now))
+    assertResult(false)(AlertsDb.shouldCheck("app1", alert, now))
+  }
+
+  test("notify on second application with the same alert rule") {
+    val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
+    val now   = ZonedDateTime.now()
+
+    AlertsDb.markChecked("app1", alert, now)
+
+    assertResult(true)(AlertsDb.shouldCheck("app2", alert, now))
   }
 
   test("don't alert on an alert that was just checked") {
     val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
     val now   = ZonedDateTime.now()
 
-    AlertsDb.markChecked(alert, now)
+    AlertsDb.markChecked("app1", alert, now)
 
-    assertResult(false)(AlertsDb.shouldCheck(alert))
+    assertResult(false)(AlertsDb.shouldCheck("app1", alert))
   }
 
-  test("serialization and deserialization of AlertsDb") {
-    AlertsDb.load()
-
-    val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
-    val now   = ZonedDateTime.now()
-
-    // check serializing and de-serializing of checkedAlertRules
-    AlertsDb.markChecked(alert, now)
-
-    AlertsDb.persist()
-    AlertsDb.reset()
-    AlertsDb.load()
-
-    assertResult(false)(AlertsDb.shouldCheck(alert, now))
-
-    AlertsDb.persist()
-    AlertsDb.reset()
-    AlertsDb.load()
-
-    assertResult(false)(AlertsDb.shouldCheck(alert, now))
-    assertResult(false)(AlertsDb.shouldCheck(alert, now))
-
-    AlertsDb.reset()
-    AlertsDb.persist()
-  }
 }

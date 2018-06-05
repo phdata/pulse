@@ -67,7 +67,7 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
    * @return
    */
   def triggeredAlert(applicationName: String, alertRule: AlertRule): Option[TriggeredAlert] =
-    if (AlertsDb.shouldCheck(alertRule)) {
+    if (AlertsDb.shouldCheck(applicationName, alertRule)) {
       try {
         val alias = s"${applicationName}_all"
         val query = new SolrQuery(alertRule.query)
@@ -92,7 +92,7 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
           logger.error(s"Error running query for alert $alertRule", e)
           None
       } finally {
-        AlertsDb.markChecked(alertRule)
+        AlertsDb.markChecked(applicationName, alertRule)
       }
     } else {
       None
