@@ -196,11 +196,12 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val app1 = AlertEngineConfigParser.convert(yaml).applications(0)
     val app2 = AlertEngineConfigParser.convert(yaml).applications(1)
 
-
     val triggeredAlerts =
-      List((app1, Option(TriggeredAlert(app1.alertRules(0), "spark1", null, 1))),
-           (app2, Option(TriggeredAlert(app2.alertRules(0), "spark2", null, 2))),
-        (app2, Option(TriggeredAlert(app2.alertRules(1), "spark2", null, 2))))
+      List(
+        (app1, Option(TriggeredAlert(app1.alertRules(0), "spark1", null, 1))),
+        (app2, Option(TriggeredAlert(app2.alertRules(0), "spark2", null, 2))),
+        (app2, Option(TriggeredAlert(app2.alertRules(1), "spark2", null, 2)))
+      )
 
     val groupedTriggerdAlerts =
       engine.groupTriggeredAlerts(triggeredAlerts)
