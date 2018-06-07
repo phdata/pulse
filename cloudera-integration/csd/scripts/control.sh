@@ -35,11 +35,6 @@ export LOGBACK_CONFIG=${LOGBACK_CONFIG:-$DEFAULT_LOGBACK_CONFIG}
 export KEYTAB_FILE=${KEYTAB_FILE:-"${CONF_DIR}/pulse.keytab"}
 export AKKA_CONF=${AKKA_CONF:-"application.conf"}
 
-# set some defaults for java Xmx
-export ALERT_ENGINE_MAX_HEAP=${ALERT_ENGINE_MAX_HEAP:-"2147483648"}
-export COLLECTION_ROLLER_MAX_HEAP=${COLLECTION_ROLLER_MAX_HEAP:-"2147483648"}
-export LOG_COLLECTOR_MAX_HEAP=${LOG_COLLECTOR_MAX_HEAP:-"2147483648"}
-
 export JAAS_CONFIG="Client {
    com.sun.security.auth.module.Krb5LoginModule required
    doNotPrompt=true
@@ -74,7 +69,6 @@ case $CMD in
       echo "passwiod is unset"
     fi
     exec $JAVA_HOME/bin/java \
-    -DXmx=$ALERT_ENGINE_MAX_HEAP \
     -Dlogback.configurationFile=$LOGBACK_CONFIG \
     $JAVA_PROPERTIES \
     $CSD_JAVA_OPTS \
@@ -93,7 +87,6 @@ case $CMD in
   (start_collection_roller)
     echo "Starting Server with Zookeeper $SOLR_ZK_QUORUM"
     exec $JAVA_HOME/bin/java \
-    -DXmx=$COLLECTION_ROLLER_MAX_HEAP \
     -Dlogback.configurationFile=$LOGBACK_CONFIG \
     $CSD_JAVA_OPTS \
     $JAVA_PROPERTIES \
@@ -107,7 +100,6 @@ case $CMD in
     echo "Starting Server on port $WEBSERVER_PORT"
     exec $JAVA_HOME/bin/java \
     -XX:+UseG1GC \
-    -DXmx=$LOG_COLLECTOR_MAX_HEAP \
     $CSD_JAVA_OPTS \
     -Dconfig.file="$AKKA_CONF" \
     -Dlogback.configurationFile=$LOGBACK_CONFIG $JAVA_PROPERTIES \
