@@ -58,10 +58,6 @@ object AlertEngineMain extends LazyLogging {
         executorService.shutdown()
       }
     } else {
-      val config: AlertEngineConfig = AlertEngineConfigParser.getConfig(parsedArgs.conf())
-
-      validateConfig(config)
-
       val alertTask = new AlertEngineTask(parsedArgs)
       alertTask.run()
     }
@@ -108,6 +104,8 @@ object AlertEngineMain extends LazyLogging {
     override def run(): Unit = {
       logger.info("starting Alerting Engine run")
       val config: AlertEngineConfig = AlertEngineConfigParser.getConfig(parsedArgs.conf())
+      logger.info(s"using config: $config")
+      validateConfig(config)
 
       val solrServer = new CloudSolrServer(parsedArgs.zkHosts())
 

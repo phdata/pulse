@@ -114,6 +114,7 @@ object CollectionRollerMain extends LazyLogging {
 
     override def run(): Unit = {
       val config = ConfigParser.getConfig(parsedArgs.conf())
+      logger.info(s"using config: $config")
 
       val (solr, solrService, collectionRoller) = createServices(parsedArgs)
 
