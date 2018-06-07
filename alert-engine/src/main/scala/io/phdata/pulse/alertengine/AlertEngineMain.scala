@@ -32,6 +32,7 @@ import org.apache.solr.client.solrj.impl.{
 }
 
 import scala.io.Source
+import scala.util.Try
 
 object AlertEngineMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES = 1
@@ -107,7 +108,12 @@ object AlertEngineMain extends LazyLogging {
 
     override def run(): Unit = {
       logger.info("starting Alerting Engine run")
-      val config: AlertEngineConfig = AlertEngineConfigParser.getConfig(parsedArgs.conf())
+      val config = try {
+        AlertEngineConfigParser.getConfig(parsedArgs.conf())
+      } catch {
+        case e: Exception => throw new RuntimeException("Error parsing configuration, exiting", e)
+      }
+
       logger.info(s"using config: $config")
       validateConfig(config)
 

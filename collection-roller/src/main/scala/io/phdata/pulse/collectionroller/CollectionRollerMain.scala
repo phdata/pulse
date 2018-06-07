@@ -84,15 +84,6 @@ object CollectionRollerMain extends LazyLogging {
     logger.info("Ending Collection Roller List App")
   }
 
-  private def createServices(parsedArgs: CollectionRollerCliArgsParser) = {
-    val now              = ZonedDateTime.now(ZoneOffset.UTC)
-    val zookeeperHosts   = parsedArgs.zkHosts()
-    val solr             = new CloudSolrServer(zookeeperHosts)
-    val solrService      = new SolrService(zookeeperHosts, solr)
-    val collectionRoller = new CollectionRoller(solrService, now)
-    (solr, solrService, collectionRoller)
-  }
-
   private def deleteApplications(parsedArgs: CollectionRollerCliArgsParser): Unit = {
     logger.info("starting Collection Roller Delete App")
 
@@ -110,12 +101,24 @@ object CollectionRollerMain extends LazyLogging {
     logger.info("ending Collection Roller Delete App")
   }
 
+  private def createServices(parsedArgs: CollectionRollerCliArgsParser) = {
+    val now              = ZonedDateTime.now(ZoneOffset.UTC)
+    val zookeeperHosts   = parsedArgs.zkHosts()
+    val solr             = new CloudSolrServer(zookeeperHosts)
+    val solrService      = new SolrService(zookeeperHosts, solr)
+    val collectionRoller = new CollectionRoller(solrService, now)
+    (solr, solrService, collectionRoller)
+  }
+
   class CollectionRollerTask(parsedArgs: CollectionRollerCliArgsParser) extends Runnable {
 
     override def run(): Unit = {
-      val config = ConfigParser.getConfig(parsedArgs.conf())
+      val config = try {
+        ConfigParser.getConfig(parsedArgs.conf())
+      } catch {
+        case e: Exception => throw new RuntimeException("Error parsing configuration, exiting", e)
+      }
       logger.info(s"using config: $config")
-
       val (solr, solrService, collectionRoller) = createServices(parsedArgs)
 
       try {
