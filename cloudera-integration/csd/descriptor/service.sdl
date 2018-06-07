@@ -20,7 +20,7 @@
   ],
   "parcel" : {
     "requiredTags" : [ "pulse" ],
-    "repoUrl" : "http://edge2.valhalla.phdata.io/cdh5/"
+    "repoUrl" : "http://ec2-34-205-9-106.compute-1.amazonaws.com/cdh5/parcels"
   },
   "roles": [
     {
