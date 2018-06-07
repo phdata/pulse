@@ -7,7 +7,7 @@
   <h3 align="center"></h3>
 
   <p align="center">
-    Hadoop log aggregation, alerting and management
+    Hadoop log aggregation, alerting, and lifecycle management
     <br>
 
   </p>
