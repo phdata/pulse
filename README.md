@@ -82,6 +82,10 @@ See the [Log Appender README](./log-appender/README.md) for more details.
 
 There are also log appenders for Bash and Python in the 'appenders' folder
 
+### Architecture Diagram
+
+![Arch diagram](images/pulse-arch.png)
+
 ## Installation
 Pulse can be installed as a Cloudera CSD (Custom Service Descriptor). See [CSD](./cloudera-integration/csd/README.md) 
 and [PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.

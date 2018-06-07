@@ -8,6 +8,8 @@ The 'latest' alias is used for any applications writing logs (like the Log Colle
 - an alias pointing to all collections called <application>_all. The 'all' alias is used for 
 searching all collections
 
+![collection-rolling](../images/collection-rolling.png)
+
 If an application does not exist in Pulse the log collector will create the required aliases and
 indexes.
 Logs are kept for a limited amount of time (weeks or months). Logs for individual applications will
@@ -16,6 +18,8 @@ actually be multiple collections, each covering a time period.
 ## Rolling
 After an application has been created, the collection roller will create new collections for each
 day and delete collections older than the configured `numCollections` hold limit.
+
+
 
 ## Configuration
 

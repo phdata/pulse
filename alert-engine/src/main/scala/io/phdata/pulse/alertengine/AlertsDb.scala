@@ -16,9 +16,9 @@
 
 package io.phdata.pulse.alertengine
 
-import java.io._
 import java.time.temporal.ChronoUnit
 import java.time.{ ZoneOffset, ZonedDateTime }
+
 import com.typesafe.scalalogging.LazyLogging
 
 /**
@@ -29,8 +29,9 @@ object AlertsDb extends LazyLogging {
 
   /**
    * Mark an alert checked, so it won't be queried again within a time period
+   *
    * @param alert The Alert
-   * @param now A timestamp, visible for testing
+   * @param now   A timestamp, visible for testing
    */
   def markChecked(applicationName: String,
                   alert: AlertRule,
@@ -48,8 +49,9 @@ object AlertsDb extends LazyLogging {
   /**
    * Test if we should check an alert rule again. If the alert is silenced (because it has alerted
    * recently) or we have recently checked this rule, the function will return <code>false</code>
+   *
    * @param alertRule the alert rule
-   * @param now the time now
+   * @param now       the time now
    * @return
    */
   def shouldCheck(applicationName: String,
@@ -65,23 +67,24 @@ object AlertsDb extends LazyLogging {
   }
 
   /**
+   * Cleans the AlertsDb
+   */
+  def close(): Unit =
+    clean()
+
+  /**
    * Remove all old alert records.
+   *
    * @param now the time now
    */
   def clean(now: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)): Unit =
     this.synchronized {
       checkedAlertRules = checkedAlertRules.filter {
-        case (storedApplicationName, storedAlert, alertedTime) =>
+        case (_, storedAlert, alertedTime) =>
           ChronoUnit.MINUTES
             .between(alertedTime, now) <= storedAlert.retryInterval
       }
     }
-
-  /**
-   * Cleans the AlertsDb and persists it in a file.
-   */
-  def close(): Unit =
-    clean()
 
   /**
    * Remove all records from the database. This should be used for testing only, calling this method

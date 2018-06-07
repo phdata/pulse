@@ -19,6 +19,9 @@ package io.phdata.pulse.alertengine.notification
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.alertengine.{ AlertRule, MailAlertProfile, TriggeredAlert }
 
+/**
+  * Main class for testing the [[io.phdata.pulse.alertengine.notification.MailNotificationService]]
+  */
 object NotificationMain extends LazyLogging {
   def main(args: Array[String]): Unit = {
     println(

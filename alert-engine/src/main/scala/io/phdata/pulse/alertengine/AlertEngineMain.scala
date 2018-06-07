@@ -22,7 +22,7 @@ import java.util.concurrent.{ Executors, ScheduledFuture, TimeUnit }
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.alertengine.notification.{
   MailNotificationService,
-  NotificationServiceFactory,
+  NotificationServices,
   SlackNotificationService
 }
 import org.apache.solr.client.solrj.impl.{
@@ -99,6 +99,10 @@ object AlertEngineMain extends LazyLogging {
       List[String]()
     }
 
+  /**
+    * Task for running an alert. Can be schduled to be run repeatedly.
+    * @param parsedArgs Application arguments
+    */
   class AlertEngineTask(parsedArgs: AlertEngineCliParser) extends Runnable {
 
     override def run(): Unit = {
@@ -124,7 +128,7 @@ object AlertEngineMain extends LazyLogging {
         .getOrElse(List())
 
       val notificationFactory =
-        new NotificationServiceFactory(mailNotificationService, slackNotificationService)
+        new NotificationServices(mailNotificationService, slackNotificationService)
       try {
         val engine: AlertEngine = new AlertEngineImpl(solrServer, notificationFactory)
         engine.run(config.applications, silencedApplications)

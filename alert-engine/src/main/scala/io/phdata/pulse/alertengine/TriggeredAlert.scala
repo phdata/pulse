@@ -18,7 +18,9 @@ package io.phdata.pulse.alertengine
 
 import org.apache.solr.common.SolrDocument
 
-// Represents an alert that has been triggered. Contains information to notify based on the alert
+/**
+  * Represents an alert that has been triggered. Contains information to notify based on the alert
+  */
 case class TriggeredAlert(rule: AlertRule,
                           applicationName: String,
                           documents: Seq[SolrDocument],

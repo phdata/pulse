@@ -19,10 +19,10 @@ package io.phdata.pulse.collectionroller
 import org.rogach.scallop.ScallopConf
 
 class CollectionRollerCliArgsParser(args: Seq[String]) extends ScallopConf(args) {
-  lazy val conf               = opt[String]("conf", 's', required = true)
-  lazy val daemonize          = opt[Boolean]("daemonize", required = false, default = Some(false))
-  lazy val zkHosts            = opt[String]("zk-hosts", required = true)
-  lazy val deleteApplications = opt[String]("delete-applications", required = false)
-  lazy val listApplications   = opt[Boolean]("list-applications", required = false)
+  lazy val conf               = opt[String]("conf", 's', required = true, descr = "Path to the collection roller yaml configuration")
+  lazy val daemonize          = opt[Boolean]("daemonize", required = false, default = Some(false), descr = "Daemonize the process and run the CollectionRoller on a schedule")
+  lazy val zkHosts            = opt[String]("zk-hosts", required = true, descr = "Zookeeper hosts")
+  lazy val deleteApplications = opt[String]("delete-applications", required = false, descr = "Delete applications (operation)")
+  lazy val listApplications   = opt[Boolean]("list-applications", required = false, descr = "List all applications (operation)")
   verify()
 }

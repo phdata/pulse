@@ -21,7 +21,7 @@ import java.io.File
 import io.phdata.pulse.alertengine.notification.{
   MailNotificationService,
   NotificationFormatter,
-  NotificationServiceFactory,
+  NotificationServices,
   SlackNotificationService
 }
 import io.phdata.pulse.common.domain.LogEvent
@@ -92,7 +92,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(
         solrClient,
-        new NotificationServiceFactory(mailNotificationService, slackNotificationService))
+        new NotificationServices(mailNotificationService, slackNotificationService))
     val result = engine.triggeredAlert(TEST_COLLECTION, alert).get
     assertResult(alert)(result.rule)
     // @TODO why is this 2 instead of 1 sometimes?
@@ -106,7 +106,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(
         solrClient,
-        new NotificationServiceFactory(mailNotificationService, slackNotificationService))
+        new NotificationServices(mailNotificationService, slackNotificationService))
     val result = engine.triggeredAlert(TEST_COLLECTION, alert).get
     assertResult(alert)(result.rule)
     assert(result.documents.isEmpty)
@@ -118,7 +118,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(
         solrClient,
-        new NotificationServiceFactory(mailNotificationService, slackNotificationService))
+        new NotificationServices(mailNotificationService, slackNotificationService))
     assertResult(None)(engine.triggeredAlert(TEST_COLLECTION, alert))
   }
 
@@ -127,7 +127,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
 
     val alertrule = AlertRule("id: id", 1, Some(0), List("mailprofile1"))
     val engine =
-      new AlertEngineImpl(null, new NotificationServiceFactory(mailNotificationService, null))
+      new AlertEngineImpl(null, new NotificationServices(mailNotificationService, null))
 
     val triggeredalert  = TriggeredAlert(alertrule, "Spark", null, 1)
     val app             = Application("a", List(alertrule), Some(List(mailAlertProfile)), None)
@@ -144,7 +144,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
 
     val alertrule = AlertRule("id: id", 1, Some(0), List(profileName))
     val engine =
-      new AlertEngineImpl(null, new NotificationServiceFactory(null, slackNotificationService))
+      new AlertEngineImpl(null, new NotificationServices(null, slackNotificationService))
 
     val triggeredalert  = TriggeredAlert(alertrule, "Spark", null, 1)
     val app             = Application("a", List(alertrule), None, Some(List(slackAlertProfile)))
@@ -159,7 +159,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(
         null,
-        new NotificationServiceFactory(mailNotificationService, slackNotificationService))
+        new NotificationServices(mailNotificationService, slackNotificationService))
 
     val yaml =
       """---

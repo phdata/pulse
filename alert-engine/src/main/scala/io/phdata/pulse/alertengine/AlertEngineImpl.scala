@@ -17,7 +17,7 @@
 package io.phdata.pulse.alertengine
 
 import com.typesafe.scalalogging.LazyLogging
-import io.phdata.pulse.alertengine.notification.NotificationServiceFactory
+import io.phdata.pulse.alertengine.notification.NotificationServices
 import io.phdata.pulse.common.JsonSupport
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.client.solrj.impl.CloudSolrServer
@@ -33,7 +33,7 @@ import scala.collection.JavaConverters._
  * @param solrServer          Solr service used to run queries against solr collections
  * @param notificatonServices Notification services used to send notifications, like mail or slack messages
  */
-class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: NotificationServiceFactory)
+class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: NotificationServices)
     extends AlertEngine
     with JsonSupport
     with LazyLogging {
@@ -46,7 +46,7 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
   }
 
   def filterSilencedApplications(applications: List[Application],
-                                 silencedApplicationNames: List[String]) = {
+                                 silencedApplicationNames: List[String]): List[Application] = {
     val silencedApplications =
       applications.filter(app => silencedApplicationNames.contains(app.name))
     silencedApplications.foreach(app => logger.info(s"silencing application ${app.name}"))
@@ -60,11 +60,12 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
       yield (application, triggeredAlert(application.name, alertRule))
 
   /**
-   * Query solr for each alert rule to check if it should be triggered
-   *
+   * Query solr for each alert rule to check if it should be triggered.
+    * If the 'resultThreshold' is 0 or greater, trigger if a result is found.
+    * If the 'resultThreshold' is less than 0, trigger if no documents are found.
    * @param applicationName The application name
    * @param alertRule       The alert rule to be checked
-   * @return
+   * @return an Option of [[io.phdata.pulse.alertengine.TriggeredAlert]]
    */
   def triggeredAlert(applicationName: String, alertRule: AlertRule): Option[TriggeredAlert] =
     if (AlertsDb.shouldCheck(applicationName, alertRule)) {
@@ -99,6 +100,11 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
       None
     }
 
+  /**
+    * Notify all [[io.phdata.pulse.alertengine.notification.NotificationService]] when an alert
+    * is triggered.
+    * @param groupedAlerts
+    */
   def notify(
       groupedAlerts: Map[(Application, String), Seq[(Application, TriggeredAlert, String)]]): Unit =
     groupedAlerts.foreach {
@@ -107,8 +113,7 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
     }
 
   /**
-   * Notify based on triggered alert
-   *
+   * Notify based on triggered alert.
    * @param application The application configuration
    * @param profileName The profile name
    * @param alerts      A list of alerts that need to be sent
