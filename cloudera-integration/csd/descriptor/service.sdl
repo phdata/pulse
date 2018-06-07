@@ -95,6 +95,7 @@
           "label": "Collection roller configuration file",
           "description": "Path to yaml collection roller configuration. If left as default the collection-roller.yml file will be used in the role current working dir and can be configured via safety valve. If you specify your own file, make sure it is fully qualified and readable by the 'pulse' user",
           "default": "collection-roller.yml",
+          "configurableInWizard": true,
           "required": "true",
           "type": "path",
           "pathType": "localDataFile"
@@ -156,6 +157,7 @@
           "label": "Alert engine configuration file path",
           "description": "Path to yaml alert engine configuration. If left as default the alert-engine.yml will reside in the roles current working dir and can be configured via safety valve. If you specify your own file, make sure it is fully qualified and readable by the 'pulse' user.",
           "default": "alert-engine.yml",
+          "configurableInWizard": true,
           "required": "true",
           "type": "string"
         },
