@@ -17,15 +17,13 @@
 package io.phdata.pulse.alertengine.notification
 
 /**
-  * Holder for [[io.phdata.pulse.alertengine.notification.NotificationService]]
-  * @param mailNotificationService The [[io.phdata.pulse.alertengine.notification.MailNotificationService]]
-  * @param slackNotificationService The [[io.phdata.pulse.alertengine.notification.SlackNotificationService]]
-  */
+ * Holder for [[io.phdata.pulse.alertengine.notification.NotificationService]]
+ * @param mailNotificationService The [[io.phdata.pulse.alertengine.notification.MailNotificationService]]
+ * @param slackNotificationService The [[io.phdata.pulse.alertengine.notification.SlackNotificationService]]
+ */
 class NotificationServices(mailNotificationService: MailNotificationService,
                            slackNotificationService: SlackNotificationService) {
   def slackService: SlackNotificationService = slackNotificationService
 
   def mailService: MailNotificationService = mailNotificationService
 }
-
-

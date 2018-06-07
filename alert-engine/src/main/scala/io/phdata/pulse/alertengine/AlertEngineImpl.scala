@@ -61,8 +61,8 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
 
   /**
    * Query solr for each alert rule to check if it should be triggered.
-    * If the 'resultThreshold' is 0 or greater, trigger if a result is found.
-    * If the 'resultThreshold' is less than 0, trigger if no documents are found.
+   * If the 'resultThreshold' is 0 or greater, trigger if a result is found.
+   * If the 'resultThreshold' is less than 0, trigger if no documents are found.
    * @param applicationName The application name
    * @param alertRule       The alert rule to be checked
    * @return an Option of [[io.phdata.pulse.alertengine.TriggeredAlert]]
@@ -101,10 +101,10 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
     }
 
   /**
-    * Notify all [[io.phdata.pulse.alertengine.notification.NotificationService]] when an alert
-    * is triggered.
-    * @param groupedAlerts
-    */
+   * Notify all [[io.phdata.pulse.alertengine.notification.NotificationService]] when an alert
+   * is triggered.
+   * @param groupedAlerts
+   */
   def notify(
       groupedAlerts: Map[(Application, String), Seq[(Application, TriggeredAlert, String)]]): Unit =
     groupedAlerts.foreach {

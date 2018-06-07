@@ -100,9 +100,9 @@ object AlertEngineMain extends LazyLogging {
     }
 
   /**
-    * Task for running an alert. Can be schduled to be run repeatedly.
-    * @param parsedArgs Application arguments
-    */
+   * Task for running an alert. Can be schduled to be run repeatedly.
+   * @param parsedArgs Application arguments
+   */
   class AlertEngineTask(parsedArgs: AlertEngineCliParser) extends Runnable {
 
     override def run(): Unit = {
