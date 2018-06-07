@@ -83,8 +83,7 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
           Some(TriggeredAlert(alertRule, applicationName, resultsSeq, 0))
         } else if (resultsSeq.lengthCompare(threshold) > 0) {
           logger.info(s"Alert triggered for $applicationName on alert $alertRule")
-          val rowCount = solrServer.query(query).getResults.getNumFound
-          Some(TriggeredAlert(alertRule, applicationName, resultsSeq, rowCount))
+          Some(TriggeredAlert(alertRule, applicationName, resultsSeq, numFound))
         } else {
           logger.info(s"No alert needed for $applicationName with alert $alertRule")
           None

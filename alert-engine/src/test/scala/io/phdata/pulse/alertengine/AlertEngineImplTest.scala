@@ -98,7 +98,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     // @TODO why is this 2 instead of 1 sometimes?
     assert(result.documents.lengthCompare(0) > 0)
     assert(result.applicationName == TEST_COLLECTION)
-    assert(result.rowcount == 12)
+    assert(result.totalNumFound == 12)
   }
 
   test("trigger alert when threshold is set to '-1' and there are no results") {

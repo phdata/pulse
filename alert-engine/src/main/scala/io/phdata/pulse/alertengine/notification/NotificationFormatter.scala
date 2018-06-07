@@ -39,7 +39,7 @@ object NotificationFormatter {
        |
        |  Application Name: ${alert.applicationName}
        |  Query: ${alert.rule.query}
-       |  Displaying ${alert.documents.length} results of ${alert.rowcount} total found:
+       |  Displaying ${alert.documents.length} results of ${alert.totalNumFound} total found:
        |
        |  ${docs.mkString("\n")}
        """.stripMargin

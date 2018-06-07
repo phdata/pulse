@@ -22,4 +22,4 @@ import org.apache.solr.common.SolrDocument
 case class TriggeredAlert(rule: AlertRule,
                           applicationName: String,
                           documents: Seq[SolrDocument],
-                          rowcount: Long)
+                          totalNumFound: Long)
