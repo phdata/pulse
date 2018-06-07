@@ -26,27 +26,17 @@
     {
       "name": "LOG_COLLECTOR",
       "label": "Log Collector",
-      "pluralLabel": "Logging Collectors",
+      "pluralLabel": "Log Collectors",
       "inExpressWizard": true,
       "jvmBased" : "true",
       "parameters": [
         {
           "name": "port",
-          "label": "log collector listening port",
-          "description": "log collector web server port number",
+          "label": "Log collector listening port",
+          "description": "Log collector web server port number",
           "required": "true",
           "type": "port",
           "default": 9001
-        },
-        {
-          "name" : "log.collector.max.heapsize",
-          "label" : "Java Heap Size of Log Collector in Bytes",
-          "description" : "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in bytes.",
-          "required" : "true",
-          "type" : "memory",
-          "unit" : "bytes",
-          "min" : 67108864,
-          "default" : 2147483648
         }
       ],
       "topology": {
@@ -59,8 +49,7 @@
           "start_log_collector"
         ],
         "environmentVariables": {
-          "WEBSERVER_PORT": "${port}",
-          "LOG_COLLECTOR_MAX_HEAP": "${log.collector.max.heapsize}"
+          "WEBSERVER_PORT": "${port}"
         }
       },
       "configWriter": {
@@ -103,22 +92,12 @@
       "parameters": [
         {
           "name": "collection.roller.configuration.file",
-          "label": "collection roller configuration file",
-          "description": "path to yaml collection roller configuration",
+          "label": "Collection roller configuration file",
+          "description": "Path to yaml collection roller configuration. If left as default the collection-roller.yml file will be used in the role current working dir and can be configured via safety valve. If you specify your own file, make sure it is fully qualified and readable by the 'pulse' user",
           "default": "collection-roller.yml",
           "required": "true",
           "type": "path",
           "pathType": "localDataFile"
-        },
-        {
-          "name" : "collection.roller.max.heapsize",
-          "label" : "Java Heap Size of Collection Roller in Bytes",
-          "description" : "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in bytes.",
-          "required" : "true",
-          "type" : "memory",
-          "unit" : "bytes",
-          "min" : 67108864,
-          "default" : 2147483648
         }
       ],
       "topology": {
@@ -131,8 +110,7 @@
           "start_collection_roller"
         ],
         "environmentVariables": {
-          "COLLECTION_ROLLER_CONFIG": "${collection.roller.configuration.file}",
-          "COLLECTION_ROLLER_MAX_HEAP": "${collection.roller.max.heapsize}"
+          "COLLECTION_ROLLER_CONFIG": "${collection.roller.configuration.file}"
         }
       },
       "kerberos": "true",
@@ -175,16 +153,16 @@
       "parameters": [
         {
           "name": "alert.engine.configuration.file",
-          "label": "alert engine configuration file",
-          "description": "path to yaml alert engine configuration",
+          "label": "Alert engine configuration file path",
+          "description": "Path to yaml alert engine configuration. If left as default the alert-engine.yml will reside in the roles current working dir and can be configured via safety valve. If you specify your own file, make sure it is fully qualified and readable by the 'pulse' user.",
           "default": "alert-engine.yml",
           "required": "true",
           "type": "string"
         },
         {
           "name": "smtp.user",
-          "label": "smtp user name",
-          "description": "smtp server username",
+          "label": "SMTP user name",
+          "description": "SMTP server username (email from-address, such as no-reply@company.com)",
           "required": "false",
           "default": "",
           "configurableInWizard": true,
@@ -192,8 +170,8 @@
         },
         {
           "name": "smtp.server.address",
-          "label": "smtp server address",
-          "description": "smtp server address for alerts",
+          "label": "SMTP server address",
+          "description": "smtp server address",
           "default": "",
           "required": "false",
           "configurableInWizard": true,
@@ -201,8 +179,8 @@
         },
         {
           "name": "smtp.port",
-          "label": "smtp port",
-          "description": "smtp listening port",
+          "label": "SMTP port",
+          "description": "SMTP host listening port",
           "default": "25",
           "required": "false",
           "configurableInWizard": true,
@@ -211,7 +189,7 @@
         {
           "name": "smtp.password",
           "label": "smtp password",
-          "description": "smtp server authentication password",
+          "description": "SMTP server authentication password",
           "default": "",
           "required": "false",
           "configurableInWizard": true,
@@ -220,20 +198,10 @@
         {
           "name": "smtp.tls",
           "label": "smtp tls",
-          "description": "smtp tls enabled indicator",
+          "description": "SMTP tls enabled indicator",
           "default": false,
           "required": "false",
           "type": "boolean"
-        },
-        {
-          "name" : "alert.engine.max.heapsize",
-          "label" : "Java Heap Size of Alert Engine in Bytes",
-          "description" : "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in bytes.",
-          "required" : "true",
-          "type" : "memory",
-          "unit" : "bytes",
-          "min" : 67108864,
-          "default" : 2147483648
         }
       ],
       "topology": {
@@ -251,8 +219,7 @@
           "SMTP_PASSWORD": "${smtp.password}",
           "SMTP_SERVER": "${smtp.server.address}",
           "SMTP_PORT": "${smtp.port}",
-          "SMTP_TLS": "${smtp.tls}",
-          "ALERT_ENGINE_MAX_HEAP": "${alert.engine.max.heapsize}"
+          "SMTP_TLS": "${smtp.tls}"
         }
       },
       "kerberos": "true",
