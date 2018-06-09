@@ -110,7 +110,7 @@ Pulse can be installed through the "Add New Service" button for your cluster.
 The wizard will ask you for:
 - `smtp user`: This will be the 'from' address for alerts
 - `smtp password`: This is only necessary if your smtp server uses authentication
-- `smtp address`: The hostname of your smpt server
+- `smtp address`: The hostname of your smtp server
 - `smtp port`: The port of your smtp server
 
 
