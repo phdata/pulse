@@ -39,7 +39,7 @@
 - Integration with existing dashboards for rich UIs. 
 
 Works with:
-- Banana
+- Bananahttp://eed3si9n.com/hot-source-dependencies-using-sbt-sriracha
 - Hue Search
 - Arcadia Data
 
@@ -94,12 +94,12 @@ and [PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.
 
 1. Download the latest CSD jar from []http://ec2-34-205-9-106.compute-1.amazonaws.com/cdh5/csd/](http://ec2-34-205-9-106.compute-1.amazonaws.com/cdh5/csd/)
 2. Place the jar in your Cloudera Manager CSD directory, usually `/opt/cloudera/csd`
-3. Modify the ownership of the jar `chown cloudera-scm: /opt/cloudera/csd/pulse-<version>.jar`
+3. Modify the ownership of the jar `chown cloudera-scm:cloudera-scm /opt/cloudera/csd/pulse-<version>.jar`
 4. Restart Cloudera Manager to install the jar
 
 ***Installing the Parcel***
 
-1. The parcel repo should be automatically added with the CSD, or add it manually:
+1. The parcel repo should be automatically added with the CSD. The url to add it manually:
 [http://ec2-34-205-9-106.compute-1.amazonaws.com/cdh5/parcels/](http://ec2-34-205-9-106.compute-1.amazonaws.com/cdh5/parcels/)
 2. Download, distribute, activate the parcel
 
