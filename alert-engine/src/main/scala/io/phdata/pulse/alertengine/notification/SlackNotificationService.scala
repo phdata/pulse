@@ -30,7 +30,7 @@ class SlackNotificationService() extends LazyLogging {
       sendSlackMsg(profile.url, formattedSubject + formattedBody)
     }
 
-  def sendSlackMsg(url: String, message: String) = {
+  def sendSlackMsg(url: String, message: String): Unit = {
     val httpClient = new DefaultHttpClient()
     try {
       val httpPost = new HttpPost(url)

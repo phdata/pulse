@@ -111,17 +111,16 @@ object AlertEngineMain extends LazyLogging {
       val config = try {
         AlertEngineConfigParser.getConfig(parsedArgs.conf())
       } catch {
-        case e: Exception => {
+        case e: Exception =>
           logger.info("Error parsing configuration, exiting", e)
           System.exit(1)
           throw new RuntimeException(e) // this code won't be reached but is needed for the typechecker
-        }
       }
 
       logger.info(s"using config: $config")
       validateConfig(config)
 
-      val solrServer = new CloudSolrServer(parsedArgs.zkHosts())
+      val solrServer = new CloudSolrServer(parsedArgs.zkHost())
 
       logger.info("starting Alert Engine run")
       val mailNotificationService =

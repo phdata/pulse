@@ -24,7 +24,7 @@ object NotificationFormatter {
 
   def formatMessage(alert: TriggeredAlert): String = {
     val docs = alert.documents.map { d =>
-      (s"""
+      s"""
           |      ID: ${d.get("id")}
           |      Category: ${d.get("category")}
           |      Timestamp: ${d.get("timestamp")}
@@ -32,7 +32,7 @@ object NotificationFormatter {
           |      Message: ${d.get("message")}
           |      Thread Name: ${d.get("threadName")}
           |      Throwable: ${d.get("throwable")}
-           """.stripMargin)
+           """.stripMargin
     }
 
     s"""  '${alert.applicationName}' Application triggered a Pulse alert.

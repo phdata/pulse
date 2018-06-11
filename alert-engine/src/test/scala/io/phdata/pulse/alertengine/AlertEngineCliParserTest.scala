@@ -49,7 +49,7 @@ class AlertEngineCliParserTest extends FunSuite {
     assertResult("silenced-applications.txt")(cliParser.silencedApplicationsFile())
     assertResult(
       "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr")(
-      cliParser.zkHosts())
+      cliParser.zkHost())
 
   }
 

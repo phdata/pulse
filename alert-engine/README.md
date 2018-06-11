@@ -36,7 +36,9 @@ The top-level object of the configuration file is a list of applications.
 An application consists of two things, alerts and profiles. Alerts tell the AlertEngine what to alert on. Profiles are used to set up connections to services like email or chat clients. As many profiles can be defined as needed, so you can send alerts through both email and Slack, or any number of services.
 An alert rule consists of
 
-- query: the query is a lucene syntax search query. If the query returns true, an alert is triggered.
+- query: Solr Query that acts as a predicate, for example this query Solr: 
+`timestamp:[NOW-10MINUTES TO NOW] AND level: ERROR` will trigger an alert if any message with level
+ 'ERROR' is found within the last 10 minutes
 - retryInterval: the query will be run on the retry interval. The retry interval is set in minutes
 - threshold: if the query returns more than threshold results, an alert will be triggered. The default is 0. If the threshold is set to `-1`, the non-existence of documents with this query will trigger an alert. This is useful for tracking application uptime.
 - alertProfiles: One or many alertProfiles can be defined. For each alertProfile defined in an alert, an alertProfile needs to be defined for the application
