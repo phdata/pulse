@@ -6,7 +6,7 @@ test:
 dist: parcel csd
 	mkdir -p dist
 	cp cloudera-integration/parcel/target/*.parcel* dist
-	cp cloudera-integration/csd/target/*.jar dist
+	cp cloudera-integration/csd/target/*.jar* dista
 
 sbt-package:
 	sbt package
