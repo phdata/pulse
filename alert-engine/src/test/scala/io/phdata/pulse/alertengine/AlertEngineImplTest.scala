@@ -21,7 +21,7 @@ import java.io.File
 import io.phdata.pulse.alertengine.notification.{
   MailNotificationService,
   NotificationFormatter,
-  NotificationServiceFactory,
+  NotificationServices,
   SlackNotificationService
 }
 import io.phdata.pulse.common.domain.LogEvent
@@ -92,13 +92,13 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(
         solrClient,
-        new NotificationServiceFactory(mailNotificationService, slackNotificationService))
+        new NotificationServices(mailNotificationService, slackNotificationService))
     val result = engine.triggeredAlert(TEST_COLLECTION, alert).get
     assertResult(alert)(result.rule)
     // @TODO why is this 2 instead of 1 sometimes?
     assert(result.documents.lengthCompare(0) > 0)
     assert(result.applicationName == TEST_COLLECTION)
-    assert(result.rowcount == 12)
+    assert(result.totalNumFound == 12)
   }
 
   test("trigger alert when threshold is set to '-1' and there are no results") {
@@ -106,7 +106,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(
         solrClient,
-        new NotificationServiceFactory(mailNotificationService, slackNotificationService))
+        new NotificationServices(mailNotificationService, slackNotificationService))
     val result = engine.triggeredAlert(TEST_COLLECTION, alert).get
     assertResult(alert)(result.rule)
     assert(result.documents.isEmpty)
@@ -118,7 +118,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(
         solrClient,
-        new NotificationServiceFactory(mailNotificationService, slackNotificationService))
+        new NotificationServices(mailNotificationService, slackNotificationService))
     assertResult(None)(engine.triggeredAlert(TEST_COLLECTION, alert))
   }
 
@@ -127,7 +127,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
 
     val alertrule = AlertRule("id: id", 1, Some(0), List("mailprofile1"))
     val engine =
-      new AlertEngineImpl(null, new NotificationServiceFactory(mailNotificationService, null))
+      new AlertEngineImpl(null, new NotificationServices(mailNotificationService, null))
 
     val triggeredalert  = TriggeredAlert(alertrule, "Spark", null, 1)
     val app             = Application("a", List(alertrule), Some(List(mailAlertProfile)), None)
@@ -144,7 +144,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
 
     val alertrule = AlertRule("id: id", 1, Some(0), List(profileName))
     val engine =
-      new AlertEngineImpl(null, new NotificationServiceFactory(null, slackNotificationService))
+      new AlertEngineImpl(null, new NotificationServices(null, slackNotificationService))
 
     val triggeredalert  = TriggeredAlert(alertrule, "Spark", null, 1)
     val app             = Application("a", List(alertrule), None, Some(List(slackAlertProfile)))
@@ -159,38 +159,56 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     val engine =
       new AlertEngineImpl(
         null,
-        new NotificationServiceFactory(mailNotificationService, slackNotificationService))
+        new NotificationServices(mailNotificationService, slackNotificationService))
 
     val yaml =
       """---
         |applications:
         |- name: spark1
         |  alertRules:
-        |  - query: "query"
-        |    retryInterval: 10
-        |    resultThreshold: 0
-        |    alertProfiles:
-        |    - mailProfile1
-        |  - query: "query"
+        |  - query: "spark1query"
         |    retryInterval: 10
         |    resultThreshold: 0
         |    alertProfiles:
         |    - mailProfile1
         |  emailProfiles:
-        |  - name: mailProfile1
+        |  - name: spark1profile
+        |    addresses:
+        |    - test@phdata.io
+        |- name: spark2
+        |  alertRules:
+        |  - query: "spark2query1"
+        |    retryInterval: 10
+        |    resultThreshold: 0
+        |    alertProfiles:
+        |    - mailProfile1
+        |  - query: "spark2query2"
+        |    retryInterval: 10
+        |    resultThreshold: 0
+        |    alertProfiles:
+        |    - mailProfile1
+        |  emailProfiles:
+        |  - name: spark2profile
         |    addresses:
         |    - test@phdata.io
         |  """.stripMargin
 
-    val app = AlertEngineConfigParser.convert(yaml).applications.head
+    val app1 = AlertEngineConfigParser.convert(yaml).applications(0)
+    val app2 = AlertEngineConfigParser.convert(yaml).applications(1)
 
     val triggeredAlerts =
-      List((app, Option(TriggeredAlert(app.alertRules(0), "spark1", null, 1))),
-           (app, Option(TriggeredAlert(app.alertRules(1), "spark2", null, 2))))
+      List(
+        (app1, Option(TriggeredAlert(app1.alertRules(0), "spark1", null, 1))),
+        (app2, Option(TriggeredAlert(app2.alertRules(0), "spark2", null, 2))),
+        (app2, Option(TriggeredAlert(app2.alertRules(1), "spark2", null, 2)))
+      )
 
-    val groupedTriggerdAlerts = engine.groupTriggeredAlerts(triggeredAlerts)
+    val groupedTriggerdAlerts =
+      engine.groupTriggeredAlerts(triggeredAlerts)
 
-    assert(groupedTriggerdAlerts.size == 1)
+    assert(groupedTriggerdAlerts.size == 2)
+    assert(groupedTriggerdAlerts.head._2.size == 1)
+    assert(groupedTriggerdAlerts.tail.head._2.size == 2)
   }
 
   test("Silenced applications alerts aren't checked") {

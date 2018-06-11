@@ -22,7 +22,7 @@ import java.util.concurrent.{ Executors, ScheduledFuture, TimeUnit }
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.alertengine.notification.{
   MailNotificationService,
-  NotificationServiceFactory,
+  NotificationServices,
   SlackNotificationService
 }
 import org.apache.solr.client.solrj.impl.{
@@ -32,6 +32,7 @@ import org.apache.solr.client.solrj.impl.{
 }
 
 import scala.io.Source
+import scala.util.Try
 
 object AlertEngineMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES = 1
@@ -58,10 +59,6 @@ object AlertEngineMain extends LazyLogging {
         executorService.shutdown()
       }
     } else {
-      val config: AlertEngineConfig = AlertEngineConfigParser.getConfig(parsedArgs.conf())
-
-      validateConfig(config)
-
       val alertTask = new AlertEngineTask(parsedArgs)
       alertTask.run()
     }
@@ -103,11 +100,26 @@ object AlertEngineMain extends LazyLogging {
       List[String]()
     }
 
+  /**
+   * Task for running an alert. Can be schduled to be run repeatedly.
+   * @param parsedArgs Application arguments
+   */
   class AlertEngineTask(parsedArgs: AlertEngineCliParser) extends Runnable {
 
     override def run(): Unit = {
       logger.info("starting Alerting Engine run")
-      val config: AlertEngineConfig = AlertEngineConfigParser.getConfig(parsedArgs.conf())
+      val config = try {
+        AlertEngineConfigParser.getConfig(parsedArgs.conf())
+      } catch {
+        case e: Exception => {
+          logger.info("Error parsing configuration, exiting", e)
+          System.exit(1)
+          throw new RuntimeException(e) // this code won't be reached but is needed for the typechecker
+        }
+      }
+
+      logger.info(s"using config: $config")
+      validateConfig(config)
 
       val solrServer = new CloudSolrServer(parsedArgs.zkHosts())
 
@@ -126,7 +138,7 @@ object AlertEngineMain extends LazyLogging {
         .getOrElse(List())
 
       val notificationFactory =
-        new NotificationServiceFactory(mailNotificationService, slackNotificationService)
+        new NotificationServices(mailNotificationService, slackNotificationService)
       try {
         val engine: AlertEngine = new AlertEngineImpl(solrServer, notificationFactory)
         engine.run(config.applications, silencedApplications)

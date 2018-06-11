@@ -19,45 +19,30 @@ package io.phdata.pulse.alertengine.notification
 import io.phdata.pulse.alertengine.TriggeredAlert
 
 object NotificationFormatter {
-  def formatSubject(alert: TriggeredAlert): String = {
-    val sub = "New alert in application " + alert.applicationName
-    sub
-  }
+  def formatSubject(alert: TriggeredAlert): String =
+    s"Pulse alert triggered for '${alert.applicationName}'"
 
   def formatMessage(alert: TriggeredAlert): String = {
-    var docs = "Pulse Alert Triggered \n"
-    val num  = alert.documents.length
-    if (num > 1) {
-      docs = docs.concat(s"""
-                |  Application: ${alert.applicationName}
-                |  Query: ${alert.rule.query}
-                |  Displaying ${num} results of ${alert.rowcount} total found.
-           """.stripMargin)
-    } else {
-      docs = docs.concat(s"""
-                |  Application: ${alert.applicationName}
-                |  Query: ${alert.rule.query}
-                |  Displaying ${num} result of ${alert.rowcount} total found.
+    val docs = alert.documents.map { d =>
+      (s"""
+          |      ID: ${d.get("id")}
+          |      Category: ${d.get("category")}
+          |      Timestamp: ${d.get("timestamp")}
+          |      Level: ${d.get("level")}
+          |      Message: ${d.get("message")}
+          |      Thread Name: ${d.get("threadName")}
+          |      Throwable: ${d.get("throwable")}
            """.stripMargin)
     }
-    alert.documents.foreach { d =>
-      val id         = d.get("id")
-      val category   = d.get("category")
-      val timestamp  = d.get("timestamp")
-      val level      = d.get("level")
-      val msg        = d.get("message")
-      val threadName = d.get("threadName")
-      val throwable  = d.get("throwable")
-      docs = docs.concat(s"""
-                            |      ID: $id
-                            |      Category: $category
-                            |      Timestamp: $timestamp
-                            |      Level: $level
-                            |      Message: $msg
-                            |      Thread Name: $threadName
-                            |      Throwable Exception: $throwable
-           """.stripMargin)
-    }
-    docs
+
+    s"""  '${alert.applicationName}' Application triggered a Pulse alert.
+       |
+       |  Application Name: ${alert.applicationName}
+       |  Query: ${alert.rule.query}
+       |  Displaying ${alert.documents.length} results of ${alert.totalNumFound} total found:
+       |
+       |  ${docs.mkString("\n")}
+       """.stripMargin
+
   }
 }

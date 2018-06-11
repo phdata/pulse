@@ -30,33 +30,17 @@ class NotificationFormatterTest extends FunSuite {
   doc.addField("threadName", "thread3")
   doc.addField("throwable", "NullPointerException")
 
-  val doc2: SolrDocument = new SolrDocument()
-  doc2.addField("id", "1970-01-01T00:00:00Z")
-  doc2.addField("category", "formatting")
-  doc2.addField("timestamp", "2018-04-06 15:15:00Z")
-  doc2.addField("level", "WARN")
-  doc2.addField("message", "Make the service better.")
-  doc2.addField("threadName", "thread5")
-  doc2.addField("throwable", "OutOfMemoryException")
-
   val alertrule = AlertRule("query0000000000", 10, Some(0), List("a", "slack"))
 
   val triggeredalert = TriggeredAlert(alertrule, "Spark", Seq(doc), 20)
-  val triggeredalert2 =
-    TriggeredAlert(alertrule, "PipeWrench", Seq(doc, doc2), 15)
 
-  test("subject content testing") {
-    assertResult("New alert in application Spark")(
+  test("format subject content") {
+    assertResult("Pulse alert triggered for 'Spark'")(
       NotificationFormatter.formatSubject(triggeredalert))
-    assertResult("New alert in application PipeWrench")(
-      NotificationFormatter.formatSubject(triggeredalert2))
   }
 
-  test("body with 1 log testing") {
+  test("format body (print only)") {
     println(NotificationFormatter.formatMessage(triggeredalert))
   }
 
-  test("body with 2 logs testing") {
-    println(NotificationFormatter.formatMessage(triggeredalert2))
-  }
 }

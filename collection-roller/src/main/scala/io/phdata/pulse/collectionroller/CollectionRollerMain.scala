@@ -22,6 +22,7 @@ import java.util.concurrent.{ Executors, ScheduledFuture, TimeUnit }
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.SolrService
 import org.apache.solr.client.solrj.impl.CloudSolrServer
+import com.typesafe.scalalogging.LazyLogging
 
 object CollectionRollerMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES = 5L // five minutes
@@ -84,15 +85,6 @@ object CollectionRollerMain extends LazyLogging {
     logger.info("Ending Collection Roller List App")
   }
 
-  private def createServices(parsedArgs: CollectionRollerCliArgsParser) = {
-    val now              = ZonedDateTime.now(ZoneOffset.UTC)
-    val zookeeperHosts   = parsedArgs.zkHosts()
-    val solr             = new CloudSolrServer(zookeeperHosts)
-    val solrService      = new SolrService(zookeeperHosts, solr)
-    val collectionRoller = new CollectionRoller(solrService, now)
-    (solr, solrService, collectionRoller)
-  }
-
   private def deleteApplications(parsedArgs: CollectionRollerCliArgsParser): Unit = {
     logger.info("starting Collection Roller Delete App")
 
@@ -110,11 +102,30 @@ object CollectionRollerMain extends LazyLogging {
     logger.info("ending Collection Roller Delete App")
   }
 
-  class CollectionRollerTask(parsedArgs: CollectionRollerCliArgsParser) extends Runnable {
+  private def createServices(parsedArgs: CollectionRollerCliArgsParser) = {
+    val now              = ZonedDateTime.now(ZoneOffset.UTC)
+    val zookeeperHosts   = parsedArgs.zkHosts()
+    val solr             = new CloudSolrServer(zookeeperHosts)
+    val solrService      = new SolrService(zookeeperHosts, solr)
+    val collectionRoller = new CollectionRoller(solrService, now)
+    (solr, solrService, collectionRoller)
+  }
+
+  class CollectionRollerTask(parsedArgs: CollectionRollerCliArgsParser)
+      extends Runnable
+      with LazyLogging {
 
     override def run(): Unit = {
-      val config = ConfigParser.getConfig(parsedArgs.conf())
-
+      val config = try {
+        ConfigParser.getConfig(parsedArgs.conf())
+      } catch {
+        case e: Exception => {
+          logger.error("Error parsing config, exiting", e)
+          System.exit(1) // bail if we have a bad config
+          throw new RuntimeException("Error parsing configuration, exiting", e) // this code won't be reached but is needed for the typechecker
+        }
+      }
+      logger.info(s"using config: $config")
       val (solr, solrService, collectionRoller) = createServices(parsedArgs)
 
       try {

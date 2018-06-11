@@ -16,6 +16,7 @@
 
 package io.phdata.pulse.collectionroller
 
+import java.io.FileNotFoundException
 import java.time.{ ZoneOffset, ZonedDateTime }
 
 import io.phdata.pulse.common.SolrService
@@ -54,10 +55,10 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     }
   }
 
-  test("fail if config dir is nonsense") {
+  test("fail if config dir does not exist") {
     val collectionRoller = new CollectionRoller(solrService, ZonedDateTime.now(ZoneOffset.UTC))
 
-    intercept[NullPointerException] {
+    intercept[FileNotFoundException] {
       collectionRoller.uploadConfigsFromDirectory("faksjhdfaksjdfh")
     }
   }

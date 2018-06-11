@@ -7,7 +7,7 @@
   <h3 align="center"></h3>
 
   <p align="center">
-    Hadoop log aggregation, alerting and management
+    Hadoop log aggregation, alerting, and lifecycle management
     <br>
 
   </p>
@@ -39,7 +39,7 @@
 - Integration with existing dashboards for rich UIs. 
 
 Works with:
-- Banana
+- Bananahttp://eed3si9n.com/hot-source-dependencies-using-sbt-sriracha
 - Hue Search
 - Arcadia Data
 
@@ -82,23 +82,26 @@ See the [Log Appender README](./log-appender/README.md) for more details.
 
 There are also log appenders for Bash and Python in the 'appenders' folder
 
+### Architecture Diagram
+
+![Arch diagram](images/pulse-arch.png)
+
 ## Installation
 Pulse can be installed as a Cloudera CSD (Custom Service Descriptor). See [CSD](./cloudera-integration/csd/README.md) 
 and [PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.
 
 ***Installing the CSD***
 
-1. Download the latest CSD jar []()
+1. Download the latest CSD jar from []http://ec2-34-205-9-106.compute-1.amazonaws.com/cdh5/csd/](http://ec2-34-205-9-106.compute-1.amazonaws.com/cdh5/csd/)
 2. Place the jar in your Cloudera Manager CSD directory, usually `/opt/cloudera/csd`
 3. Modify the ownership of the jar `chown cloudera-scm:cloudera-scm /opt/cloudera/csd/pulse-<version>.jar`
 4. Restart Cloudera Manager to install the jar
 
 ***Installing the Parcel***
 
-1. Download the parcel and parcel.sha from []()
-2. Place the parcel in the parcel-repo directory, usually `/opt/cloudera/parcel-repo`
-3. In Cloudera Manager, navigate to the Parcels page and click 'Check for new Parcels' button
-4. Find the Pulse parcel, deploy and activate it
+1. The parcel repo should be automatically added with the CSD. The url to add it manually:
+[http://ec2-34-205-9-106.compute-1.amazonaws.com/cdh5/parcels/](http://ec2-34-205-9-106.compute-1.amazonaws.com/cdh5/parcels/)
+2. Download, distribute, activate the parcel
 
 ***Installing the service***
 
@@ -107,8 +110,9 @@ Pulse can be installed through the "Add New Service" button for your cluster.
 The wizard will ask you for:
 - `smtp user`: This will be the 'from' address for alerts
 - `smtp password`: This is only necessary if your smtp server uses authentication
-- `smtp address`: The hostname of your smpt server
+- `smtp address`: The hostname of your smtp server
 - `smtp port`: The port of your smtp server
+
 
 ***Deploying config***
 Pulse has two configuration files, `collection-roller.yml` and `alert-engine.yml`
@@ -158,16 +162,3 @@ or refresh/install the CSD in Cloudera Manager
 
 ## Submitting a pull request
 Before submitting a pull request, please make sure `make test` and `make dist` both pass successfully.
-
-## Downloads
-
-### CSD
-https://s3.amazonaws.com/phdata-pulse/csd/PULSE-1.0.0-cdh5.jar
-
-### Parcels
-https://s3.amazonaws.com/phdata-pulse/parcels/PULSE-1.0.0-cdh5-el7.parcel
-https://s3.amazonaws.com/phdata-pulse/parcels/PULSE-1.0.0-cdh5-el7.parcel.sha
-
-https://s3.amazonaws.com/phdata-pulse/parcels/PULSE-1.0.0-cdh5-el6.parcel
-https://s3.amazonaws.com/phdata-pulse/parcels/PULSE-1.0.0-cdh5-el6.parcel.sha
-

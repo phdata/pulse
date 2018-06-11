@@ -17,5 +17,11 @@
 package io.phdata.pulse.alertengine
 
 trait AlertEngine {
+
+  /**
+   * Run the AlertEngine.
+   * @param applications List of applications to alert on
+   * @param silencedApplications List of applications that have been silenced and should not alert
+   */
   def run(applications: List[Application], silencedApplications: List[String]): Unit
 }
