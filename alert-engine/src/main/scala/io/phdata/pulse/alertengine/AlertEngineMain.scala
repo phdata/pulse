@@ -142,9 +142,10 @@ object AlertEngineMain extends LazyLogging {
         val engine: AlertEngine = new AlertEngineImpl(solrServer, notificationFactory)
         engine.run(config.applications, silencedApplications)
         logger.info("ending Alert Engine run")
-
       } catch {
-        case e: Throwable => logger.error("caught exception in Collection Roller task", e)
+        case e: Throwable =>
+          logger.error("caught exception in Collection Roller task", e)
+          System.exit(1)
       } finally {
         try {
           solrServer.shutdown()

@@ -140,7 +140,9 @@ object CollectionRollerMain extends LazyLogging {
         logger.info("ending Collection Roller run")
 
       } catch {
-        case t: Throwable => logger.error("Exception caught in Collection Roller task", t)
+        case t: Throwable =>
+          logger.error("Exception caught in Collection Roller task", t)
+          System.exit(1)
       } finally {
         try {
           solr.shutdown()
