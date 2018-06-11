@@ -15,15 +15,12 @@
  */
 package io.phdata.pulse.common
 
-/**
- * Created by sunandinidogra on 4/13/18.
- */
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import io.phdata.pulse.common.domain.LogEvent
 import spray.json.{ DefaultJsonProtocol, RootJsonFormat }
 
 /**
- * Provides JsonSupport for the LogEvent case class
+ * Provides Json serialization/deserialization for the LogEvent case class
  */
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit def logEventJsonFormat: RootJsonFormat[LogEvent] = jsonFormat8(LogEvent)

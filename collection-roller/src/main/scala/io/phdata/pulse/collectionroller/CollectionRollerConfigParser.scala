@@ -25,6 +25,9 @@ object YamlProtocol extends DefaultYamlProtocol {
   implicit val config      = yamlFormat2(CollectionRollerConfig)
 }
 
+/**
+ * Functionality to parse a yaml configuration into a case class
+ */
 object ConfigParser {
   def getConfig(path: String): CollectionRollerConfig = {
     val yamlString = Source.fromFile(path).getLines.mkString("\n")
@@ -37,8 +40,22 @@ object ConfigParser {
   }
 }
 
+/**
+ *
+ * @param solrConfigSetDir Local directory containg one or many Solr Config Sets to be uploaded
+ * @param applications List of [[Application]]s
+ */
 case class CollectionRollerConfig(solrConfigSetDir: Option[String], applications: List[Application])
 
+/**
+ *
+ * @param name Name of the application
+ * @param numCollections Number of Solr collections to keep for the application
+ * @param shards Number of Solr shards for each Solr collection
+ * @param replicas Number of replicas for each Solr collection
+ * @param rollPeriod Period (in days) to roll/rotate the Solr collections
+ * @param solrConfigSetName Solr Config Set name. ConfigSet should exist in Zookeeper
+ */
 case class Application(name: String,
                        numCollections: Option[Int],
                        shards: Option[Int],

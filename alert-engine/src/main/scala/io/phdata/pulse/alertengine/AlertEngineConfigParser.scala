@@ -21,16 +21,16 @@ import net.jcazevedo.moultingyaml._
 import scala.io.Source
 
 object YamlProtocol extends DefaultYamlProtocol {
-  implicit val alert: YamlFormat[AlertRule] = yamlFormat4(AlertRule)
-  implicit val mailProfile: YamlFormat[MailAlertProfile] = yamlFormat2(MailAlertProfile)
+  implicit val alert: YamlFormat[AlertRule]                = yamlFormat4(AlertRule)
+  implicit val mailProfile: YamlFormat[MailAlertProfile]   = yamlFormat2(MailAlertProfile)
   implicit val slackProfile: YamlFormat[SlackAlertProfile] = yamlFormat2(SlackAlertProfile)
-  implicit val application: YamlFormat[Application] = yamlFormat4(Application)
-  implicit val config: YamlFormat[AlertEngineConfig] = yamlFormat1(AlertEngineConfig)
+  implicit val application: YamlFormat[Application]        = yamlFormat4(Application)
+  implicit val config: YamlFormat[AlertEngineConfig]       = yamlFormat1(AlertEngineConfig)
 }
 
 /**
-  * Methods to parse an alert engine yaml into case classes
-  */
+ * Methods to parse an alert engine yaml into case classes
+ */
 object AlertEngineConfigParser {
   def getConfig(path: String): AlertEngineConfig = {
     val yamlString = Source.fromFile(path).getLines.mkString("\n")
@@ -51,18 +51,18 @@ case class Application(name: String,
                        slackProfiles: Option[List[SlackAlertProfile]])
 
 /**
-  * An [[AlertRule]]
-  * @param query Solr Query that acts as a predicate, for example this query:
-  *              {{{timestamp:[NOW-10MINUTES TO NOW] AND level: ERROR}}} will alert if any message
-  *              with level 'ERROR' is found within the last 10 minutes
-  * @param retryInterval the query will be run on the retry interval. The retry interval is set in minutes
-  * @param resultThreshold if the query returns more than threshold results, an alert will be
-  *                        triggered. The default is 0. If the threshold is set to `-1`, the
-  *                        non-existence of documents with this query will trigger an alert. This
-  *                        is useful for tracking application uptime.
-  * @param alertProfiles One or many alertProfiles can be defined. For each alertProfile defined in
-  *                      an alert, an alertProfile needs to be defined for the application
-  */
+ * An [[AlertRule]]
+ * @param query Solr Query that acts as a predicate, for example this query:
+ *              {{{timestamp:[NOW-10MINUTES TO NOW] AND level: ERROR}}} will alert if any message
+ *              with level 'ERROR' is found within the last 10 minutes
+ * @param retryInterval the query will be run on the retry interval. The retry interval is set in minutes
+ * @param resultThreshold if the query returns more than threshold results, an alert will be
+ *                        triggered. The default is 0. If the threshold is set to `-1`, the
+ *                        non-existence of documents with this query will trigger an alert. This
+ *                        is useful for tracking application uptime.
+ * @param alertProfiles One or many alertProfiles can be defined. For each alertProfile defined in
+ *                      an alert, an alertProfile needs to be defined for the application
+ */
 case class AlertRule(query: String,
                      retryInterval: Int,
                      resultThreshold: Option[Int] = None,
@@ -72,6 +72,6 @@ trait AlertProfile {
   val name: String
 }
 
-case class SlackAlertProfile(name: String, url: String)            extends AlertProfile
+case class SlackAlertProfile(name: String, url: String) extends AlertProfile
 
 case class MailAlertProfile(name: String, addresses: List[String]) extends AlertProfile

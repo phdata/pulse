@@ -16,23 +16,17 @@
 
 package io.phdata.pulse.logcollector
 
-import java.util.concurrent.Executors
-
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.ActorSystem
 import akka.http.scaladsl.common.EntityStreamingSupport
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
 import akka.http.scaladsl.server.Directives._
-import akka.stream.{ ActorMaterializer, Materializer }
+import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.LazyLogging
-import io.phdata.pulse.common.SolrService
-import io.phdata.pulse.common.{ JsonSupport, SolrService }
 import io.phdata.pulse.common.domain.LogEvent
-
-import scala.concurrent.ExecutionContext
+import io.phdata.pulse.common.{ JsonSupport, SolrService }
 
 /**
  * Http Rest Endpoint
- *
  */
 class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with LazyLogging {
 

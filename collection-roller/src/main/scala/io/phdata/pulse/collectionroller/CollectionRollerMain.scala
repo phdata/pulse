@@ -25,7 +25,9 @@ import org.apache.solr.client.solrj.impl.CloudSolrServer
 import com.typesafe.scalalogging.LazyLogging
 
 object CollectionRollerMain extends LazyLogging {
-  val DAEMON_INTERVAL_MINUTES = 5L // five minutes
+  val DAEMON_INTERVAL_MINUTES       = 5L // five minutes
+  val CLEANUP_SLEEP_INTERVAL_MILLIS = 100
+
   def main(args: Array[String]) {
     val parsedArgs = new CollectionRollerCliArgsParser(args)
     logger.debug(s"Parsed args: $parsedArgs")
@@ -52,7 +54,6 @@ object CollectionRollerMain extends LazyLogging {
     } else if (parsedArgs.listApplications.supplied) {
       listApplications(parsedArgs)
     } else {
-      val applicationsConfig   = ConfigParser.getConfig(parsedArgs.conf())
       val collectionRollerTask = new CollectionRollerTask(parsedArgs)
       collectionRollerTask.run()
     }
@@ -63,11 +64,11 @@ object CollectionRollerMain extends LazyLogging {
           logger.warn("Caught exit signal, trying to cleanup tasks")
           while (future.getDelay(TimeUnit.SECONDS) == 0) {
             logger.info("waiting for tasks to finish")
-            Thread.sleep(100)
+            Thread.sleep(CLEANUP_SLEEP_INTERVAL_MILLIS)
           }
         } catch {
           case e: InterruptedException =>
-            logger.error("Failed to clean up gracefully")
+            logger.error("Failed to clean up gracefully", e)
         }
     }
   }
@@ -119,11 +120,10 @@ object CollectionRollerMain extends LazyLogging {
       val config = try {
         ConfigParser.getConfig(parsedArgs.conf())
       } catch {
-        case e: Exception => {
+        case e: Exception =>
           logger.error("Error parsing config, exiting", e)
           System.exit(1) // bail if we have a bad config
           throw new RuntimeException("Error parsing configuration, exiting", e) // this code won't be reached but is needed for the typechecker
-        }
       }
       logger.info(s"using config: $config")
       val (solr, solrService, collectionRoller) = createServices(parsedArgs)

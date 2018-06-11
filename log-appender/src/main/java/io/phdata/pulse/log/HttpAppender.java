@@ -165,6 +165,7 @@ public class HttpAppender extends AppenderSkeleton {
 
   /**
    * Visible for testing.
+   *
    * @param httpManager
    */
   protected void setHttpManager(HttpManager httpManager) {

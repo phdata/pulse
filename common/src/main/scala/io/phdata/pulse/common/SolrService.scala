@@ -101,7 +101,7 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
 
   def aliasExists(name: String): Boolean = {
     logger.info(s"searching for alias existence: $name")
-    listAliases().filter(_._1 == name).nonEmpty
+    listAliases().exists(_._1 == name)
   }
 
   def listAliases(): Map[String, Set[String]] = {
