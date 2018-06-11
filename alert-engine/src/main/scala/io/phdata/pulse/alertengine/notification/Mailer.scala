@@ -34,20 +34,20 @@ class Mailer(smtpServer: String,
     props.put("mail.smtp.starttls.enable", "true")
   }
 
-  val session = password.fold {
-    logger.info("no password supplied, skipping authentication")
-    props.put("mail.smtp.auth", "false")
-    Session.getInstance(props)
-  } { password =>
-    logger.info("authenticating with password")
-    val auth = new Authenticator {
-      override def getPasswordAuthentication = new PasswordAuthentication(username, password)
-    }
-    props.put("mail.smtp.auth", "true")
-    Session.getInstance(props, auth)
-  }
-
   def sendMail(addresses: List[String], subject: String, body: String): Unit = {
+    val session = password.fold {
+      logger.info("no password supplied, skipping authentication")
+      props.put("mail.smtp.auth", "false")
+      Session.getInstance(props)
+    } { password =>
+      logger.info("authenticating with password")
+      val auth = new Authenticator {
+        override def getPasswordAuthentication = new PasswordAuthentication(username, password)
+      }
+      props.put("mail.smtp.auth", "true")
+      Session.getInstance(props, auth)
+    }
+
     val message: Message = new MimeMessage(session)
     message.setFrom(new InternetAddress(username))
     message.setSentDate(new Date())
