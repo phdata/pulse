@@ -19,7 +19,6 @@ sha:
 	sha1sum target/$(distro7).parcel | awk '{ print $$1 }' > target/$(distro7).parcel.sha
 	sha1sum target/$(distro6).parcel | awk '{ print $$1 }' > target/$(distro6).parcel.sha
 
-
 install-dir:
 	cp target/$(packageName) /opt/cloudera/parcel-repo
 	chown cloudera-scm: /opt/cloudera/parcel-repo/$(packageName)
