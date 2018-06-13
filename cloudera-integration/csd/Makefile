@@ -22,8 +22,5 @@ place:
 	echo setting permissions
 	chown cloudera-scm: /opt/cloudera/csd/$(packageName).jar
 
-upload: csd
-	aws s3 cp target/$(packageName).jar s3://phdata-pulse/csd/$(packageName).jar
-
 clean: 
 	rm -rf target

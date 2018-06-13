@@ -47,12 +47,6 @@ install-parcel: parcel
 install-csd: csd
 	$(MAKE) -C cloudera-integration/csd install
 
-upload-csd:
-	$(MAKE) -C cloudera-integration/csd upload
-
-upload-parcel:
-	$(MAKE) -C cloudera-integration/parcel upload
-
 install: install-parcel install-csd
 
 run: run-log-collector run-collection-roller run-alert-engine
