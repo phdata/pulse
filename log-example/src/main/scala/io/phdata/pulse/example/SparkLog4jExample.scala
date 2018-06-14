@@ -28,6 +28,9 @@ object SparkLog4jExample {
     val conf = new SparkConf().setAppName("Pulse Spark Logging Example")
     val sc   = SparkContext.getOrCreate(conf)
 
+    // set the application id on the Mapped Diagnostic Context so it will show as a field in the logs
+    org.apache.log4j.MDC.put("application_id", sc.applicationId)
+
     val myTestData = 1 to 10000
     val testRdd    = sc.parallelize(myTestData)
 
