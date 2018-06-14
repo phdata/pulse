@@ -32,6 +32,7 @@ import org.apache.solr.client.solrj.impl.{
 }
 
 import scala.io.Source
+import scala.util.Try
 
 object AlertEngineMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES = 1
@@ -79,15 +80,8 @@ object AlertEngineMain extends LazyLogging {
 
   def validateConfig(config: AlertEngineConfig): Unit =
     config.applications.foreach { application =>
-      // have either a mail or slack profile, otherwise no alerts will be sent
       assert(application.emailProfiles.isDefined || application.slackProfiles.isDefined)
 
-      // make sure the result threshold is greater than zero
-      application.alertRules.foreach {
-        case rule if rule.resultThreshold.isDefined =>
-          rule.resultThreshold.map(threshold =>
-            assert(threshold >= 0, s"Threshold must a positive number for rule: $rule"))
-      }
     }
 
   def readSilencedApplications(path: String): List[String] =
@@ -108,7 +102,6 @@ object AlertEngineMain extends LazyLogging {
 
   /**
    * Task for running an alert. Can be schduled to be run repeatedly.
-   *
    * @param parsedArgs Application arguments
    */
   class AlertEngineTask(parsedArgs: AlertEngineCliParser) extends Runnable {
@@ -162,5 +155,4 @@ object AlertEngineMain extends LazyLogging {
       }
     }
   }
-
 }

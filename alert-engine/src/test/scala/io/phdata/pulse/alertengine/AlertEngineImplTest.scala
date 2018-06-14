@@ -18,24 +18,16 @@ package io.phdata.pulse.alertengine
 
 import java.io.File
 
-import io.phdata.pulse.alertengine.notification.{
-  MailNotificationService,
-  NotificationServices,
-  SlackNotificationService
-}
+import io.phdata.pulse.alertengine.notification.{MailNotificationService, NotificationServices, SlackNotificationService}
 import io.phdata.pulse.common.domain.LogEvent
-import io.phdata.pulse.common.{ DocumentConversion, SolrService }
-import io.phdata.pulse.testcommon.{ BaseSolrCloudTest, TestUtil }
+import io.phdata.pulse.common.{DocumentConversion, SolrService}
+import io.phdata.pulse.testcommon.{BaseSolrCloudTest, TestUtil}
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 import org.mockito.Mockito
-import org.scalatest.{ BeforeAndAfterEach, FunSuite }
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import org.scalatest.mockito.MockitoSugar
 
-class AlertEngineImplTest
-    extends FunSuite
-    with BaseSolrCloudTest
-    with MockitoSugar
-    with BeforeAndAfterEach {
+class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSugar with BeforeAndAfterEach {
   val CONF_NAME        = "testconf"
   val APPLICATION_NAME = TestUtil.randomIdentifier()
 
@@ -110,8 +102,8 @@ class AlertEngineImplTest
     assert(result.totalNumFound == 12)
   }
 
-  test("trigger alert when threshold is set to '0' and there are no results") {
-    val alert = AlertRule("category: DOESNOTEXIST", 1, Some(0), List("tony@phdata.io"))
+  test("trigger alert when threshold is set to '-1' and there are no results") {
+    val alert = AlertRule("category: DOESNOTEXIST", 1, Some(-1), List("tony@phdata.io"))
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -123,7 +115,7 @@ class AlertEngineImplTest
   }
 
   test("don't match non alert") {
-    val alert = AlertRule("id: notexists", 1, Some(1), List("tony@phdata.io"))
+    val alert = AlertRule("id: notexists", 1, Some(0), List("tony@phdata.io"))
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -249,7 +241,7 @@ class AlertEngineImplTest
   }
 
   test("mark alert triggered when results are found") {
-    val alert = AlertRule("category: ERROR", 1, Some(1), List("tony@phdata.io"))
+    val alert = AlertRule("category: ERROR", 1, Some(-1), List("tony@phdata.io"))
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -259,7 +251,7 @@ class AlertEngineImplTest
   }
 
   test("mark alert triggered when no results are found") {
-    val alert = AlertRule("category: DOESNOTEXIST", 1, Some(0), List("tony@phdata.io"))
+    val alert = AlertRule("category: DOESNOTEXIST", 1, Some(-1), List("tony@phdata.io"))
     val engine =
       new AlertEngineImpl(
         solrClient,
