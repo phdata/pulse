@@ -17,12 +17,17 @@
 package io.phdata.pams.example
 
 import java.net.InetAddress
-
+import org.apache.log4j.MDC
 import org.apache.spark.{ SparkConf, SparkContext }
 import org.slf4j.LoggerFactory
-
 import scala.util.Try
 
+/**
+ * This example shows how to
+ * 1) initialize a logger
+ * 2) write the application id and hostname to the driver and executors MDC so they will be
+ * searchable in the solr index.
+ */
 object SparkLog4jExample {
 
   private val log = LoggerFactory.getLogger(this.getClass)
@@ -32,27 +37,30 @@ object SparkLog4jExample {
     val conf = new SparkConf().setAppName("Pulse Spark Logging Example")
     val sc   = SparkContext.getOrCreate(conf)
 
-    val myTestData    = 1 to 10000
-    val testRdd       = sc.parallelize(myTestData)
-    val applicationId = sc.applicationId
+    val testData = 1 to 10000
+    val testRdd  = sc.parallelize(testData)
 
+    // put the applicationId in a variable so it can be serialized and sent to the executors where [[sc]] is not available.
+    val applicationId = sc.applicationId
     // set the application id of the driver
     org.apache.log4j.MDC.put("application_id", applicationId)
     // set the hostname of the driver
     org.apache.log4j.MDC.put("hostname", InetAddress.getLocalHost().getHostName())
 
     /**
-     * This lazy initializer will set hostname and application_id on the executors
+     * This lazy initializer will put the  hostname and application_id on the executors
+     * Any values added to the MDC will be sent to the log collector and available for searching
+     *
      */
     object LoggingConfiguration {
-      private lazy val setMdcAppId = Try(org.apache.log4j.MDC.put("application_id", applicationId))
-        .getOrElse(log.warn(s"Error setting application id"))
-      private lazy val setHostName = Try(
-        org.apache.log4j.MDC.put("hostname", InetAddress.getLocalHost().getHostName()))
       lazy val init = {
         setHostName
         setMdcAppId
       }
+      private lazy val setMdcAppId = Try(MDC.put("application_id", applicationId))
+        .getOrElse(log.warn(s"Error setting application id"))
+      private lazy val setHostName = Try(
+        MDC.put("hostname", InetAddress.getLocalHost().getHostName()))
     }
 
     testRdd.foreach { num =>
@@ -62,11 +70,6 @@ object SparkLog4jExample {
       } else {
         log.info(s"error: " + num)
       }
-    }
-
-    val y = testRdd.mapPartitions { p =>
-      LoggingConfiguration.init // initialized once on first record, value is thrown away an nothing done for other records
-      p.map(x => x)
     }
 
     log.info("Shutting down the spark logging example")
