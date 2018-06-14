@@ -18,23 +18,18 @@ package io.phdata.pulse.alertengine
 
 import java.io.File
 
-import io.phdata.pulse.alertengine.notification.{
-  MailNotificationService,
-  NotificationFormatter,
-  NotificationServices,
-  SlackNotificationService
-}
+import io.phdata.pulse.alertengine.notification.{MailNotificationService, NotificationServices, SlackNotificationService}
 import io.phdata.pulse.common.domain.LogEvent
-import io.phdata.pulse.common.{ DocumentConversion, SolrService }
-import io.phdata.pulse.testcommon.{ BaseSolrCloudTest, TestUtil }
+import io.phdata.pulse.common.{DocumentConversion, SolrService}
+import io.phdata.pulse.testcommon.{BaseSolrCloudTest, TestUtil}
 import org.apache.solr.client.solrj.impl.CloudSolrServer
-import org.mockito.{ Matchers, Mockito }
-import org.scalatest.FunSuite
+import org.mockito.Mockito
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import org.scalatest.mockito.MockitoSugar
 
-class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSugar {
-  val CONF_NAME       = "testconf"
-  val TEST_COLLECTION = TestUtil.randomIdentifier()
+class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSugar with BeforeAndAfterEach {
+  val CONF_NAME        = "testconf"
+  val APPLICATION_NAME = TestUtil.randomIdentifier()
 
   val solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress, solrClient)
 
@@ -46,9 +41,15 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
 
   val mockSolrServer = mock[CloudSolrServer]
 
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    AlertsDb.reset()
+  }
+
   override def beforeAll(): Unit = {
     super.beforeAll()
-    val alias = TEST_COLLECTION + "_all"
+    AlertsDb.reset()
+    val alias = APPLICATION_NAME + "_all"
     solrService.uploadConfDir(
       new File(System.getProperty("user.dir") + "/test-config/solr_configs/conf").toPath,
       CONF_NAME)
@@ -93,11 +94,11 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
       new AlertEngineImpl(
         solrClient,
         new NotificationServices(mailNotificationService, slackNotificationService))
-    val result = engine.triggeredAlert(TEST_COLLECTION, alert).get
+    val result = engine.triggeredAlert(APPLICATION_NAME, alert).get
     assertResult(alert)(result.rule)
     // @TODO why is this 2 instead of 1 sometimes?
     assert(result.documents.lengthCompare(0) > 0)
-    assert(result.applicationName == TEST_COLLECTION)
+    assert(result.applicationName == APPLICATION_NAME)
     assert(result.totalNumFound == 12)
   }
 
@@ -107,10 +108,10 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
       new AlertEngineImpl(
         solrClient,
         new NotificationServices(mailNotificationService, slackNotificationService))
-    val result = engine.triggeredAlert(TEST_COLLECTION, alert).get
+    val result = engine.triggeredAlert(APPLICATION_NAME, alert).get
     assertResult(alert)(result.rule)
     assert(result.documents.isEmpty)
-    assert(result.applicationName == TEST_COLLECTION)
+    assert(result.applicationName == APPLICATION_NAME)
   }
 
   test("don't match non alert") {
@@ -119,7 +120,7 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
       new AlertEngineImpl(
         solrClient,
         new NotificationServices(mailNotificationService, slackNotificationService))
-    assertResult(None)(engine.triggeredAlert(TEST_COLLECTION, alert))
+    assertResult(None)(engine.triggeredAlert(APPLICATION_NAME, alert))
   }
 
   test("Mail profile is matched from AlertRule to Application") {
@@ -227,5 +228,45 @@ class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSu
     println(results)
     assert(results.length == 1)
     assert(results.contains(activeApp))
+  }
+
+  test("mark alert triggered on results found > 0") {
+    val alert = AlertRule("category: ERROR", 1, Some(0), List("testing@tester.com"))
+    val engine =
+      new AlertEngineImpl(
+        solrClient,
+        new NotificationServices(mailNotificationService, slackNotificationService))
+    val result = engine.triggeredAlert(APPLICATION_NAME, alert).get
+    assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alert))
+  }
+
+  test("mark alert triggered when results are found") {
+    val alert = AlertRule("category: ERROR", 1, Some(-1), List("tony@phdata.io"))
+    val engine =
+      new AlertEngineImpl(
+        solrClient,
+        new NotificationServices(mailNotificationService, slackNotificationService))
+    assert(engine.triggeredAlert(APPLICATION_NAME, alert).isDefined)
+    assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alert))
+  }
+
+  test("mark alert triggered when no results are found") {
+    val alert = AlertRule("category: DOESNOTEXIST", 1, Some(-1), List("tony@phdata.io"))
+    val engine =
+      new AlertEngineImpl(
+        solrClient,
+        new NotificationServices(mailNotificationService, slackNotificationService))
+    assert(engine.triggeredAlert(APPLICATION_NAME, alert).isDefined)
+    assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alert))
+  }
+
+  test("don't mark alert triggered when no results are found") {
+    val alert = AlertRule("category: DOESNOTEXIST", 1, Some(1), List("tony@phdata.io"))
+    val engine =
+      new AlertEngineImpl(
+        solrClient,
+        new NotificationServices(mailNotificationService, slackNotificationService))
+    assertResult(None)(engine.triggeredAlert(APPLICATION_NAME, alert))
+    assertResult(true)(AlertsDb.shouldCheck(APPLICATION_NAME, alert))
   }
 }

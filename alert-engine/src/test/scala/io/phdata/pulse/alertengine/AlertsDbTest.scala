@@ -31,7 +31,7 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
     val firstTime  = ZonedDateTime.now()
     val secondTime = firstTime.plusMinutes(6)
 
-    AlertsDb.markChecked("app1", alert, secondTime)
+    AlertsDb.markTriggered("app1", alert, secondTime)
 
     assertResult(false)(AlertsDb.shouldCheck("app1", alert, secondTime))
   }
@@ -47,7 +47,7 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
     val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
     val now   = ZonedDateTime.now()
 
-    AlertsDb.markChecked("app1", alert, now)
+    AlertsDb.markTriggered("app1", alert, now)
 
     assertResult(false)(AlertsDb.shouldCheck("app1", alert, now))
   }
@@ -56,7 +56,7 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
     val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
     val now   = ZonedDateTime.now()
 
-    AlertsDb.markChecked("app1", alert, now)
+    AlertsDb.markTriggered("app1", alert, now)
 
     assertResult(true)(AlertsDb.shouldCheck("app2", alert, now))
   }
@@ -65,7 +65,7 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
     val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
     val now   = ZonedDateTime.now()
 
-    AlertsDb.markChecked("app1", alert, now)
+    AlertsDb.markTriggered("app1", alert, now)
 
     assertResult(false)(AlertsDb.shouldCheck("app1", alert))
   }

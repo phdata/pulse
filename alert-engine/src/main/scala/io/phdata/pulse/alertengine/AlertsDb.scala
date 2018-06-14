@@ -33,9 +33,9 @@ object AlertsDb extends LazyLogging {
    * @param alert The Alert
    * @param now   A timestamp, visible for testing
    */
-  def markChecked(applicationName: String,
-                  alert: AlertRule,
-                  now: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)): Unit =
+  def markTriggered(applicationName: String,
+                    alert: AlertRule,
+                    now: ZonedDateTime = ZonedDateTime.now(ZoneOffset.UTC)): Unit =
     this.synchronized {
       // if the alert is already in the list, remove it
       val alertRemoved = checkedAlertRules.filterNot {

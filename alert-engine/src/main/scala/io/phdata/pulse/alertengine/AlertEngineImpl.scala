@@ -72,7 +72,7 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
       try {
         val alias = s"${applicationName}_all"
         val query = new SolrQuery(alertRule.query)
-        query.set("fl", "*")
+        query.set("fl", "*") // return full results
         query.set("collection", alias)
         val results    = solrServer.query(query).getResults
         val numFound   = results.getNumFound
@@ -81,9 +81,11 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
         if (threshold == -1 && results.isEmpty) {
           logger.info(
             s"Alert triggered for $applicationName on alert $alertRule at no results found condition")
+          AlertsDb.markTriggered(applicationName, alertRule)
           Some(TriggeredAlert(alertRule, applicationName, resultsSeq, 0))
         } else if (resultsSeq.lengthCompare(threshold) > 0) {
           logger.info(s"Alert triggered for $applicationName on alert $alertRule")
+          AlertsDb.markTriggered(applicationName, alertRule)
           Some(TriggeredAlert(alertRule, applicationName, resultsSeq, numFound))
         } else {
           logger.info(s"No alert needed for $applicationName with alert $alertRule")
@@ -93,8 +95,6 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
         case e: Exception =>
           logger.error(s"Error running query for alert $alertRule", e)
           None
-      } finally {
-        AlertsDb.markChecked(applicationName, alertRule)
       }
     } else {
       None
