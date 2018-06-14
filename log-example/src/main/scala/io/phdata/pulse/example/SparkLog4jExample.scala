@@ -16,8 +16,12 @@
 
 package io.phdata.pams.example
 
+import java.net.InetAddress
+
 import org.apache.spark.{ SparkConf, SparkContext }
 import org.slf4j.LoggerFactory
+
+import scala.util.Try
 
 object SparkLog4jExample {
 
@@ -28,18 +32,41 @@ object SparkLog4jExample {
     val conf = new SparkConf().setAppName("Pulse Spark Logging Example")
     val sc   = SparkContext.getOrCreate(conf)
 
-    // set the application id on the Mapped Diagnostic Context so it will show as a field in the logs
-    org.apache.log4j.MDC.put("application_id", sc.applicationId)
+    val myTestData    = 1 to 10000
+    val testRdd       = sc.parallelize(myTestData)
+    val applicationId = sc.applicationId
 
-    val myTestData = 1 to 10000
-    val testRdd    = sc.parallelize(myTestData)
+    // set the application id of the driver
+    org.apache.log4j.MDC.put("application_id", applicationId)
+    // set the hostname of the driver
+    org.apache.log4j.MDC.put("hostname", InetAddress.getLocalHost().getHostName())
+
+    /**
+     * This lazy initializer will set hostname and application_id on the executors
+     */
+    object LoggingConfiguration {
+      private lazy val setMdcAppId = Try(org.apache.log4j.MDC.put("application_id", applicationId))
+        .getOrElse(log.warn(s"Error setting application id"))
+      private lazy val setHostName = Try(
+        org.apache.log4j.MDC.put("hostname", InetAddress.getLocalHost().getHostName()))
+      lazy val init = {
+        setHostName
+        setMdcAppId
+      }
+    }
 
     testRdd.foreach { num =>
+      LoggingConfiguration.init // initialized once on first record, value is thrown away an nothing done for other records
       if (num % 100 == 0) {
         log.warn(s"found num: " + num)
       } else {
         log.info(s"error: " + num)
       }
+    }
+
+    val y = testRdd.mapPartitions { p =>
+      LoggingConfiguration.init // initialized once on first record, value is thrown away an nothing done for other records
+      p.map(x => x)
     }
 
     log.info("Shutting down the spark logging example")
