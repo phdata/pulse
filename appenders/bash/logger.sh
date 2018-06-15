@@ -47,6 +47,6 @@ logger(){
 
   timestamp=$( date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-  curl -s -X POST -H 'Content-Type: application/json' -d '{"category": "'$category'","timestamp": "'$timestamp'", "level": "'$level'", "message": "'$message'", "threadName": "'$threadName'"}' http://$PULSE_COLLECTOR_HOST:$PULSE_COLLECTOR_PORT/log?application=$application
+  curl -s -X POST -H 'Content-Type: application/json' -d '{"category": "'$category'","timestamp": "'$timestamp'", "level": "'$level'", "message": "'$message'", "threadName": "'$threadName'"}' http://$PULSE_COLLECTOR_HOST:$PULSE_COLLECTOR_PORT/event/$application
 
 }

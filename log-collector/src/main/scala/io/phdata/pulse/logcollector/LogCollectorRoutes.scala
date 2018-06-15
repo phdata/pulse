@@ -41,21 +41,48 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
    * Defines /log routes
    */
   val routes =
-    path("log") {
-      get {
-        complete("Log Collector")
-      } ~
-      post {
-        // route example "/log?application=applicationName"
-        parameter('application) { applicationName =>
-          // create a streaming Source from the incoming json
-          entity(as[LogEvent]) { logEvent =>
-            logger.trace("received message")
-            streamRef ! (applicationName, logEvent)
+  path("log") {
+    get {
+      complete("Log Collector")
+    } ~
+    post {
+      // route example "/log?application=applicationName"
+      parameter('application) { applicationName =>
+        // create a streaming Source from the incoming json
+        entity(as[LogEvent]) { logEvent =>
+          logger.trace("received message")
+          streamRef ! (applicationName, logEvent)
 
-            complete(HttpEntity(ContentTypes.`application/json`, "ok"))
-          }
+          complete(HttpEntity(ContentTypes.`application/json`, "ok"))
         }
       }
     }
+  } ~ path("v2" / "event" / Segment) { applicationName =>
+    /**
+     * Consumes a single log event
+     */
+    post {
+      // route example "/log?application=applicationName"
+      // create a streaming Source from the incoming json
+      entity(as[LogEvent]) { logEvent =>
+        logger.trace("received message")
+        streamRef ! (applicationName, logEvent)
+
+        complete(HttpEntity(ContentTypes.`application/json`, "ok"))
+      }
+    }
+  } ~ path("v2" / "events" / Segment) { applicationName =>
+    /**
+     * Consumes an array of log events
+     */
+    post {
+      // create a streaming Source from the incoming json
+      entity(as[Array[LogEvent]]) { logEvents =>
+        logger.trace("received message")
+        logEvents.foreach(logEvent => streamRef ! (applicationName, logEvent))
+
+        complete(HttpEntity(ContentTypes.`application/json`, "ok"))
+      }
+    }
+  }
 }
