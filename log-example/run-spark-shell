@@ -1,5 +1,5 @@
 #!/bin/bash
-spark-shell \
+spark2-shell \
 --files src/main/resources/log4j.properties
 --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:src/main/resources/log4j.properties" \
 --conf "spark.executor.extraJavaOptions=-Dlog4j.configuration=file:log4j.properties"
