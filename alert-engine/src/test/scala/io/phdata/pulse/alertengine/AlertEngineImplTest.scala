@@ -18,16 +18,24 @@ package io.phdata.pulse.alertengine
 
 import java.io.File
 
-import io.phdata.pulse.alertengine.notification.{MailNotificationService, NotificationServices, SlackNotificationService}
+import io.phdata.pulse.alertengine.notification.{
+  MailNotificationService,
+  NotificationServices,
+  SlackNotificationService
+}
 import io.phdata.pulse.common.domain.LogEvent
-import io.phdata.pulse.common.{DocumentConversion, SolrService}
-import io.phdata.pulse.testcommon.{BaseSolrCloudTest, TestUtil}
+import io.phdata.pulse.common.{ DocumentConversion, SolrService }
+import io.phdata.pulse.testcommon.{ BaseSolrCloudTest, TestUtil }
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 import org.mockito.Mockito
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
+import org.scalatest.{ BeforeAndAfterEach, FunSuite }
 import org.scalatest.mockito.MockitoSugar
 
-class AlertEngineImplTest extends FunSuite with BaseSolrCloudTest with MockitoSugar with BeforeAndAfterEach {
+class AlertEngineImplTest
+    extends FunSuite
+    with BaseSolrCloudTest
+    with MockitoSugar
+    with BeforeAndAfterEach {
   val CONF_NAME        = "testconf"
   val APPLICATION_NAME = TestUtil.randomIdentifier()
 
