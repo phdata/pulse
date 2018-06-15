@@ -130,6 +130,27 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
       solrService.getAlias(s"${app.name}_all"))
   }
 
+  test("move latest alias collection") {
+    val appName     = TestUtil.randomIdentifier()
+    val initialTime = ZonedDateTime.now(ZoneOffset.UTC)
+    val secondTime  = initialTime.plusDays(2)
+
+    val collectionRoller = new CollectionRoller(solrService, initialTime)
+
+    val app =
+      Application(appName, None, None, None, None, "testconf")
+    collectionRoller.initializeApplications(List(app))
+
+    collectionRoller.rollApplications(List(app))
+
+    val collectionRoller2 =
+      new CollectionRoller(solrService, ZonedDateTime.parse(secondTime.toString))
+    collectionRoller2.rollApplications(List(app))
+
+    assertResult(Some(Set(s"${app.name}_${secondTime.toInstant.getEpochSecond}")))(
+      solrService.getAlias(s"${app.name}_latest"))
+  }
+
   test("delete application") {
     val app1Name    = TestUtil.randomIdentifier()
     val app2Name    = TestUtil.randomIdentifier()

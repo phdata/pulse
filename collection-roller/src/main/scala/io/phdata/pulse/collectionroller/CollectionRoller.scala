@@ -214,6 +214,7 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime) extends
       solrService.listCollections().filter(_.startsWith(application.name))
 
     solrService.createAlias(searchAliasName(application.name), applicationCollections: _*)
+    solrService.createAlias(latestAliasName(application.name), nextCollection)
   }
 
   /**
