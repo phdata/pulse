@@ -17,6 +17,18 @@
 
 # Pulse
 
+
+Table of Contents
+
+* [Pulse Features](#pulse-features)
+* [Adding an application to Pulse](#adding-an-application-to-pulse)
+* [Components](#components)
++ [Architecture Diagram](#architecture-diagram)
+* [Installation](#installation)
+* [Running the application manually on a cluster](#running-the-application-manually-on-a-cluster)
+* [Running tests](#running-tests)
+* [Contributing](#contributing)
+
 ## Pulse Features
 
 ***Log Aggregation and Search***
@@ -90,20 +102,20 @@ There are also log appenders for Bash and Python in the 'appenders' folder
 Pulse can be installed as a Cloudera CSD (Custom Service Descriptor). See [CSD](./cloudera-integration/csd/README.md) 
 and [PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.
 
-***Installing the CSD***
+####Installing the CSD####
 
 1. Download the latest CSD jar from [http://downloads.phdata.io/cdh5/csd/](http://downloads.phdata.io/cdh5/csd/)
 2. Place the jar in your Cloudera Manager CSD directory, usually `/opt/cloudera/csd`
 3. Modify the ownership of the jar `chown cloudera-scm:cloudera-scm /opt/cloudera/csd/pulse-<version>.jar`
 4. Restart Cloudera Manager to install the jar
 
-***Installing the Parcel***
+####Installing the Parcel####
 
 1. The parcel repo should be automatically added with the CSD. The url to add it manually:
 [downloads.phdata.io/cdh5/parcels/](http://downloads.phdata.io/cdh5/parcels/)
 2. Download, distribute, activate the parcel
 
-***Installing the service***
+####Installing the service####
 
 Pulse can be installed through the "Add New Service" button for your cluster.
 
@@ -114,7 +126,7 @@ The wizard will ask you for:
 - `smtp port`: The port of your smtp server
 
 
-***Deploying config***
+####Deploying config####
 Pulse has two configuration files, `collection-roller.yml` and `alert-engine.yml`
 
 Both of these configs are deployed via safety valves. [Alert Engine Example](./example-configs/collection-roller/collection-roller.yml) and [Collection Roller Example](./example-configs/alert-engine/alert-engine.yml)
@@ -160,5 +172,4 @@ the csd/parcel to /opt/cloudera/csd and /opt/cloudera/parcel-repo. It will not d
 or refresh/install the CSD in Cloudera Manager
 - `run`:  run all components locally. This will run log collector, collection roller, and alert engine.
 
-## Submitting a pull request
 Before submitting a pull request, please make sure `make test` and `make dist` both pass successfully.
