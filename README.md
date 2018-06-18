@@ -51,7 +51,7 @@ Table of Contents
 - Integration with existing dashboards for rich UIs. 
 
 Works with:
-- Bananahttp://eed3si9n.com/hot-source-dependencies-using-sbt-sriracha
+- Banana
 - Hue Search
 - Arcadia Data
 
