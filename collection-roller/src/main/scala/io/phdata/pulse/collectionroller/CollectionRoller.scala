@@ -287,4 +287,12 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime) extends
       .map(x => x.split("_")(0))
       .toList
 
+  /**
+   * List all aliases belonging to an application
+   * @return Map of alias names as keys and collection names as Set[String]
+   */
+  def aliasMap(): Map[String, Set[String]] =
+    solrService
+      .listAliases()
+
 }

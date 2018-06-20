@@ -51,6 +51,8 @@ object CollectionRollerMain extends LazyLogging {
       }
     } else if (parsedArgs.deleteApplications.supplied) {
       deleteApplications(parsedArgs)
+    } else if (parsedArgs.listApplications.supplied && parsedArgs.verbose.supplied) {
+      listApplicationsVerbose(parsedArgs)
     } else if (parsedArgs.listApplications.supplied) {
       listApplications(parsedArgs)
     } else {
@@ -79,6 +81,28 @@ object CollectionRollerMain extends LazyLogging {
     val (solr, solrService, collectionRoller) = createServices(parsedArgs)
     try {
       collectionRoller.collectionList().foreach(println)
+
+    } finally {
+      solrService.close()
+      solr.shutdown()
+    }
+    logger.info("Ending Collection Roller List App")
+  }
+
+  private def listApplicationsVerbose(parsedArgs: CollectionRollerCliArgsParser): Unit = {
+    logger.info("Starting Collection Roller List App")
+
+    val (solr, solrService, collectionRoller) = createServices(parsedArgs)
+    try {
+
+      println("Applications:")
+      collectionRoller.collectionList().foreach(println)
+      println("Aliases/Collections:")
+
+      for ((k, v) <- collection.mutable.LinkedHashMap(
+             collectionRoller.aliasMap().toSeq.sortBy(_._1): _*))
+        printf(" Alias : %s  Collection(s) : %s\n", k, v.mkString(","))
+
     } finally {
       solrService.close()
       solr.shutdown()

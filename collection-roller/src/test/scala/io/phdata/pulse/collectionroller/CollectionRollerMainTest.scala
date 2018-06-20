@@ -48,6 +48,33 @@ class CollectionRollerMainTest extends FunSuite with BaseSolrCloudTest {
     assert(collectionRoller.collectionList().contains(app2Name))
   }
 
+  test("List applications from Main method in verbose mode") {
+    val app1Name = TestUtil.randomIdentifier()
+    val app2Name = TestUtil.randomIdentifier()
+    val args = Array(
+      "--conf",
+      "sample conf",
+      "--zk-hosts",
+      miniSolrCloudCluster.getZkServer.getZkAddress,
+      "--list-applications",
+      "--verbose"
+    )
+
+    val appList = List(
+      Application(app1Name, None, None, None, None, "testconf"),
+      Application(app2Name, None, None, None, None, "testconf")
+    )
+    collectionRoller.initializeApplications(appList)
+    assert(collectionRoller.collectionList().contains(app1Name))
+    assert(collectionRoller.collectionList().contains(app2Name))
+
+    CollectionRollerMain.main(args)
+
+    // check if alias exists for app1 & app2
+    assert(collectionRoller.collectionList().contains(app1Name))
+    assert(collectionRoller.collectionList().contains(app2Name))
+  }
+
   test("delete applications from Main method") {
     val app1Name = TestUtil.randomIdentifier()
     val app2Name = TestUtil.randomIdentifier()
