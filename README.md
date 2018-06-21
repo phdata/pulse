@@ -109,13 +109,13 @@ and [PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.
 3. Modify the ownership of the jar `chown cloudera-scm:cloudera-scm /opt/cloudera/csd/pulse-<version>.jar`
 4. Restart Cloudera Manager to install the jar
 
-####Installing the Parcel
+#### Installing the Parcel
 
 1. The parcel repo should be automatically added with the CSD. The url to add it manually:
 [downloads.phdata.io/cdh5/parcels/](http://downloads.phdata.io/cdh5/parcels/)
 2. Download, distribute, activate the parcel
 
-####Installing the service
+#### Installing the service
 
 Pulse can be installed through the "Add New Service" button for your cluster.
 
@@ -126,7 +126,7 @@ The wizard will ask you for:
 - `smtp port`: The port of your smtp server
 
 
-####Deploying config
+#### Deploying config
 Pulse has two configuration files, `collection-roller.yml` and `alert-engine.yml`
 
 Both of these configs are deployed via safety valves. [Alert Engine Example](./example-configs/collection-roller/collection-roller.yml) and [Collection Roller Example](./example-configs/alert-engine/alert-engine.yml)
