@@ -102,7 +102,7 @@ There are also log appenders for Bash and Python in the 'appenders' folder
 Pulse can be installed as a Cloudera CSD (Custom Service Descriptor). See [CSD](./cloudera-integration/csd/README.md) 
 and [PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.
 
-####Installing the CSD
+#### Installing the CSD
 
 1. Download the latest CSD jar from [http://downloads.phdata.io/cdh5/csd/](http://downloads.phdata.io/cdh5/csd/)
 2. Place the jar in your Cloudera Manager CSD directory, usually `/opt/cloudera/csd`
