@@ -50,7 +50,9 @@ import io.phdata.pulse.common.SolrService
  * @param solrService
  * @param now
  */
-class CollectionRoller(solrService: SolrService, val now: ZonedDateTime) extends LazyLogging {
+class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
+    extends AutoCloseable
+    with LazyLogging {
   val DEFAULT_ROLLPERIOD      = 1
   val DEFAULT_SHARDS          = 1
   val DEFAULT_REPLICAS        = 1
@@ -286,5 +288,8 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime) extends
       .filter(x => x.contains("_latest"))
       .map(x => x.split("_")(0))
       .toList
+
+  override def close(): Unit =
+    solrService.close()
 
 }
