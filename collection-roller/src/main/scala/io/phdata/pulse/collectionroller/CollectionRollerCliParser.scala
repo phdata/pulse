@@ -34,9 +34,9 @@ class CollectionRollerCliArgsParser(args: Seq[String]) extends ScallopConf(args)
   lazy val listApplications =
     opt[Boolean]("list-applications", required = false, descr = "List all applications (operation)")
   lazy val verbose =
-    opt[Boolean]("verbose",
-                 required = false,
-                 descr =
-                   "List addtnl info (aliases and collections) for all applications (operation)")
+    opt[Boolean](
+      "verbose",
+      required = false,
+      descr = "List additional info (aliases and collections) for all applications (operation)")
   verify()
 }

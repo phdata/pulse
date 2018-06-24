@@ -94,14 +94,18 @@ object CollectionRollerMain extends LazyLogging {
 
     val (solr, solrService, collectionRoller) = createServices(parsedArgs)
     try {
+      for (app <- collectionRoller.collectionList()) {
 
-      println("Applications:")
-      collectionRoller.collectionList().foreach(println)
-      println("Aliases/Collections:")
+        println(app)
 
-      for ((k, v) <- collection.mutable.LinkedHashMap(
-             collectionRoller.aliasMap().toSeq.sortBy(_._1): _*))
-        printf(" Alias : %s  Collection(s) : %s\n", k, v.mkString(","))
+        println("\t" + app + "_latest")
+        for ((k, v) <- collectionRoller.aliasMap().filter(alias => alias._1 == app + "_latest"))
+          println("\t\t" + v.mkString("\n"))
+
+        println("\t" + app + "_all")
+        for ((k, v) <- collectionRoller.aliasMap().filter(alias => alias._1 == app + "_all"))
+          println("\t\t" + v.mkString("\n"))
+      }
 
     } finally {
       solrService.close()
