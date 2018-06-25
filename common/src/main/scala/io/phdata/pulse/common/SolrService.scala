@@ -202,6 +202,17 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
     makeRequest(request)
   }
 
-  def close(): Unit =
-    zkClient.close()
+  def close(): Unit = {
+    try {
+      solr.shutdown()
+    } catch {
+      case e: Exception => logger.warn("Couldn't close solr client cleanly", e)
+    }
+
+    try {
+      zkClient.close()
+    } catch {
+      case e: Exception => logger.warn("Couldn't close zkClient cleanly", e)
+    }
+  }
 }
