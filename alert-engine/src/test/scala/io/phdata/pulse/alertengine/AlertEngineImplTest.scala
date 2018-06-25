@@ -202,14 +202,26 @@ class AlertEngineImplTest
         |    - test@phdata.io
         |  """.stripMargin
 
-    val app1 = AlertEngineConfigParser.convert(yaml).applications(0)
-    val app2 = AlertEngineConfigParser.convert(yaml).applications(1)
-
     val triggeredAlerts =
       List(
-        (app1, Option(TriggeredAlert(app1.alertRules(0), "spark1", null, 1))),
-        (app2, Option(TriggeredAlert(app2.alertRules(0), "spark2", null, 2))),
-        (app2, Option(TriggeredAlert(app2.alertRules(1), "spark2", null, 2)))
+        (AlertEngineConfigParser.convert(yaml).applications(0),
+         Option(
+           TriggeredAlert(AlertEngineConfigParser.convert(yaml).applications(0).alertRules(0),
+                          "spark1",
+                          null,
+                          1))),
+        (AlertEngineConfigParser.convert(yaml).applications(1),
+         Option(
+           TriggeredAlert(AlertEngineConfigParser.convert(yaml).applications(1).alertRules(0),
+                          "spark2",
+                          null,
+                          2))),
+        (AlertEngineConfigParser.convert(yaml).applications(1),
+         Option(
+           TriggeredAlert(AlertEngineConfigParser.convert(yaml).applications(1).alertRules(1),
+                          "spark2",
+                          null,
+                          2)))
       )
 
     val groupedTriggerdAlerts =
@@ -218,6 +230,7 @@ class AlertEngineImplTest
     assert(groupedTriggerdAlerts.size == 2)
     assert(groupedTriggerdAlerts.head._2.size == 1)
     assert(groupedTriggerdAlerts.tail.head._2.size == 2)
+
   }
 
   test("Silenced applications alerts aren't checked") {

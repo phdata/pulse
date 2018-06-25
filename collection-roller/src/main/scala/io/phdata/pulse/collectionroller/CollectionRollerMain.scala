@@ -50,6 +50,8 @@ object CollectionRollerMain extends LazyLogging {
       }
     } else if (parsedArgs.deleteApplications.supplied) {
       deleteApplications(parsedArgs)
+    } else if (parsedArgs.listApplications.supplied && parsedArgs.verbose.supplied) {
+      listApplicationsVerbose(parsedArgs)
     } else if (parsedArgs.listApplications.supplied) {
       listApplications(parsedArgs)
     } else {
@@ -81,7 +83,23 @@ object CollectionRollerMain extends LazyLogging {
     } finally {
       collectionRoller.close()
     }
-    logger.info("Ending Collection Roller List App")
+  }
+
+  private def listApplicationsVerbose(parsedArgs: CollectionRollerCliArgsParser): Unit = {
+    val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
+    try {
+      for (app <- collectionRoller.collectionList()) {
+        println(app)
+        println("\t" + app + "_latest")
+        for ((k, v) <- collectionRoller.aliasMap().filter(alias => alias._1 == app + "_latest"))
+          println("\t\t" + v.mkString("\n"))
+        println("\t" + app + "_all")
+        for ((k, v) <- collectionRoller.aliasMap().filter(alias => alias._1 == app + "_all"))
+          println("\t\t" + v.mkString("\n"))
+      }
+    } finally {
+      collectionRoller.close()
+    }
   }
 
   private def createCollectionRoller(zookeeper: String) = {
