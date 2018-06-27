@@ -97,8 +97,9 @@ lazy val dependencies =
 
     val junit = "junit" % "junit" % junitVersion % "test"
     val junitInterface = "com.novocode" % "junit-interface" % "0.11" % "test"
+    val cats = "org.typelevel" %% "cats-core" % "1.1.0"
 
-    val common = Seq(scalaLogging, scalaTest, logback, commonsLogging)
+    val common = Seq(scalaLogging, scalaTest, logback, commonsLogging, cats)
     val cli = Seq(scallop, scalaYaml)
     val all = common ++ cli ++ Seq(scalaDockerTest, spotifyDockerTest)
 

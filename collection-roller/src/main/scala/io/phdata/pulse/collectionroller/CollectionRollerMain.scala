@@ -20,10 +20,11 @@ import java.time.{ ZoneOffset, ZonedDateTime }
 import java.util.concurrent.{ Executors, ScheduledFuture, TimeUnit }
 
 import com.typesafe.scalalogging.LazyLogging
+import io.phdata.pulse.collectionroller.util.ValidationImplicits._
 import io.phdata.pulse.common.SolrService
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.Try
 
 object CollectionRollerMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES       = 5L // five minutes
@@ -141,6 +142,7 @@ object CollectionRollerMain extends LazyLogging {
           System.exit(1) // bail if we have a bad config
           throw new RuntimeException("Error parsing configuration, exiting", e) // this code won't be reached but is needed for the typechecker
       }
+
       logger.info(s"using config: $config")
 
       val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
@@ -149,32 +151,36 @@ object CollectionRollerMain extends LazyLogging {
         logger.info("starting Collection Roller run")
 
         val configUploadResults =
-          config.solrConfigSetDir.map(dir => Try(collectionRoller.uploadConfigsFromDirectory(dir)))
+          config.solrConfigSetDir
+            .map(dir => Try(collectionRoller.uploadConfigsFromDirectory(dir)))
+            .toSeq
+            .toValidated()
+            .mapInvalid { e =>
+              logger.error("fatal error", e)
+              cleanupAndExit()
+            }
 
         val collectionRollingResults =
           collectionRoller.run(config.applications)
 
         val allResults = collectionRollingResults ++ configUploadResults
-        // a failure exists, kill the application so the supervisor will alert
-        if (allResults.exists(t => t.isFailure)) {
-          allResults
-            .filter(t => t.isFailure)
-            .map { t =>
-              t match {
-                case Success(t) =>
-                case Failure(e) => logger.error("", e)
-              }
-            }
-          System.exit(1)
+
+        if (allResults.exists(_.isInvalid)) {
+          allResults.mapInvalid(e => logger.error("fatal error", e))
+
         }
         logger.info("ending Collection Roller run")
-      } catch {
-        case t: Throwable =>
-          logger.error("Exception caught in Collection Roller task", t)
-          System.exit(1)
       } finally {
-        collectionRoller.close()
+        cleanupAndExit()
       }
+
+      def cleanupAndExit() =
+        try {
+          collectionRoller.close()
+        } finally {
+          // a failure exists, kill the application so the supervisor will alert
+          System.exit(1)
+        }
     }
   }
 

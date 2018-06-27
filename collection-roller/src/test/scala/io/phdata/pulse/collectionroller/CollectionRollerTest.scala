@@ -50,17 +50,14 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
   test("fail if config dir is null") {
     val collectionRoller = new CollectionRoller(solrService, ZonedDateTime.now(ZoneOffset.UTC))
 
-    intercept[NullPointerException] {
-      collectionRoller.uploadConfigsFromDirectory(null)
-    }
+    assert(collectionRoller.uploadConfigsFromDirectory(null).isFailure)
+
   }
 
   test("fail if config dir does not exist") {
     val collectionRoller = new CollectionRoller(solrService, ZonedDateTime.now(ZoneOffset.UTC))
 
-    intercept[FileNotFoundException] {
-      collectionRoller.uploadConfigsFromDirectory("faksjhdfaksjdfh")
-    }
+    assert(collectionRoller.uploadConfigsFromDirectory("faksjhdfaksjdfh").isFailure)
   }
 
   test("oldest collection is deleted") {
