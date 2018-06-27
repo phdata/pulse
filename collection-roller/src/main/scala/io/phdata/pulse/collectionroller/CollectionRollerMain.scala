@@ -171,7 +171,7 @@ object CollectionRollerMain extends LazyLogging {
         }
         logger.info("ending Collection Roller run")
       } finally {
-        cleanupAndExit()
+        collectionRoller.close()
       }
 
       def cleanupAndExit() =
