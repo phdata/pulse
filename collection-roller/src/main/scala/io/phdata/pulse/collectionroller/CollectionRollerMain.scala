@@ -23,7 +23,7 @@ import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.SolrService
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 
-import scala.util.Try
+import scala.util.{ Failure, Success, Try }
 
 object CollectionRollerMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES       = 5L // five minutes
@@ -159,7 +159,12 @@ object CollectionRollerMain extends LazyLogging {
         if (allResults.exists(t => t.isFailure)) {
           allResults
             .filter(t => t.isFailure)
-            .foreach(t => logger.error("", t))
+            .map { t =>
+              t match {
+                case Success(t) =>
+                case Failure(e) => logger.error("", e)
+              }
+            }
           System.exit(1)
         }
         logger.info("ending Collection Roller run")
