@@ -24,7 +24,7 @@ import scala.util.{ Failure, Success, Try }
 object ValidationImplicits {
 
   /**
-   * Extendsion methods for an iterable of [[cats.data.Validated]]
+   * Extension methods for an iterable of [[cats.data.Validated]]
    */
   implicit class validatedIterableOps[L, R](coll: Iterable[Validated[L, R]]) {
 

@@ -26,15 +26,22 @@ class ValidationImplicitsTest extends FunSuite {
 
   val testKeyword = "worked"
 
-  val isValid: Try[String] = Success(testKeyword)
-
-  val isNotValid: Try[String] = Failure(new Exception())
-
-  val sequence = Seq(isValid, isNotValid)
+  val success: Try[String] = Success(testKeyword)
+  val failure: Try[String] = Failure(new Exception())
+  val sequence             = Seq(success, failure)
 
   test("map over a sequence of valid values") {
     val mapped = sequence.toValidated().mapValid(x => x.toUpperCase())
     assert(mapped.exists(x => x.exists(_ == testKeyword.toUpperCase())))
   }
 
+  test("convert at Try into a Validated") {
+    assert(Try(throw new Exception).toValidated().isInvalid)
+    assert(Try(1).toValidated().isValid)
+  }
+
+  test("convert an Iterable[Try] to Iterable[Validated]") {
+    assert(sequence.toValidated().exists(_.isValid))
+    assert(sequence.toValidated().exists(_.isInvalid))
+  }
 }
