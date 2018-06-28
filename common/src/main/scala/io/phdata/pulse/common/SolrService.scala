@@ -114,7 +114,7 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
       logger.info(s"no alias block found")
       Map()
     } else {
-      logger.info(s"found aliases: $aliases")
+      logger.debug(s"found aliases: $aliases")
 
       aliases
         .asInstanceOf[java.util.LinkedHashMap[String, String]]
