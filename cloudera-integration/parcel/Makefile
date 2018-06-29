@@ -41,6 +41,9 @@ conf: dir
 validate-parcel-json: parcel
 	../validator -p target/$(packageName)/meta/parcel.json
 
+validate-alternatives-json: parcel
+	../validator -a target/$(packageName)/meta/alternatives.json
+
 clean:
 	rm -rf target
 
