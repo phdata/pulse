@@ -4,16 +4,18 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class BatchingEventHandlerTest {
+public class BufferingEventHandlerTest {
 
   @Test
   public void BatchMultipleEventsDontFlushWithLowNumber() {
     Integer flushInterval = 1000;
-    Integer batchSize = 10;
-    BatchingEventHandler handler = new BatchingEventHandler(batchSize, flushInterval);
+    Integer bufferSize = 10;
+    BufferingEventHandler handler = new BufferingEventHandler();
+    handler.setFlushIntervalMillis(flushInterval);
+    handler.setBufferSize(bufferSize);
 
-    // create fewer events than the batchsize
-    int eventsCreated = batchSize - 1;
+    // create fewer events than the buffersize
+    int eventsCreated = bufferSize - 1;
 
     LoggingEvent[] events = TestUtils.generateEvents(eventsCreated);
     for (LoggingEvent event : events) {
@@ -29,9 +31,11 @@ public class BatchingEventHandlerTest {
   public void batchMultipleEventsFlushWhenOverSizeThreshold() {
     Integer flushInterval = 1000;
     Integer batchSize = 10;
-    BatchingEventHandler handler = new BatchingEventHandler(batchSize, flushInterval);
+    BufferingEventHandler handler = new BufferingEventHandler();
+    handler.setFlushIntervalMillis(flushInterval);
+    handler.setBufferSize(batchSize);
 
-    // create more events than the batchsize
+    // create more events than the buffersize
     int eventsCreated = batchSize + 1;
 
     LoggingEvent[] events = TestUtils.generateEvents(eventsCreated);
@@ -46,11 +50,13 @@ public class BatchingEventHandlerTest {
   @Test
   public void flushAfterFlushInterval() throws Exception {
     Integer flushInterval = 1000;
-    Integer batchSize = 10;
-    BatchingEventHandler handler = new BatchingEventHandler(batchSize, flushInterval);
+    Integer bufferSize = 10;
+    BufferingEventHandler handler = new BufferingEventHandler();
+    handler.setFlushIntervalMillis(flushInterval);
+    handler.setBufferSize(bufferSize);
 
-    // create fewer events than the batchsize
-    int eventsCreated = batchSize - 1;
+    // create fewer events than the buffersize
+    int eventsCreated = bufferSize - 1;
 
     LoggingEvent[] events = TestUtils.generateEvents(eventsCreated);
     for (LoggingEvent event : events) {
@@ -67,10 +73,12 @@ public class BatchingEventHandlerTest {
   @Test
   public void getMessages() throws Exception {
     Integer flushInterval = 1000;
-    Integer batchSize = 10;
-    BatchingEventHandler handler = new BatchingEventHandler(batchSize, flushInterval);
+    Integer bufferSize = 10;
+    BufferingEventHandler handler = new BufferingEventHandler();
+    handler.setFlushIntervalMillis(flushInterval);
+    handler.setBufferSize(bufferSize);
 
-    // create fewer events than the batchsize
+    // create fewer events than the buffersize
     int eventsCreated = 100;
 
     LoggingEvent[] events = TestUtils.generateEvents(eventsCreated);

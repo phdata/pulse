@@ -20,18 +20,16 @@ import org.apache.log4j.spi.LoggingEvent;
 
 import java.util.ArrayList;
 
-public class BatchingEventHandler {
-  private Integer batchSize;
-  private Integer flushIntervalMillis;
+public class BufferingEventHandler {
+  private Integer bufferSize = 1000;
+  private Integer flushIntervalMillis = 1000;
   long lastFlushedMillis;
 
   private ArrayList<LoggingEvent> messages;
 
-  public BatchingEventHandler(Integer batchSize, Integer flushIntervalMillis) {
-    this.batchSize = batchSize;
-    this.flushIntervalMillis = flushIntervalMillis;
+  public BufferingEventHandler() {
     lastFlushedMillis = System.currentTimeMillis();
-    messages = new ArrayList<>(batchSize);
+    messages = new ArrayList<>(bufferSize);
   }
 
   synchronized public void addEvent(LoggingEvent event) {
@@ -46,21 +44,29 @@ public class BatchingEventHandler {
   public boolean shouldFlush() {
     long currentTime = System.currentTimeMillis();
     boolean exceededTimeThreshold = (lastFlushedMillis + flushIntervalMillis) < currentTime;
-    boolean exceededSizeThreshold = messages.size() > batchSize;
+    boolean exceededSizeThreshold = messages.size() > bufferSize;
 
     return (exceededTimeThreshold || exceededSizeThreshold) && messages.size() > 0;
   }
 
   /**
-   * Get all messages from the queue.
+   * Get all messages from the buffer.
    *
    * @return
    */
   synchronized protected LoggingEvent[] getMessages() {
-    LoggingEvent[] batchedEvents = new LoggingEvent[messages.size()];
-    batchedEvents = messages.toArray(batchedEvents);
+    LoggingEvent[] bufferedEvents = new LoggingEvent[messages.size()];
+    bufferedEvents = messages.toArray(bufferedEvents);
     messages.clear();
     lastFlushedMillis = System.currentTimeMillis();
-    return batchedEvents;
+    return bufferedEvents;
+  }
+
+  public void setBufferSize(int size) {
+    bufferSize = size;
+  }
+
+  public void setFlushIntervalMillis(int interval) {
+    flushIntervalMillis = interval;
   }
 }

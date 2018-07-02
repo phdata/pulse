@@ -34,7 +34,7 @@ public class HttpAppender extends AppenderSkeleton {
 
   private final long INITIAL_BACKOFF_TIME_SECONDS = 1;
   private JsonParser jsonParser = new JsonParser();
-  private BatchingEventHandler eventHandler = new BatchingEventHandler(1000, 1000);
+  private BufferingEventHandler bufferingEventHandler = new BufferingEventHandler();
 
   private HttpManager httpManager;
   private String address;
@@ -57,9 +57,9 @@ public class HttpAppender extends AppenderSkeleton {
   @Override
   protected void append(LoggingEvent event) {
     try {
-      eventHandler.addEvent(event);
+      bufferingEventHandler.addEvent(event);
 
-      if (shouldPost()) {
+      if (shouldFlush()) {
         flush();
       }
     } catch (Throwable t) {
@@ -72,7 +72,7 @@ public class HttpAppender extends AppenderSkeleton {
    * @throws Exception
    */
   private void flush() throws Exception {
-    String json = jsonParser.renderArray(eventHandler.getMessages());
+    String json = jsonParser.renderArray(bufferingEventHandler.getMessages());
     lastPostSuccess = httpManager.send(json);
     if (lastPostSuccess) {
       lastSuccessfulPostTime = currentTimeSeconds();
@@ -86,10 +86,10 @@ public class HttpAppender extends AppenderSkeleton {
    * If the log messages should be flushed based on previous errors and how many records the batching event handler contains
    * @return Boolean decision
    */
-  private boolean shouldPost() {
+  private boolean shouldFlush() {
     Long currentTime = currentTimeSeconds();
 
-    return (eventHandler.shouldFlush() // The batch has grown large enough or enought time has passed
+    return (bufferingEventHandler.shouldFlush() // The batch has grown large enough or enought time has passed
             && lastPostSuccess // the last post was a success
             || currentTime > lastSuccessfulPostTime + backoffTimeSeconds); // enough time has passed after the last failure that we want to try to post again
   }
@@ -122,6 +122,14 @@ public class HttpAppender extends AppenderSkeleton {
     this.address = address;
   }
 
+  public void setBufferSize(int size) {
+    bufferingEventHandler.setBufferSize(size);
+  }
+
+  public void setFlushInterval(int interval) {
+    bufferingEventHandler.setFlushIntervalMillis(interval);
+  }
+
   private Long currentTimeSeconds() {
     return System.currentTimeMillis() / 1000L;
   }
@@ -143,8 +151,8 @@ public class HttpAppender extends AppenderSkeleton {
   /**
    * Visible for testing
    */
-  protected void setBatchingEventHandler(BatchingEventHandler eventHandler) {
-    this.eventHandler = eventHandler;
+  protected void setBatchingEventHandler(BufferingEventHandler eventHandler) {
+    this.bufferingEventHandler = eventHandler;
   }
 }
 
