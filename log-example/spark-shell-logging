@@ -1,5 +1,6 @@
 #!/bin/bash
-spark-shell \
+# This file is intended for quick testing of logging with spark. You probably don't want to log your spark-shell sessions.
+spark2-shell \
 --files src/main/resources/log4j.properties
 --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:src/main/resources/log4j.properties" \
 --conf "spark.executor.extraJavaOptions=-Dlog4j.configuration=file:log4j.properties"

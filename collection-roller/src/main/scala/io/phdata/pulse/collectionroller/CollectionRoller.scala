@@ -50,7 +50,9 @@ import io.phdata.pulse.common.SolrService
  * @param solrService
  * @param now
  */
-class CollectionRoller(solrService: SolrService, val now: ZonedDateTime) extends LazyLogging {
+class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
+    extends AutoCloseable
+    with LazyLogging {
   val DEFAULT_ROLLPERIOD      = 1
   val DEFAULT_SHARDS          = 1
   val DEFAULT_REPLICAS        = 1
@@ -183,7 +185,7 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime) extends
       .getAlias(alias)
 
     collections.exists { coll =>
-      val collSeconds = coll.head.substring(application.name.length + 1).toLong
+      val collSeconds = CollectionNameParser.parseTimestamp(coll.head)
       val instant     = Instant.ofEpochSecond(collSeconds)
       val latestDate  = ZonedDateTime.ofInstant(instant, ZoneOffset.UTC)
       ChronoUnit.DAYS.between(latestDate, now) >= application.rollPeriod.getOrElse(
@@ -214,6 +216,7 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime) extends
       solrService.listCollections().filter(_.startsWith(application.name))
 
     solrService.createAlias(searchAliasName(application.name), applicationCollections: _*)
+    solrService.createAlias(latestAliasName(application.name), nextCollection)
   }
 
   /**
@@ -228,14 +231,28 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime) extends
     if (appCollections.lengthCompare(application.numCollections.getOrElse(DEFAULT_NUM_COLLECTIONS)) <= 0) {
       Seq()
     } else {
+      val collectionsToKeep = application.numCollections.getOrElse(DEFAULT_NUM_COLLECTIONS)
       val collectionToDelete = appCollections
         .sortBy { coll =>
-          coll.substring(application.name.length + 1).toLong
+          CollectionNameParser.parseTimestamp(coll)
         }
         .reverse
-        .drop(appCollections.length - application.numCollections.getOrElse(DEFAULT_NUM_COLLECTIONS))
+        .drop(appCollections.length - collectionsToKeep)
 
-      collectionToDelete.map(coll => solrService.deleteCollection(coll))
+      collectionToDelete.map { coll =>
+        logger.info(s"deleting collection $coll")
+        solrService.deleteCollection(coll)
+        logger.info(s"successfully deleted collection $coll")
+      }
+      // verify collections have been delteted
+      val collections = solrService
+        .listCollections()
+        .filter(_.startsWith(application.name))
+
+      if (collections.length != collectionsToKeep) {
+        logger.error(
+          s"Collections are not being successfully deleted. Keeping collections ${collectionsToKeep} but found collections $collections")
+      }
     }
   }
 
@@ -283,7 +300,17 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime) extends
       .listAliases()
       .keys
       .filter(x => x.contains("_latest"))
-      .map(x => x.split("_")(0))
+      .map(CollectionNameParser.parseName)
       .toList
 
+  /**
+   * List all aliases belonging to an application
+   * @return Map of alias names as keys and collection names as Set[String]
+   */
+  def aliasMap(): Map[String, Set[String]] =
+    solrService
+      .listAliases()
+
+  override def close(): Unit =
+    solrService.close()
 }

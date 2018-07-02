@@ -114,7 +114,7 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
       logger.info(s"no alias block found")
       Map()
     } else {
-      logger.info(s"found aliases: $aliases")
+      logger.debug(s"found aliases: $aliases")
 
       aliases
         .asInstanceOf[java.util.LinkedHashMap[String, String]]
@@ -202,6 +202,17 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
     makeRequest(request)
   }
 
-  def close(): Unit =
-    zkClient.close()
+  def close(): Unit = {
+    try {
+      solr.shutdown()
+    } catch {
+      case e: Exception => logger.warn("Couldn't close solr client cleanly", e)
+    }
+
+    try {
+      zkClient.close()
+    } catch {
+      case e: Exception => logger.warn("Couldn't close zkClient cleanly", e)
+    }
+  }
 }

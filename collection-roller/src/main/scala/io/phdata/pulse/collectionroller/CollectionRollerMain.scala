@@ -22,7 +22,6 @@ import java.util.concurrent.{ Executors, ScheduledFuture, TimeUnit }
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.SolrService
 import org.apache.solr.client.solrj.impl.CloudSolrServer
-import com.typesafe.scalalogging.LazyLogging
 
 object CollectionRollerMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES       = 5L // five minutes
@@ -51,6 +50,8 @@ object CollectionRollerMain extends LazyLogging {
       }
     } else if (parsedArgs.deleteApplications.supplied) {
       deleteApplications(parsedArgs)
+    } else if (parsedArgs.listApplications.supplied && parsedArgs.verbose.supplied) {
+      listApplicationsVerbose(parsedArgs)
     } else if (parsedArgs.listApplications.supplied) {
       listApplications(parsedArgs)
     } else {
@@ -76,14 +77,37 @@ object CollectionRollerMain extends LazyLogging {
   private def listApplications(parsedArgs: CollectionRollerCliArgsParser): Unit = {
     logger.info("Starting Collection Roller List App")
 
-    val (solr, solrService, collectionRoller) = createServices(parsedArgs)
+    val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
     try {
       collectionRoller.collectionList().foreach(println)
     } finally {
-      solrService.close()
-      solr.shutdown()
+      collectionRoller.close()
     }
-    logger.info("Ending Collection Roller List App")
+  }
+
+  private def listApplicationsVerbose(parsedArgs: CollectionRollerCliArgsParser): Unit = {
+    val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
+    try {
+      for (app <- collectionRoller.collectionList()) {
+        println(app)
+        println("\t" + app + "_latest")
+        for ((k, v) <- collectionRoller.aliasMap().filter(alias => alias._1 == app + "_latest"))
+          println("\t\t" + v.mkString("\n"))
+        println("\t" + app + "_all")
+        for ((k, v) <- collectionRoller.aliasMap().filter(alias => alias._1 == app + "_all"))
+          println("\t\t" + v.mkString("\n"))
+      }
+    } finally {
+      collectionRoller.close()
+    }
+  }
+
+  private def createCollectionRoller(zookeeper: String) = {
+    val now              = ZonedDateTime.now(ZoneOffset.UTC)
+    val solr             = new CloudSolrServer(zookeeper)
+    val solrService      = new SolrService(zookeeper, solr)
+    val collectionRoller = new CollectionRoller(solrService, now)
+    collectionRoller
   }
 
   private def deleteApplications(parsedArgs: CollectionRollerCliArgsParser): Unit = {
@@ -91,25 +115,15 @@ object CollectionRollerMain extends LazyLogging {
 
     logger.debug(s"parsed applications ${parsedArgs.deleteApplications}")
 
-    val (solr, solrService, collectionRoller) = createServices(parsedArgs)
+    val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
     try {
       val applications =
         parsedArgs.deleteApplications.toOption.get.split(',').toList
       collectionRoller.deleteApplications(applications)
     } finally {
-      solr.shutdown()
-      solrService.close()
+      collectionRoller.close()
     }
     logger.info("ending Collection Roller Delete App")
-  }
-
-  private def createServices(parsedArgs: CollectionRollerCliArgsParser) = {
-    val now              = ZonedDateTime.now(ZoneOffset.UTC)
-    val zookeeperHosts   = parsedArgs.zkHosts()
-    val solr             = new CloudSolrServer(zookeeperHosts)
-    val solrService      = new SolrService(zookeeperHosts, solr)
-    val collectionRoller = new CollectionRoller(solrService, now)
-    (solr, solrService, collectionRoller)
   }
 
   class CollectionRollerTask(parsedArgs: CollectionRollerCliArgsParser)
@@ -126,7 +140,7 @@ object CollectionRollerMain extends LazyLogging {
           throw new RuntimeException("Error parsing configuration, exiting", e) // this code won't be reached but is needed for the typechecker
       }
       logger.info(s"using config: $config")
-      val (solr, solrService, collectionRoller) = createServices(parsedArgs)
+      val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
 
       try {
         logger.info("starting Collection Roller run")
@@ -144,12 +158,7 @@ object CollectionRollerMain extends LazyLogging {
           logger.error("Exception caught in Collection Roller task", t)
           System.exit(1)
       } finally {
-        try {
-          solr.shutdown()
-          solrService.close()
-        } catch {
-          case e: Exception => logger.warn("exception closing services", e)
-        }
+        collectionRoller.close()
       }
     }
   }
