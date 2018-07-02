@@ -1,5 +1,5 @@
 ---
-solrConfigSetDir: /etc/pulse/solr-configs/
+solrConfigSetDir: /etc/phdata-pulse/solr-configs/
 applications:
 - name: pulse-test-default
   solrConfigSetName: pulseconfigv2

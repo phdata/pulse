@@ -1,6 +1,6 @@
 {
   "conf": {
-    "destination": "/etc/pulse",
+    "destination": "/etc/phdata-pulse",
     "source": "conf",
     "priority": 10,
     "isDirectory": true
