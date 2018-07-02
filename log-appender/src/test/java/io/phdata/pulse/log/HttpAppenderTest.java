@@ -4,7 +4,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -31,7 +30,9 @@ public class HttpAppenderTest {
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(false);
     HttpAppender appender = new HttpAppender();
     appender.setHttpManager(httpManager);
-    appender.setBatchingEventHandler(new BatchingEventHandler(1, 1));
+    appender.setBatchingEventHandler(new BufferingEventHandler());
+    appender.setBufferSize(1);
+    appender.setFlushInterval(1);
 
     // first event batch should call 'send'
     appender.append(TestUtils.getEvent());
@@ -52,7 +53,7 @@ public class HttpAppenderTest {
 
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
     HttpAppender appender = new HttpAppender();
-    appender.setBatchingEventHandler(new BatchingEventHandler(1000, 1000));
+    appender.setBatchingEventHandler(new BufferingEventHandler());
 
     appender.setHttpManager(httpManager);
     // first event should call 'send'
@@ -71,7 +72,7 @@ public class HttpAppenderTest {
 
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
     HttpAppender appender = new HttpAppender();
-    appender.setBatchingEventHandler(new BatchingEventHandler(1000, 1000));
+    appender.setBatchingEventHandler(new BufferingEventHandler());
 
     appender.setHttpManager(httpManager);
     // first event should call 'send'
