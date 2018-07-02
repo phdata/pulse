@@ -45,6 +45,13 @@ public class HttpAppender extends AppenderSkeleton {
   private long backoffTimeSeconds = INITIAL_BACKOFF_TIME_SECONDS;
 
   public HttpAppender() {
+    Runtime.getRuntime().addShutdownHook(new Thread()
+    {
+      public void run()
+      {
+        close();
+      }
+    });
   }
 
   @Override
@@ -140,3 +147,4 @@ public class HttpAppender extends AppenderSkeleton {
     this.eventHandler = eventHandler;
   }
 }
+
