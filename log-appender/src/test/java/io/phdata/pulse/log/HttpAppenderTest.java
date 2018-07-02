@@ -1,24 +1,16 @@
 package io.phdata.pulse.log;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.MDC;
 import org.apache.log4j.spi.LoggingEvent;
-import org.apache.log4j.spi.ThrowableInformation;
-import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.util.HashMap;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 
 public class HttpAppenderTest {
@@ -31,80 +23,60 @@ public class HttpAppenderTest {
     MockitoAnnotations.initMocks(this);
   }
 
-
-  @Test
-  public void testRenderJson() throws Exception {
-
-    HttpAppender appender = new HttpAppender();
-
-    MDC.put("hostname", "host1.com");
-
-    // declare and initialize variables
-    Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
-    long timeStamp = 1;
-    Throwable throwable = new Throwable("Test");
-    ThrowableInformation throwableInformation = new ThrowableInformation(throwable, logger);
-    HashMap properties = new HashMap();
-    properties.put("key", "value");
-
-    LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, timeStamp, Level.INFO, "Hello, World",
-            "main", throwableInformation, "ndc", null, properties);
-
-    // call renderJson method which converts an event into json
-    String json = appender.renderJson(event);
-
-    assertNotNull(json);
-
-    // read json for parsing
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode rootNode = objectMapper.readValue(json, JsonNode.class);
-
-    // check value of each field of LoggingEvent
-    assertEquals("io.phdata.pulse.log.HttpAppenderTest", rootNode.get("category").asText());
-    assertEquals("1970-01-01T00:00:00Z", rootNode.get("timestamp").asText());
-    assertEquals("INFO", rootNode.get("level").asText());
-    assertEquals("Hello, World", rootNode.get("message").asText());
-    assertEquals("main", rootNode.get("threadName").asText());
-    Assert.assertTrue(rootNode.get("throwable").toString().contains("java.lang.Throwable: Test"));
-    assertEquals("{\"key\":\"value\",\"hostname\":\"host1.com\"}", rootNode.get("properties").toString());
-  }
-
-  @Test
-  public void testNullMdc() {
-    MDC.clear();
-    assert (MDC.getContext() == null);
-    HttpAppender appender = new HttpAppender();
-
-    Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
-    long timeStamp = 1;
-    Throwable throwable = new Throwable("Test");
-    ThrowableInformation throwableInformation = new ThrowableInformation(throwable, logger);
-    HashMap properties = new HashMap();
-    properties.put("key", "value");
-
-    LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, timeStamp, Level.INFO, "Hello, World",
-            "main", throwableInformation, "ndc", null, properties);
-
-    String json = appender.renderJson(event);
-
-    assertNotNull(json);
-  }
-
   @Test
   public void testStopPostingOnFailure() {
     Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
-
-    LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, 1, Level.INFO, "Hello, World",
-            "main", null, "ndc", null, null);
 
     // there was an error
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(false);
     HttpAppender appender = new HttpAppender();
     appender.setHttpManager(httpManager);
+    appender.setBatchingEventHandler(new BatchingEventHandler(1, 1));
+
+    // first event batch should call 'send'
+    appender.append(TestUtils.getEvent());
+
+    // second event batch should not call 'send'
+    appender.append(TestUtils.getEvent());
+
+    // verify 'send' was called only once
+    Mockito.verify(httpManager, times(1)).send(Matchers.any());
+  }
+
+  @Test
+  public void dontPostWhenBatchingHandlerIsntReady() {
+    Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
+
+    LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, 1, Level.INFO, "Hello, World",
+            "main", null, "ndc", null, null);
+
+    Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
+    HttpAppender appender = new HttpAppender();
+    appender.setBatchingEventHandler(new BatchingEventHandler(1000, 1000));
+
+    appender.setHttpManager(httpManager);
     // first event should call 'send'
     appender.append(event);
-    // second event should not call 'send'
+
+    // verify 'send' was called only once
+    Mockito.verify(httpManager, times(0)).send(Matchers.any());
+  }
+
+  @Test
+  public void flushEventsOnClose() {
+    Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
+
+    LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, 1, Level.INFO, "Hello, World",
+            "main", null, "ndc", null, null);
+
+    Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
+    HttpAppender appender = new HttpAppender();
+    appender.setBatchingEventHandler(new BatchingEventHandler(1000, 1000));
+
+    appender.setHttpManager(httpManager);
+    // first event should call 'send'
     appender.append(event);
+    appender.close();
 
     // verify 'send' was called only once
     Mockito.verify(httpManager, times(1)).send(Matchers.any());
