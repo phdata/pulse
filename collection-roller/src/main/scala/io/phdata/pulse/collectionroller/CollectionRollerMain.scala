@@ -20,8 +20,11 @@ import java.time.{ ZoneOffset, ZonedDateTime }
 import java.util.concurrent.{ Executors, ScheduledFuture, TimeUnit }
 
 import com.typesafe.scalalogging.LazyLogging
+import io.phdata.pulse.collectionroller.util.ValidationImplicits._
 import io.phdata.pulse.common.SolrService
 import org.apache.solr.client.solrj.impl.CloudSolrServer
+
+import scala.util.Try
 
 object CollectionRollerMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES       = 5L // five minutes
@@ -102,14 +105,6 @@ object CollectionRollerMain extends LazyLogging {
     }
   }
 
-  private def createCollectionRoller(zookeeper: String) = {
-    val now              = ZonedDateTime.now(ZoneOffset.UTC)
-    val solr             = new CloudSolrServer(zookeeper)
-    val solrService      = new SolrService(zookeeper, solr)
-    val collectionRoller = new CollectionRoller(solrService, now)
-    collectionRoller
-  }
-
   private def deleteApplications(parsedArgs: CollectionRollerCliArgsParser): Unit = {
     logger.info("starting Collection Roller Delete App")
 
@@ -126,6 +121,14 @@ object CollectionRollerMain extends LazyLogging {
     logger.info("ending Collection Roller Delete App")
   }
 
+  private def createCollectionRoller(zookeeper: String) = {
+    val now              = ZonedDateTime.now(ZoneOffset.UTC)
+    val solr             = new CloudSolrServer(zookeeper)
+    val solrService      = new SolrService(zookeeper, solr)
+    val collectionRoller = new CollectionRoller(solrService, now)
+    collectionRoller
+  }
+
   class CollectionRollerTask(parsedArgs: CollectionRollerCliArgsParser)
       extends Runnable
       with LazyLogging {
@@ -139,27 +142,45 @@ object CollectionRollerMain extends LazyLogging {
           System.exit(1) // bail if we have a bad config
           throw new RuntimeException("Error parsing configuration, exiting", e) // this code won't be reached but is needed for the typechecker
       }
+
       logger.info(s"using config: $config")
+
       val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
 
       try {
         logger.info("starting Collection Roller run")
 
-        config.solrConfigSetDir.foreach { dir =>
-          collectionRoller.uploadConfigsFromDirectory(dir)
+        val configUploadResults =
+          config.solrConfigSetDir
+            .map(dir => Try(collectionRoller.uploadConfigsFromDirectory(dir)))
+            .toSeq
+            .toValidated()
+            .mapInvalid { e =>
+              logger.error("fatal error", e)
+              cleanupAndExit()
+            }
+
+        val collectionRollingResults =
+          collectionRoller.run(config.applications)
+
+        val allResults = collectionRollingResults ++ configUploadResults
+
+        if (allResults.exists(_.isInvalid)) {
+          allResults.mapInvalid(e => logger.error("fatal error", e))
+
         }
-
-        collectionRoller.initializeApplications(config.applications)
-        collectionRoller.rollApplications(config.applications)
         logger.info("ending Collection Roller run")
-
-      } catch {
-        case t: Throwable =>
-          logger.error("Exception caught in Collection Roller task", t)
-          System.exit(1)
       } finally {
         collectionRoller.close()
       }
+
+      def cleanupAndExit() =
+        try {
+          collectionRoller.close()
+        } finally {
+          // a failure exists, kill the application so the supervisor will alert
+          System.exit(1)
+        }
     }
   }
 

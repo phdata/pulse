@@ -43,7 +43,7 @@ class CollectionRollerMainTest extends FunSuite with BaseSolrCloudTest {
       Application(app1Name, None, None, None, None, "testconf"),
       Application(app2Name, None, None, None, None, "testconf")
     )
-    collectionRoller.initializeApplications(appList)
+    collectionRoller.run(appList)
     assert(collectionRoller.collectionList().contains(app1Name))
     assert(collectionRoller.collectionList().contains(app2Name))
   }
@@ -64,7 +64,7 @@ class CollectionRollerMainTest extends FunSuite with BaseSolrCloudTest {
       Application(app1Name, None, None, None, None, "testconf"),
       Application(app2Name, None, None, None, None, "testconf")
     )
-    collectionRoller.initializeApplications(appList)
+    collectionRoller.run(appList)
     assert(collectionRoller.collectionList().contains(app1Name))
     assert(collectionRoller.collectionList().contains(app2Name))
 
@@ -92,7 +92,7 @@ class CollectionRollerMainTest extends FunSuite with BaseSolrCloudTest {
       Application(app2Name, None, None, None, None, "testconf")
     )
 
-    collectionRoller.initializeApplications(appList)
+    collectionRoller.run(appList)
     CollectionRollerMain.main(args)
 
     // check if alias exists for app1 & app2

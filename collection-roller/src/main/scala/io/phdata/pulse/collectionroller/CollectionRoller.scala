@@ -21,8 +21,13 @@ import java.nio.file.Paths
 import java.time.temporal.ChronoUnit
 import java.time.{ Instant, ZoneOffset, ZonedDateTime }
 
+import cats.data.Validated
+import cats.implicits._
 import com.typesafe.scalalogging.LazyLogging
+import io.phdata.pulse.collectionroller.util.ValidationImplicits._
 import io.phdata.pulse.common.SolrService
+
+import scala.util.Try
 
 /**
  * Collection/Alias management and rolling/rotation.
@@ -46,9 +51,6 @@ import io.phdata.pulse.common.SolrService
  * keep for that application (could be a week or a month or years, depends on application
  * requirements). After we reach the max amount, we start deleting the oldest collection as we add
  * new ones.
- *
- * @param solrService
- * @param now
  */
 class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
     extends AutoCloseable
@@ -64,7 +66,7 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
    *
    * @param solrConfigSetDir Location of the ConfigSetDir
    */
-  def uploadConfigsFromDirectory(solrConfigSetDir: String): Unit = {
+  def uploadConfigsFromDirectory(solrConfigSetDir: String): Try[Unit] = Try {
     val directory = new File(solrConfigSetDir)
 
     if (!directory.exists()) {
@@ -77,31 +79,46 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
     logger.info(s"Attempting to upload directories ${solrInstanceDirectories.mkString(" ")}")
 
     solrInstanceDirectories.foreach { instanceDir =>
-      try {
-        solrService.uploadConfDir(Paths.get(instanceDir.getPath), instanceDir.getName)
-        logger.info(s"Uploaded solr configuration from directory ${instanceDir.getAbsolutePath}")
-      } catch {
-        case e: Exception =>
-          logger.error(s"Could not upload solr configuration: ${instanceDir.getAbsolutePath}", e)
-      }
+      solrService.uploadConfDir(Paths.get(instanceDir.getPath), instanceDir.getName)
+      logger.info(s"Uploaded solr configuration from directory ${instanceDir.getAbsolutePath}")
     }
   }
 
+  def run(applications: Seq[Application]): Iterable[Validated[Throwable, Unit]] = {
+    val initializeResults = applications
+      .map(app => initializeApplication(app))
+      .toValidated()
+
+    initializeResults.mapValid(app => rollApplication(app))
+  }
+
   /**
-   * Initialize a list of applications if it doesn't exist.
+   * Initiialize application by creating
+   *  - A collection for logging called ${applicationName}_{$unixTimestamp}
+   *  - An alias ${applicationName}_all pointing at the above collection
+   *  - An alias ${applicationName}_latest pointing at the above collection
    *
-   * @param applications List of applications to initialize.
+   * @param application the [[io.phdata.pulse.collectionroller.Application]] to be initialized
+   * @return
    */
-  def initializeApplications(applications: List[Application]): Unit =
-    applications.foreach { app =>
-      try {
-        if (!applicationExists(app)) {
-          initializeApplication(app)
-        }
-      } catch {
-        case e: Exception => logger.error(s"error initializing application ${app.name}", e)
-      }
+  private def initializeApplication(application: Application) = Try {
+    if (!applicationExists(application)) {
+      logger.info(s"creating application ${application.name}")
+      val nextCollection = getNextCollectionName(application.name)
+      solrService.createCollection(nextCollection,
+                                   application.shards.getOrElse(DEFAULT_SHARDS),
+                                   application.replicas.getOrElse(DEFAULT_REPLICAS),
+                                   application.solrConfigSetName,
+                                   null)
+
+      assert(solrService.collectionExists(nextCollection),
+             "collection does not exist, turn on debug logging or check solr logs")
+      solrService.createAlias(latestAliasName(application.name), nextCollection)
+      solrService.createAlias(searchAliasName(application.name), nextCollection)
+
     }
+    application
+  }
 
   /**
    * Check if an application already exists by checking for an application alias
@@ -122,31 +139,6 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
     result
   }
 
-  /**
-   * Initiialize application by creating
-   *  - A collection for logging called ${applicationName}_{$unixTimestamp}
-   *  - An alias ${applicationName}_all pointing at the above collection
-   *  - An alias ${applicationName}_latest pointing at the above collection
-   *
-   * @param application the [[io.phdata.pulse.collectionroller.Application]] to be initialized
-   * @return
-   */
-  private def initializeApplication(application: Application): Unit = {
-
-    logger.info(s"creating application ${application.name}")
-    val nextCollection = getNextCollectionName(application.name)
-    solrService.createCollection(nextCollection,
-                                 application.shards.getOrElse(DEFAULT_SHARDS),
-                                 application.replicas.getOrElse(DEFAULT_REPLICAS),
-                                 application.solrConfigSetName,
-                                 null)
-
-    assert(solrService.collectionExists(nextCollection),
-           "collection does not exist, turn on debug logging or check solr logs")
-    solrService.createAlias(latestAliasName(application.name), nextCollection)
-    solrService.createAlias(searchAliasName(application.name), nextCollection)
-  }
-
   private def latestAliasName(applicationName: String) = s"${applicationName}_latest"
 
   private def getNextCollectionName(applicationName: String) =
@@ -155,28 +147,39 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
   private def searchAliasName(name: String) = s"${name}_all"
 
   /**
-   * Roll a list of applications
+   * - Create a new collection with a newer timestamp
+   * - Point the 'latest' application at this new collection
+   * - Add the collection to the 'all' collection alias
+   * - If needed, delete any collections older than the max collections configured
    *
-   * @param applications The list of [[io.phdata.pulse.collectionroller.Application]]s to be rolled
+   * @param application The [[io.phdata.pulse.collectionroller.Application]] to be rolled
+   * @return
    */
-  def rollApplications(applications: List[Application]): Unit =
-    applications.foreach { application =>
-      try {
-        if (shouldRollApplication(application)) {
-          rollCollection(application)
-        } else {
-          logger.info(s"No actions needed for application ${application.name}")
-        }
-      } catch {
-        case e: Exception => logger.error(s"Error rolling application ${application.name}", e)
-      }
+  private def rollApplication(application: Application): Unit =
+    if (shouldRollApplication(application)) {
+      logger.info(s"rolling collections for: ${application.name}")
+
+      val nextCollection = getNextCollectionName(application.name)
+      solrService.createCollection(nextCollection,
+                                   application.shards.getOrElse(DEFAULT_SHARDS),
+                                   application.replicas.getOrElse(DEFAULT_SHARDS),
+                                   application.solrConfigSetName,
+                                   null)
+
+      deleteOldestCollection(application)
+
+      val applicationCollections =
+        solrService.listCollections().filter(_.startsWith(application.name))
+
+      solrService.createAlias(searchAliasName(application.name), applicationCollections: _*)
+      solrService.createAlias(latestAliasName(application.name), nextCollection)
     }
 
   /**
    * Check an application should be rolled by comparing the timestamp on the newest application
    * to the configured `rollPeriod`.
    *
-   * @param application
+   * @param application application to maybe roll
    * @return
    */
   private def shouldRollApplication(application: Application): Boolean = {
@@ -184,43 +187,22 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
     val collections = solrService
       .getAlias(alias)
 
-    collections.exists { coll =>
-      val collSeconds = CollectionNameParser.parseTimestamp(coll.head)
-      val instant     = Instant.ofEpochSecond(collSeconds)
-      val latestDate  = ZonedDateTime.ofInstant(instant, ZoneOffset.UTC)
-      ChronoUnit.DAYS.between(latestDate, now) >= application.rollPeriod.getOrElse(
-        DEFAULT_ROLLPERIOD)
-    }
-  }
-
-  /**
-   * - Create a new collection with a newer timestamp
-   * - Point the 'latest' application at this new collection
-   * - Add the collection to the 'all' collection alias
-   * - If needed, delete any collections older than the max collections configured
-   * @param application The [[io.phdata.pulse.collectionroller.Application]] to be rolled
-   * @return
-   */
-  private def rollCollection(application: Application): Unit = {
-    logger.info(s"rolling collections for: ${application.name}")
-
-    val nextCollection = getNextCollectionName(application.name)
-    solrService.createCollection(nextCollection,
-                                 application.shards.getOrElse(DEFAULT_SHARDS),
-                                 application.replicas.getOrElse(DEFAULT_SHARDS),
-                                 application.solrConfigSetName,
-                                 null)
-    deleteOldestCollection(application)
-
-    val applicationCollections =
-      solrService.listCollections().filter(_.startsWith(application.name))
-
-    solrService.createAlias(searchAliasName(application.name), applicationCollections: _*)
-    solrService.createAlias(latestAliasName(application.name), nextCollection)
+    collections
+      .map { collectionSet =>
+        collectionSet.exists { coll =>
+          val collSeconds = CollectionNameParser.parseTimestamp(coll)
+          val instant     = Instant.ofEpochSecond(collSeconds)
+          val latestDate  = ZonedDateTime.ofInstant(instant, ZoneOffset.UTC)
+          ChronoUnit.DAYS.between(latestDate, now) >= application.rollPeriod.getOrElse(
+            DEFAULT_ROLLPERIOD)
+        }
+      }
+      .getOrElse(false)
   }
 
   /**
    * Deletes the oldest collection for an application, by timestamp.
+   *
    * @param application The [[io.phdata.pulse.collectionroller.Application]] to operate on
    */
   private def deleteOldestCollection(application: Application): Unit = {
@@ -257,10 +239,21 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
   }
 
   /**
+   * Roll a list of applications
+   *
+   * @param applications The list of [[io.phdata.pulse.collectionroller.Application]]s to be rolled
+   */
+  def rollApplications(applications: List[Application]): Seq[Try[Unit]] =
+    applications
+      .filter(shouldRollApplication)
+      .map(application => Try(rollApplication(application)))
+
+  /**
    * Fully delete a list of applications including
    *  - 'latest' alias
    *  - 'all' alias
    *  - All application collections
+   *
    * @param applications [[io.phdata.pulse.collectionroller.Application]]s to delete
    */
   def deleteApplications(applications: List[String]): Unit =
@@ -281,6 +274,7 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
 
   /**
    * Delete all collections belonging to an application
+   *
    * @param appName The appname to delete collections for
    */
   private def deleteCollections(appName: String): Unit = {
@@ -293,6 +287,7 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
 
   /**
    * List all collections belonging to an application
+   *
    * @return The list of collection names
    */
   def collectionList(): List[String] =

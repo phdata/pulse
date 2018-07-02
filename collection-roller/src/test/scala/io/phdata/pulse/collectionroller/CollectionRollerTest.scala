@@ -34,7 +34,7 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     val nowSeconds       = now.toInstant.getEpochSecond
     val collectionRoller = new CollectionRoller(solrService, now)
     val app              = Application(appName, None, None, None, None, "testconf")
-    collectionRoller.initializeApplications(List(app))
+    collectionRoller.run(List(app))
 
     assertResult(true)(solrService.collectionExists(s"${app.name}_$nowSeconds"))
     assertResult(true)(solrService.aliasExists(s"${app.name}_latest"))
@@ -50,17 +50,14 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
   test("fail if config dir is null") {
     val collectionRoller = new CollectionRoller(solrService, ZonedDateTime.now(ZoneOffset.UTC))
 
-    intercept[NullPointerException] {
-      collectionRoller.uploadConfigsFromDirectory(null)
-    }
+    assert(collectionRoller.uploadConfigsFromDirectory(null).isFailure)
+
   }
 
   test("fail if config dir does not exist") {
     val collectionRoller = new CollectionRoller(solrService, ZonedDateTime.now(ZoneOffset.UTC))
 
-    intercept[FileNotFoundException] {
-      collectionRoller.uploadConfigsFromDirectory("faksjhdfaksjdfh")
-    }
+    assert(collectionRoller.uploadConfigsFromDirectory("faksjhdfaksjdfh").isFailure)
   }
 
   test("oldest collection is deleted") {
@@ -74,7 +71,7 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
 
     val app =
       Application(appName, Some(2), Some(1), Some(1), Some(1), "testconf")
-    collectionRoller.initializeApplications(List(app))
+    collectionRoller.run(List(app))
     collectionRoller.rollApplications(List(app))
 
     val times = List(secondTime, thirdTime, fourthTime)
@@ -113,7 +110,7 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
 
     val app =
       Application(appName, None, None, None, None, "testconf")
-    collectionRoller.initializeApplications(List(app))
+    collectionRoller.run(List(app))
 
     collectionRoller.rollApplications(List(app))
 
@@ -139,7 +136,7 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
 
     val app =
       Application(appName, None, None, None, None, "testconf")
-    collectionRoller.initializeApplications(List(app))
+    collectionRoller.run(List(app))
 
     collectionRoller.rollApplications(List(app))
 
@@ -163,7 +160,7 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
 
     val collectionRoller = new CollectionRoller(solrService, initialTime)
 
-    collectionRoller.initializeApplications(List(app1, app2))
+    collectionRoller.run(List(app1, app2))
     collectionRoller.deleteApplications(List(app1Name, app2Name))
 
     // check if alias exists for app1 & app2
