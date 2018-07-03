@@ -33,10 +33,10 @@ logger(){
         message="${1#*=}"
     ;;
     --threadName=*)
-        threadName="'${1#*=}'"
+        threadName="${1#*=}"
     ;;
     --application=*)
-        application="'${1#*=}'"
+        application="${1#*=}"
         ;;
     *)
         echo "Usage Info: logger --category=category --level=level --message=message --threadname=threadname"
