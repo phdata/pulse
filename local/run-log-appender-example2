@@ -1,3 +1,0 @@
-#!/bin/bash
-set -x
-java -Dlog4j.debug=true -Dlog4j.configuration=file:log-example/src/main/resources/log4j.properties2 -cp "target/lib/appenders/*:log-example/target/scala-2.11/*"  io.phdata.pulse.example.StandaloneAppExample 100000 0
