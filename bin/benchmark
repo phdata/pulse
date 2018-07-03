@@ -1,0 +1,2 @@
+#!/bin/bash
+ab -c 10 -n 1000 -T application/json -p bin/payload.json http://localhost:9015/v2/events/pulse-test-100

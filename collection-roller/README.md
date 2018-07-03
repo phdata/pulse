@@ -60,7 +60,7 @@ This configuration file is passes as a CLI argument along with a list of zookeep
 
 ## Running the Collection Roller
 A helper script to run the collection roller (mostly used for development) is here
-`local/run-collection-roller`
+`bin/collection-roller`
 
 To run the collection roller from the command line looks like
 
