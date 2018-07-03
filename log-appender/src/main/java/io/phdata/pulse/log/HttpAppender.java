@@ -72,7 +72,7 @@ public class HttpAppender extends AppenderSkeleton {
    * @throws Exception
    */
   private void flush() throws Exception {
-    String json = jsonParser.renderArray(bufferingEventHandler.getMessages());
+    String json = jsonParser.marshallArray(bufferingEventHandler.getMessages());
     lastPostSuccess = httpManager.send(json);
     if (lastPostSuccess) {
       lastSuccessfulPostTime = currentTimeSeconds();
