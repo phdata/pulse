@@ -38,7 +38,6 @@ public class BufferingEventHandler {
 
   /**
    * Whether the message queue should be flushed, based on time and size thresholds.
-   *
    * @return Boolean decision
    */
   public boolean shouldFlush() {
@@ -51,8 +50,7 @@ public class BufferingEventHandler {
 
   /**
    * Get all messages from the buffer.
-   *
-   * @return
+   * @return Array of messages
    */
   synchronized protected LoggingEvent[] getMessages() {
     LoggingEvent[] bufferedEvents = new LoggingEvent[messages.size()];
