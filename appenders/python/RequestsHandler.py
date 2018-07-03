@@ -13,7 +13,7 @@ class RequestsHandler(logging.handlers.HTTPHandler):
         Args: hostname, url, Method
         Returns: RequestsHandler Object
         """
-        super().__init__(*args)
+        super(RequestsHandler, self).__init__(*args)
 
     def emit(self, record):
         """
