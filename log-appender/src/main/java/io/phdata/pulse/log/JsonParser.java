@@ -8,21 +8,20 @@ import org.apache.log4j.spi.LoggingEvent;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class JsonParser {
   private JsonFactory jsonFactory = new JsonFactory();
 
-  public String renderArray(LoggingEvent[] events) throws Exception {
+  public String marshallArray(LoggingEvent[] events) throws Exception {
     StringWriter writer = new StringWriter();
     JsonGenerator jg = jsonFactory.createGenerator(writer);
 
     jg.writeStartArray();
 
     for (LoggingEvent event : events) {
-      renderEvent(event, jg);
+      marshallEventInternal(event, jg);
     }
 
     jg.writeEndArray();
@@ -38,7 +37,18 @@ public class JsonParser {
    * @param event a LoggingEvent
    * @return JSON string representation
    */
-  public void renderEvent(LoggingEvent event, JsonGenerator jg) {
+  public String marshallEvent(LoggingEvent event) throws IOException {
+    StringWriter writer = new StringWriter();
+    JsonGenerator jg = jsonFactory.createGenerator(writer);
+
+    marshallEventInternal(event, jg);
+
+    jg.close();
+    return writer.toString();
+  }
+
+
+  private void marshallEventInternal(LoggingEvent event, JsonGenerator jg) {
     try {
 
       jg.writeStartObject();
