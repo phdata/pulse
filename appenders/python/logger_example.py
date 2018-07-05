@@ -25,11 +25,7 @@ def main(argv,logger):
 
 if __name__ == "__main__":
     logger = logging.getLogger('mylogger')
-<<<<<<< HEAD
-    http_handler = RequestsHandler('http://0.0.0.0:9015','/log?application=pulse-test-default','POST')
-=======
-    http_handler = RequestsHandler('http://0.0.0.0:9005','/v2/event/python_app','POST')
->>>>>>> 5c53d865e763ebef5995062486b4dbad89ef817f
+    http_handler = RequestsHandler('http://0.0.0.0:9015','/v2/event/python_app','POST')
     logger.addHandler(http_handler)
     logger.setLevel(logging.INFO)
     main(sys.argv[1:],logger)
