@@ -27,12 +27,14 @@ object StandaloneAppExample {
     val numEvents   = args(0).toInt
     val sleepMillis = args(1).toInt
     0 to numEvents map { num =>
-      log.info("info message")
+      val uuid = java.util.UUID.randomUUID.toString()
+      log.info(s"info message $uuid")
       Thread.sleep(sleepMillis)
       if (num % 300 == 0) {
-        log.error("error happened", new Exception())
+        log.error(s"error happened $uuid", new Exception())
       }
     }
+    throw new Exception("exiting")
 
   }
 

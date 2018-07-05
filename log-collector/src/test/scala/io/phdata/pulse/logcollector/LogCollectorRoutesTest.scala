@@ -38,6 +38,15 @@ class LogCollectorRoutesTest
     with BaseSolrCloudTest {
   val CONF_NAME = "testconf"
 
+  val document = new LogEvent(None,
+                              "ERROR",
+                              "1970-01-01T00:00:00Z",
+                              "ERROR",
+                              "message",
+                              "thread oxb",
+                              Some("Exception in thread main"),
+                              None)
+
   val solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress, solrClient)
 
   solrService.uploadConfDir(
@@ -49,19 +58,30 @@ class LogCollectorRoutesTest
   val routes = new LogCollectorRoutes(solrService).routes
 
   test("post json to endpoint") {
-    val document = new LogEvent(None,
-                                "ERROR",
-                                "1970-01-01T00:00:00Z",
-                                "ERROR",
-                                "message",
-                                "thread oxb",
-                                Some("Exception in thread main"),
-                                None)
-
     val docEntity = Marshal(document).to[MessageEntity].futureValue
 
     Post(uri = "/log?application=test")
-      .withEntity(docEntity) ~> routes ~> check {}
+      .withEntity(docEntity) ~> routes ~> check {
+      assert(status === (StatusCodes.OK))
+    }
+  }
+
+  test("post single log event to 'event' endpoint") {
+    val docEntity = Marshal(document).to[MessageEntity].futureValue
+
+    Post(uri = "/v2/event/test")
+      .withEntity(docEntity) ~> routes ~> check {
+      assert(status === (StatusCodes.OK))
+    }
+  }
+
+  test("post multiple log events to 'event' endpoint") {
+    val entity = Marshal(Array(document, document)).to[MessageEntity].futureValue
+
+    Post(uri = "/v2/events/test")
+      .withEntity(entity) ~> Route.seal(routes) ~> check {
+      assert(status === (StatusCodes.OK))
+    }
   }
 
   test("return 400 bad request if a LogEvent isn's sent") {

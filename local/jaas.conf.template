@@ -1,9 +1,0 @@
-Client {
-  com.sun.security.auth.module.Krb5LoginModule required
-  useKeyTab=true
-  useTicketCache=false
-  keyTab="my-user.keytab"
-  principal="user@DOMAIN"
-  doNotPrompt="true"
-  debug="true";
-};

@@ -48,26 +48,3 @@ install-csd: csd
 	$(MAKE) -C cloudera-integration/csd install
 
 install: install-parcel install-csd
-
-run: run-log-collector run-collection-roller run-alert-engine
-
-run-log-collector:
-	local/run-log-collector
-
-run-collection-roller:
-	local/run-collection-roller
-
-run-alert-engine:
-	local/run-alert-engine
-
-run-log-appender-example:
-	local/run-log-appender-example
-
-run-python-log-example:
-	local/run-python-log-example
-
-run-bash-log-example:
-	local/run-bash-log-example
-
-benchmark:
-	local/benchmark

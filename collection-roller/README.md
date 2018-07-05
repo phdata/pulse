@@ -27,7 +27,7 @@ A Collection Roller configuration file is written in yaml and will look like:
 
 ```yaml
 
-sorlConfigSetDir: /etc/phdata-pulse/solr-configs/ # directory containing one or many solr instancedir configs to be uploaded. The name of the config when uploaded to solr will be the name of the directory
+sorlConfigSetDir: /etc/pulse-logger/solr-configs/ # directory containing one or many solr instancedir configs to be uploaded. The name of the config when uploaded to solr will be the name of the directory
 applications:
 # Config using all defaults
 - name: pulse-test-default
@@ -60,7 +60,7 @@ This configuration file is passes as a CLI argument along with a list of zookeep
 
 ## Running the Collection Roller
 A helper script to run the collection roller (mostly used for development) is here
-`local/run-collection-roller`
+`bin/collection-roller`
 
 To run the collection roller from the command line looks like
 

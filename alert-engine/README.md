@@ -48,7 +48,7 @@ A silenced application file can be provided `--silenced-application-file silence
 That contains one line per application that should not alert.
 
 ## Running the Alert Engine
-A helper script for running the alert engine is located at `local/run-alert-engine`.
+A helper script for running the alert engine is located at `bin/alert-engine`.
 
 Example usage of the Alert Engine:
 ```bash

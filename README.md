@@ -139,17 +139,16 @@ Alert Engine Advanced Configuration Snippet (Safety Valve) for alert-engine.yml`
 
 ## Running the application manually on a cluster
 
-Remove the `.template` suffix from these two files under the local directory.
+Remove the `.template` suffix from these two files under the `bin` directory.
 - `cp env.sh.template env.sh`
-- `cp jaas.conf.template jaas.conf`
 
 Change the kerberos keyTab and principal in `jaas.conf` to your own (you need to create one if you don't have it already)
 
 Run individual components:
 ```bash
-$ local/run-collection-roller
-$ local/run-log-collector
-$ local/run-alert-engine
+$ bin/collection-roller
+$ bin/log-collector
+$ bin/alert-engine
 ```
 
 ## Running tests
@@ -170,6 +169,5 @@ Makefile targets are run with `make <target-name>`, some target examples are lik
 - `install`: install parcel and CSD. This is only valid on a node running Cloudera Manager and will install
 the csd/parcel to /opt/cloudera/csd and /opt/cloudera/parcel-repo. It will not distribute/activate the parcel
 or refresh/install the CSD in Cloudera Manager
-- `run`:  run all components locally. This will run log collector, collection roller, and alert engine.
 
 Before submitting a pull request, please make sure `make test` and `make dist` both pass successfully.
