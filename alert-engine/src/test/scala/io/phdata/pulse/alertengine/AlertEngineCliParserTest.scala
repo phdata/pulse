@@ -44,7 +44,7 @@ class AlertEngineCliParserTest extends FunSuite {
       "--smtp-server",
       "sample.smtpserver.com",
       "--smtp-user",
-      sys.env.getOrElse("SMTP_USER", "None"),
+      "testing@company.com",
       "--smtp-port",
       "49152",
       "--silenced-application-file",
