@@ -1,5 +1,5 @@
 #Python custom log Handler
-- Install pythonAppender
+- Install pulse_appender
 `pip install [project_root]/appenders/pulse_appender`
 - Import RequestsHandler to your program
 `import RequestsHandler`
