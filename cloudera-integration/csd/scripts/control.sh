@@ -60,14 +60,7 @@ case $CMD in
     else
       SMTP_TLS_FLAG=""
     fi
-    if [ -n "${SMTP_PASSWORD}" ]
-    then
-      SMTP_PASSWORD_FLAG="--smtp-password $SMTP_PASSWORD"
-      echo "password is set"
-    else
-      SMTP_PASSWORD_FLAG=""
-      echo "passwiod is unset"
-    fi
+
     exec $JAVA_HOME/bin/java \
     -Dlogback.configurationFile=$LOGBACK_CONFIG \
     $JAVA_PROPERTIES \
@@ -77,7 +70,6 @@ case $CMD in
     --zk-hosts $SOLR_ZK_QUORUM \
     --smtp-server  $SMTP_SERVER  \
     --smtp-user  $SMTP_USER  \
-    $SMTP_PASSWORD_FLAG  \
     --smtp-port $SMTP_PORT \
     --conf $ALERT_ENGINE_CONFIG \
     $SMTP_TLS_FLAG \
