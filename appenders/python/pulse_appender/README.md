@@ -1,6 +1,6 @@
 #Python custom log Handler
-- Install pythonAppender
-`pip install appenders/pythonAppender`
+- Install pulse_appender
+`pip install [project_root]/appenders/python/pulse_appender`
 - Import RequestsHandler to your program
 `import RequestsHandler`
 - RequestsHandler takes 3 Arguments hostname, url, Method (currently just post method is implemented)
