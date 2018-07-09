@@ -1,3 +1,3 @@
 #!/bin/bash
 set -x
-python3 appenders/python/logger_example.py
+python appenders/python/pulse_appender/logger_example.py
