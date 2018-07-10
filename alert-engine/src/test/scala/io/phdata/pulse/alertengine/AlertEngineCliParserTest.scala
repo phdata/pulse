@@ -20,18 +20,30 @@ import org.scalatest.FunSuite
 
 class AlertEngineCliParserTest extends FunSuite {
 
+  /*
+  *function to set environmental variables for testing
+   */
   def setEnv(key: String, value: String) = {
+
     val field = System.getenv().getClass.getDeclaredField("m")
     field.setAccessible(true)
     val map = field.get(System.getenv()).asInstanceOf[java.util.Map[java.lang.String, java.lang.String]]
     map.put(key, value)
+
   }
 
   test("Test Env variable setup") {
+
     setEnv("SMTP_PASSWORD", "pa$$word")
     setEnv("SMTP_USER", "testing@company.com")
-    assertResult("testing@company.com")(sys.env.getOrElse("SMTP_USER", "None"))
-    assertResult("pa$$word")(sys.env.getOrElse("SMTP_PASSWORD", "None"))
+
+    val user : Option[String] = sys.env.get("SMTP_USER")
+    val password : Option[String] = sys.env.get("SMTP_PASSWORD")
+    val noneExistingEnvVariable : Option[String] = sys.env.get("xxx_xx_xxx_non_evn_variable")
+
+    assertResult(Some("testing@company.com"))(user)
+    assertResult(Some("pa$$word"))(password)
+    assertResult(None)(noneExistingEnvVariable)
 
   }
 
