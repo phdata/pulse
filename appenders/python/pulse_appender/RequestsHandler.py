@@ -1,8 +1,8 @@
-import logging
 import requests
+from logging import handlers
 from LogFormatter import LogFormatter
 
-class RequestsHandler(logging.handlers.HTTPHandler):
+class RequestsHandler(handlers.HTTPHandler):
     """
     Custom loggin handler
     Inherits HTTPHandler class
@@ -13,7 +13,7 @@ class RequestsHandler(logging.handlers.HTTPHandler):
         Args: hostname, url, Method
         Returns: RequestsHandler Object
         """
-        super().__init__(*args)
+        super(RequestsHandler, self).__init__(*args)
 
     def emit(self, record):
         """
