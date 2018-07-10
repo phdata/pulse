@@ -73,7 +73,7 @@
         }
       ],
       "logging" : {
-        "dir" : "/var/log/pulse",
+        "dir" : "/var/log/pulse-logging",
         "filename" : "log-collector.log",
         "modifiable" : true,
         "configName" : "log.dir",
@@ -135,7 +135,7 @@
         }
       ]},
       "logging" : {
-        "dir" : "/var/log/pulse",
+        "dir" : "/var/log/pulse-logging",
         "filename" : "collection-roller.log",
         "modifiable" : true,
         "configName" : "log.dir",
@@ -249,7 +249,7 @@
         }
       ]},
       "logging" : {
-        "dir" : "/var/log/pulse",
+        "dir" : "/var/log/pulse-logging",
         "filename" : "alert-engine.log",
         "modifiable" : true,
         "configName" : "log.dir",
