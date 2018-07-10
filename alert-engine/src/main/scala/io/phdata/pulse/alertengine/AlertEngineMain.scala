@@ -127,7 +127,7 @@ object AlertEngineMain extends LazyLogging {
         new MailNotificationService(parsedArgs.smtpServer(),
                                     parsedArgs.smtpPort(),
                                     parsedArgs.smtpUser(),
-                                    Option(parsedArgs.smtpPassword),
+                                    parsedArgs.smtpPassword,
                                     parsedArgs.smtp_tls())
 
       val slackNotificationService = new SlackNotificationService
