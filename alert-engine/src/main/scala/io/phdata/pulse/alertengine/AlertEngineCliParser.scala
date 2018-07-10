@@ -30,15 +30,10 @@ class AlertEngineCliParser(args: Seq[String]) extends ScallopConf(args) {
                                     default = Some(false),
                                     descr = "Daemonize the process and run alerting on an interval")
   lazy val smtpServer = opt[String]("smtp-server", required = false, descr = "SMTP server hostmane")
-
-
   lazy val smtpUser = opt[String]("smtp-user",
                                   required = false,
                                   descr = "SMTP username (from address), like 'user@company.com'")
-
-  lazy val smtpPassword =  sys.env.getOrElse("SMTP_PASSWORD", "None")
-
-
+  lazy val smtpPassword : Option[String]=  sys.env.get("SMTP_PASSWORD")
   lazy val smtpPort =
     opt[Long]("smtp-port", required = false, descr = "SMTP server port. Defaults to 25")
   lazy val smtp_tls = opt[Boolean]("smtp-tls",
