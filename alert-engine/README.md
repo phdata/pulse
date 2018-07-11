@@ -61,3 +61,4 @@ java -Dlogback.configurationFile=logback.xml \
     --conf example-configs/alert-engine/alert-engine.yml \
     --silenced-application-file silenced-applications.txt
 ```
+Note: The SMTP_PASSWORD is read from the environment and not included in the list of commandline arguments, so make sure to include it in bin/env.sh. See [bin/env.sh.template](./bin/env.sh.template) for an env template.
