@@ -27,7 +27,7 @@ A Collection Roller configuration file is written in yaml and will look like:
 
 ```yaml
 
-sorlConfigSetDir: /etc/pulse/solr-configs/ # directoring containing one or many solr instancedir configs to be uploaded. The name of the config when uploaded to solr will be the name of the directory
+sorlConfigSetDir: /etc/pulse-logger/solr-configs/ # directory containing one or many solr instancedir configs to be uploaded. The name of the config when uploaded to solr will be the name of the directory
 applications:
 # Config using all defaults
 - name: pulse-test-default
