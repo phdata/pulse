@@ -24,16 +24,13 @@ class AlertEngineCliParserTest extends FunSuite {
   *function to set environmental variables for testing
    */
   def setEnv(key: String, value: String) = {
-
     val field = System.getenv().getClass.getDeclaredField("m")
     field.setAccessible(true)
     val map = field.get(System.getenv()).asInstanceOf[java.util.Map[java.lang.String, java.lang.String]]
     map.put(key, value)
-
   }
 
   test("Test Env variable setup") {
-
     setEnv("SMTP_PASSWORD", "pa$$word")
     setEnv("SMTP_USER", "testing@company.com")
 
@@ -44,12 +41,10 @@ class AlertEngineCliParserTest extends FunSuite {
     assertResult(Some("testing@company.com"))(user)
     assertResult(Some("pa$$word"))(password)
     assertResult(None)(noneExistingEnvVariable)
-
   }
 
 
   test("Test AlertEngineCliParse") {
-
     val args = Array(
       "--conf",
       "sample conf",
@@ -75,7 +70,6 @@ class AlertEngineCliParserTest extends FunSuite {
     assertResult(
       "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr")(
       cliParser.zkHost())
-
   }
 
 }
