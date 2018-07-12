@@ -1,4 +1,4 @@
-#!/usr/bin/env bash 
+#!/usr/bin/env bash
 #
 # Copyright 2018 phData Inc.
 #
@@ -23,6 +23,11 @@ set -euo pipefail
 
 CMD=$1
 
+function log {
+  timestamp=$(date)
+  echo "$timestamp: $1"
+}
+
 export DEFAULT_JAVA_HOME=$(readlink -f /usr/java/latest/)
 export JAVA_HOME=${JAVA_HOME:-$DEFAULT_JAVA_HOME}
 export DEFAULT_JAAS_CONF_PATH="${CONF_DIR}/jaas.conf"
@@ -45,6 +50,37 @@ export JAAS_CONFIG="Client {
 };"
 
 echo "${JAAS_CONFIG}" > "${CONF_DIR}/jaas.conf"
+
+# Dump environmental variables
+log "DEFAULT_JAVA_HOME : $DEFAULT_JAVA_HOME"
+log "JAVA_HOME : $JAVA_HOME"
+log "DEFAULT_JAAS_CONF_PATH : $DEFAULT_JAAS_CONF_PATH"
+log "JAAS_CONF_PATH : $JAAS_CONF_PATH"
+log "JAVA_PROPERTIES : $JAVA_PROPERTIES"
+log "DEFAULT_CLASS_PATH : $DEFAULT_CLASS_PATH"
+log "CLASS_PATH : $CLASS_PATH"
+log "DEFAULT_LOGBACK_CONFIG : $DEFAULT_LOGBACK_CONFIG"
+log "LOGBACK_CONFIG : $LOGBACK_CONFIG"
+log "KEYTAB_FILE : $KEYTAB_FILE"
+log "AKKA_CONF : $AKKA_CONF"
+log "CLASS_PATH: $CLASS_PATH"
+log "ZK_QUORUM: $ZK_QUORUM"
+log "ZK_QUORUM_SOLR: $ZK_QUORUM_SOLR"
+log "SMTP_SERVER: $SMTP_SERVER"
+log "SMTP_USER: $SMTP_USER"
+log "SMTP_PASSWORD: $SMTP_PASSWORD"
+log "SMTP_PORT: $SMTP_PORT"
+log "SMTP_TLS: $SMTP_TLS"
+log "ALERT_ENGINE_CONFIG: $ALERT_ENGINE_CONFIG"
+log "COLLECTION_ROLLER_CONFIG: $COLLECTION_ROLLER_CONFIG"
+log "WEBSERVER_PORT: $WEBSERVER_PORT"
+log "AKKA_CONF: $AKKA_CONF"
+log "PULSE_DIST: $PULSE_DIST"
+log "CONF_DIR: $CONF_DIR"
+log "PULSE_PRINCIPAL: $PULSE_PRINCIPAL"
+log "KEYTAB_FILE: $KEYTAB_FILE"
+log "LOGBACK_CONFIG: $LOGBACK_CONFIG"
+log "CSD_JAVA_OPTS: $CSD_JAVA_OPTS
 
 # solr zk ensemble needs to have '/solr' suffix
 IFS=', ' read -r -a zk_array <<< "$ZK_QUORUM"
@@ -105,4 +141,3 @@ case $CMD in
     ;;
 
 esac
-
