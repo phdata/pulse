@@ -23,15 +23,9 @@ set -euo pipefail
 
 CMD=$1
 
-# For better debugging
-date 1>&2
-
-CMD=$1
-
 function log {
   timestamp=$(date)
-  echo "$timestamp: $1"       #stdout
-  #echo "$timestamp: $1" 1>&2; #stderr
+  echo "$timestamp: $1"
 }
 
 export DEFAULT_JAVA_HOME=$(readlink -f /usr/java/latest/)
