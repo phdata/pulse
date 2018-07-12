@@ -20,17 +20,38 @@ import org.scalatest.FunSuite
 
 class AlertEngineCliParserTest extends FunSuite {
 
-  test("Test AlertEngineCliParse") {
+  /*
+  *function to set environmental variables for testing
+   */
+  def setEnv(key: String, value: String) = {
+    val field = System.getenv().getClass.getDeclaredField("m")
+    field.setAccessible(true)
+    val map = field.get(System.getenv()).asInstanceOf[java.util.Map[java.lang.String, java.lang.String]]
+    map.put(key, value)
+  }
 
+  test("Test Env variable setup") {
+    setEnv("SMTP_PASSWORD", "pa$$word")
+    setEnv("SMTP_USER", "testing@company.com")
+
+    val user : Option[String] = sys.env.get("SMTP_USER")
+    val password : Option[String] = sys.env.get("SMTP_PASSWORD")
+    val noneExistingEnvVariable : Option[String] = sys.env.get("xxx_xx_xxx_non_evn_variable")
+
+    assertResult(Some("testing@company.com"))(user)
+    assertResult(Some("pa$$word"))(password)
+    assertResult(None)(noneExistingEnvVariable)
+  }
+
+
+  test("Test AlertEngineCliParse") {
     val args = Array(
       "--conf",
       "sample conf",
       "--smtp-server",
       "sample.smtpserver.com",
       "--smtp-user",
-      "raymondblanc",
-      "--smtp-password",
-      "raymondblanc_password",
+      "testing@company.com",
       "--smtp-port",
       "49152",
       "--silenced-application-file",
@@ -43,14 +64,12 @@ class AlertEngineCliParserTest extends FunSuite {
 
     assertResult("sample.smtpserver.com")(cliParser.smtpServer())
     assertResult("sample conf")(cliParser.conf())
-    assertResult("raymondblanc")(cliParser.smtpUser())
-    assertResult("raymondblanc_password")(cliParser.smtpPassword())
+    assertResult("testing@company.com")(cliParser.smtpUser())
     assertResult(49152)(cliParser.smtpPort())
     assertResult("silenced-applications.txt")(cliParser.silencedApplicationsFile())
     assertResult(
       "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr")(
       cliParser.zkHost())
-
   }
 
 }
