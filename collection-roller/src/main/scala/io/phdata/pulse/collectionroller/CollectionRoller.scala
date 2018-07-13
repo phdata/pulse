@@ -208,7 +208,6 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
       }
     }.getOrElse(false)
 
-
   }
 
   /**
