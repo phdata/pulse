@@ -119,7 +119,6 @@ public class HttpAppenderTest {
 
     assert(sendArgument.getValue().contains("\"hostname\":"));
   }
-
 }
 
 /**

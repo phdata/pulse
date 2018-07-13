@@ -73,9 +73,7 @@ public class HttpAppender extends AppenderSkeleton {
         event.setProperty(HOSTNAME, hostname);
       }
 
-      if (shouldFlush(event)) {
-        flush();
-      }
+      flush();
     } catch (Throwable t) {
       LogLog.error("Unexpected error: " + t, t);
     }
@@ -107,6 +105,7 @@ public class HttpAppender extends AppenderSkeleton {
             && lastPostSuccess // the last post was a success
             || currentTime > lastSuccessfulPostTime + backoffTimeSeconds // enough time has passed after the last failure that we want to try to post again
             || event.getLevel().isGreaterOrEqual(Level.ERROR)); // always flush on error messages
+
   }
 
   @Override
