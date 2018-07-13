@@ -83,6 +83,25 @@ public class HttpAppenderTest {
     Mockito.verify(httpManager, times(1)).send(Matchers.any());
   }
 
+  @Test
+  public void flushEventsOnError() {
+    Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
+
+    LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, 1, Level.ERROR, "Hello, World",
+            "main", null, "ndc", null, null);
+
+    Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
+    HttpAppender appender = new HttpAppender();
+    appender.setBatchingEventHandler(new BufferingEventHandler());
+
+    appender.setHttpManager(httpManager);
+    // first event should call 'send'
+    appender.append(event);
+
+    // verify 'send' was called
+    Mockito.verify(httpManager, times(1)).send(Matchers.any());
+  }
+
 }
 
 /**

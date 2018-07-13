@@ -17,6 +17,8 @@
 package io.phdata.pulse.log;
 
 import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.Level;
+import org.apache.log4j.Priority;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.LoggingEvent;
 
@@ -57,7 +59,7 @@ public class HttpAppender extends AppenderSkeleton {
     try {
       bufferingEventHandler.addEvent(event);
 
-      if (shouldFlush()) {
+      if (shouldFlush(event)) {
         flush();
       }
     } catch (Throwable t) {
@@ -84,12 +86,13 @@ public class HttpAppender extends AppenderSkeleton {
    * If the log messages should be flushed based on previous errors and how many records the batching event handler contains
    * @return Boolean decision
    */
-  private boolean shouldFlush() {
+  private boolean shouldFlush(LoggingEvent event) {
     Long currentTime = currentTimeSeconds();
 
     return (bufferingEventHandler.shouldFlush() // The batch has grown large enough or enought time has passed
             && lastPostSuccess // the last post was a success
-            || currentTime > lastSuccessfulPostTime + backoffTimeSeconds); // enough time has passed after the last failure that we want to try to post again
+            || currentTime > lastSuccessfulPostTime + backoffTimeSeconds // enough time has passed after the last failure that we want to try to post again
+            || event.getLevel().isGreaterOrEqual(Level.ERROR)); // always flush on error messages
   }
 
   @Override
