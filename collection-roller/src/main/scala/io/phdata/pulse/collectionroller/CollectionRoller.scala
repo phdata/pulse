@@ -187,7 +187,7 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
     val collections = solrService
       .getAlias(alias)
 
-    collections.exists { collectionSet =>
+    collections.map { collectionSet =>
       collectionSet.exists { coll =>
         val collSeconds = CollectionNameParser.parseTimestamp(coll)
         val instant = Instant.ofEpochSecond(collSeconds)
@@ -196,14 +196,17 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
 
         val result = daysSinceLastRoll >= application.rollPeriod.getOrElse(DEFAULT_ROLLPERIOD)
 
-        if (!result){
+        if (result){
+          logger.info(s"Rolling collection, last rolled on $latestDate")
+        }
+        else{
           val daysUntilNextRoll = application.rollPeriod.getOrElse(DEFAULT_ROLLPERIOD) - daysSinceLastRoll
           logger.info(s"No actions needed on collection, last rolled on $latestDate, will roll in $daysUntilNextRoll days")
         }
 
         result
       }
-    }
+    }.getOrElse(false)
 
 
   }
