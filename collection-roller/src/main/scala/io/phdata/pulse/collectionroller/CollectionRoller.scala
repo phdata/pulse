@@ -187,7 +187,7 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
     val collections = solrService
       .getAlias(alias)
 
-    val thing = collections.exists { collectionSet =>
+    collections.exists { collectionSet =>
       collectionSet.exists { coll =>
         val collSeconds = CollectionNameParser.parseTimestamp(coll)
         val instant = Instant.ofEpochSecond(collSeconds)
