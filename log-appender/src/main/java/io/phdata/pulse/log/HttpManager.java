@@ -40,20 +40,22 @@ public class HttpManager {
         post.setHeader("Content-type", "application/json");
 
         StringEntity strEntity = new StringEntity(logMessage, Charset.forName("UTF8"));
-//        strEntity.setChunked(true);
         post.setEntity(strEntity);
-
-        LogLog.debug("Executing request: "+  post.getRequestLine());
+        if (LogLog.debugEnabled()) {
+            LogLog.debug("Executing request: " +  post.getRequestLine());
+        }
         boolean isSuccessful = false;
         try {
             CloseableHttpResponse response = client.execute(post);
             int statusCode = response.getStatusLine().getStatusCode();
             response.close();
 
-            LogLog.debug("Response code: " + statusCode);
+            if (LogLog.debugEnabled()) {
+                LogLog.debug("Response code: " + statusCode);
+            }
             isSuccessful = (200 <= statusCode && statusCode < 300);
         } catch (IOException ie) {
-           LogLog.error("Request failed", ie);
+           LogLog.error("Request failed: " + ie, ie);
         }
         return isSuccessful;
     }
