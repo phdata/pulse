@@ -41,18 +41,15 @@ public class HttpManager {
 
         StringEntity strEntity = new StringEntity(logMessage, Charset.forName("UTF8"));
         post.setEntity(strEntity);
-        if (LogLog.debugEnabled()) {
-            LogLog.debug("Executing request: " +  post.getRequestLine());
-        }
+        LogLog.debug("Executing request: " +  post.getRequestLine());
         boolean isSuccessful = false;
         try {
             CloseableHttpResponse response = client.execute(post);
             int statusCode = response.getStatusLine().getStatusCode();
             response.close();
 
-            if (LogLog.debugEnabled()) {
-                LogLog.debug("Response code: " + statusCode);
-            }
+            LogLog.debug("Response code: " + statusCode);
+
             isSuccessful = (200 <= statusCode && statusCode < 300);
         } catch (IOException ie) {
            LogLog.error("Request failed: " + ie, ie);
