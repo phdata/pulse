@@ -42,7 +42,7 @@ Table of Contents
   - Enable custom log search
   - Alert when critical criteria is met
 - Comfortable applying Log4j components
-- 
+
 ## Pulse Features
 
 ***Log Aggregation and Search***
