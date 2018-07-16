@@ -45,10 +45,8 @@ public class HttpAppender extends AppenderSkeleton {
   private long backoffTimeSeconds = INITIAL_BACKOFF_TIME_SECONDS;
 
   public HttpAppender() {
-    Runtime.getRuntime().addShutdownHook(new Thread()
-    {
-      public void run()
-      {
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      public void run() {
         close();
       }
     });
@@ -63,7 +61,7 @@ public class HttpAppender extends AppenderSkeleton {
         flush();
       }
     } catch (Throwable t) {
-      LogLog.error("Unexpected error", t);
+      LogLog.error("Unexpected error: " + t, t);
     }
   }
 
@@ -98,14 +96,15 @@ public class HttpAppender extends AppenderSkeleton {
   public void close()  {
     try {
       flush();
-
     } catch (Exception e) {
-      LogLog.error("Unexpected exception while flushing events", e);
+      LogLog.error("Unexpected exception while flushing events: " + e, e);
+    } catch (Error e) {
+      LogLog.error("Unexpected error while flushing events: " + e, e);
     }
     try {
       httpManager.close();
     } catch (IOException ie) {
-      LogLog.error("Unexpected exception while closing HttpAppender", ie);
+      LogLog.error("Unexpected exception while closing HttpAppender: " + ie, ie);
     }
   }
 
@@ -136,7 +135,11 @@ public class HttpAppender extends AppenderSkeleton {
 
   @Override
   public void activateOptions() {
-    httpManager = new HttpManager(URI.create(this.address));
+    if (this.address == null) {
+      throw new NullPointerException("Logger config 'Address' not set");
+    } else {
+      httpManager = new HttpManager(URI.create(this.address));
+    }
   }
 
   /**
