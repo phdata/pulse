@@ -5,10 +5,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import static org.mockito.Mockito.times;
 
@@ -100,6 +97,27 @@ public class HttpAppenderTest {
 
     // verify 'send' was called
     Mockito.verify(httpManager, times(1)).send(Matchers.any());
+  }
+
+  @Test
+  public void setHostname() {
+    Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
+
+    LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, 1, Level.ERROR, "Hello, World",
+            "main", null, "ndc", null, null);
+
+    ArgumentCaptor<String> sendArgument = ArgumentCaptor.forClass(String.class);
+
+    HttpAppender appender = new HttpAppender();
+    appender.setBatchingEventHandler(new BufferingEventHandler());
+
+    appender.setHttpManager(httpManager);
+    // first event should call 'send' since we are sending an error message
+    appender.append(event);
+
+    Mockito.verify(httpManager).send(sendArgument.capture());
+
+    assert(sendArgument.getValue().contains("\"hostname\":"));
   }
 
 }

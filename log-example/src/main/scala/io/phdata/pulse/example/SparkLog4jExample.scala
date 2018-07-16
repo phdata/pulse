@@ -44,8 +44,6 @@ object SparkLog4jExample {
     val applicationId = sc.applicationId
     // set the application id of the driver
     org.apache.log4j.MDC.put("application_id", applicationId)
-    // set the hostname of the driver
-    org.apache.log4j.MDC.put("hostname", InetAddress.getLocalHost().getHostName())
 
     /**
      * This lazy initializer will put the  hostname and application_id on the executors
@@ -54,13 +52,10 @@ object SparkLog4jExample {
      */
     object LoggingConfiguration {
       lazy val init = {
-        setHostName
         setMdcAppId
       }
       private lazy val setMdcAppId = Try(MDC.put("application_id", applicationId))
         .getOrElse(log.warn(s"Error setting application id"))
-      private lazy val setHostName = Try(
-        MDC.put("hostname", InetAddress.getLocalHost().getHostName()))
     }
 
     testRdd.foreach { num =>
