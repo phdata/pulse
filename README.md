@@ -20,6 +20,7 @@
 
 Table of Contents
 
+* [Intended Audience](#intended-audience)
 * [Pulse Features](#pulse-features)
 * [Adding an application to Pulse](#adding-an-application-to-pulse)
 * [Components](#components)
@@ -29,6 +30,19 @@ Table of Contents
 * [Running tests](#running-tests)
 * [Contributing](#contributing)
 
+## Intended Audience
+
+- Running the Cloudera Distribution of Hadoop
+- Orchestrating the cluster with Cloudera Manager
+  - Comfortable with CSD's
+- Support applications on the cluster
+- Desire aggregate logging solution for applications
+- Turn application logs into actionable data points
+  - Build application dashboards
+  - Enable custom log search
+  - Alert when critical criteria is met
+- Comfortable applying Log4j components
+- 
 ## Pulse Features
 
 ***Log Aggregation and Search***
@@ -37,18 +51,18 @@ Table of Contents
 ***Alerting***
 - Flexible alerting using the Pulse Alert Engine
 - Write alerts using the full solr query syntax. Example alerts:
-	- There was an appliction Error in the last 5 minutes 
+	- There was an appliction Error in the last 5 minutes
 	- My application has stopped logging messages
 - Email and web hook integrations
-	
+
 ***Log Lifecycle Management***
-- Built in rotation of logs. 
+- Built in rotation of logs.
   - Keep logs for as long as you need them
   - Automatically rotate new log indexes after a configured time period
   - Easily search all logs
 
 ***Dashboarding***
-- Integration with existing dashboards for rich UIs. 
+- Integration with existing dashboards for rich UIs.
 
 Works with:
 - Banana
@@ -64,15 +78,15 @@ Works with:
 - Manage and monitor Pulse from within Cloudera Manager
 
 ## Adding an application to Pulse
-If a new application wants to use Pulse, a block should be created in the Collection Roller config.yml 
+If a new application wants to use Pulse, a block should be created in the Collection Roller config.yml
 file and the Alert Engine config.yml file. See the [Alert Engine readme](./alert-engine/README.md)
 and [Collection Roller readme](./collection-roller/README.md) for more details.
 
 ## Components
 
 ***Collection Roller***
-The collection roller is responsible for creating solr indexes for new applications in Pulse and 
-deleting old or expired log collections. 
+The collection roller is responsible for creating solr indexes for new applications in Pulse and
+deleting old or expired log collections.
 
 ***Alert Engine***
 The Alert Engine is a daemon process with a set of `alertRules`. Alert rules can be configured
@@ -99,7 +113,7 @@ There are also log appenders for Bash and Python in the 'appenders' folder
 ![Arch diagram](images/pulse-arch.png)
 
 ## Installation
-Pulse can be installed as a Cloudera CSD (Custom Service Descriptor). See [CSD](./cloudera-integration/csd/README.md) 
+Pulse can be installed as a Cloudera CSD (Custom Service Descriptor). See [CSD](./cloudera-integration/csd/README.md)
 and [PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.
 
 #### Installing the CSD
