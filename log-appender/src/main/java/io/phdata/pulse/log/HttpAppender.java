@@ -24,6 +24,7 @@ import org.apache.log4j.spi.LoggingEvent;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.UnknownHostException;
 
 /**
  * An HTTP log appender implementation for Log4j 1.2.x
@@ -34,6 +35,7 @@ import java.net.URI;
  */
 public class HttpAppender extends AppenderSkeleton {
 
+  public static final String HOSTNAME = "hostname";
   private final long INITIAL_BACKOFF_TIME_SECONDS = 1;
   private JsonParser jsonParser = new JsonParser();
   private BufferingEventHandler bufferingEventHandler = new BufferingEventHandler();
@@ -46,18 +48,30 @@ public class HttpAppender extends AppenderSkeleton {
 
   private long backoffTimeSeconds = INITIAL_BACKOFF_TIME_SECONDS;
 
+  private String hostname = null;
+
   public HttpAppender() {
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
         close();
       }
     });
+
+    try {
+      hostname = java.net.InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      LogLog.error("Could not set hostname: " + e, e);
+    }
   }
 
   @Override
   protected void append(LoggingEvent event) {
     try {
       bufferingEventHandler.addEvent(event);
+
+      if (event.getProperty(HOSTNAME) == null) {
+        event.setProperty(HOSTNAME, hostname);
+      }
 
       if (shouldFlush(event)) {
         flush();
