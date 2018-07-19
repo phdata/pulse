@@ -185,7 +185,7 @@ public class HttpAppender extends AppenderSkeleton {
   /**
    * Visible for testing
    */
-  protected void setBatchingEventHandler(MessageBuffer messageBuffer) {
+  protected void setMessageBuffer(MessageBuffer messageBuffer) {
     this.messageBuffer = messageBuffer;
   }
 

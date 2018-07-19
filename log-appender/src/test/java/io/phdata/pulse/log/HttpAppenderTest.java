@@ -26,7 +26,7 @@ public class HttpAppenderTest {
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(false);
     HttpAppender appender = new HttpAppender();
     appender.setHttpManager(httpManager);
-    appender.setBatchingEventHandler(new MessageBuffer());
+    appender.setMessageBuffer(new MessageBuffer());
     appender.setBufferSize(1);
 
     // first event batch should call 'send'
@@ -48,7 +48,7 @@ public class HttpAppenderTest {
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(false);
     HttpAppender appender = new HttpAppender();
     appender.setHttpManager(httpManager);
-    appender.setBatchingEventHandler(new MessageBuffer());
+    appender.setMessageBuffer(new MessageBuffer());
     appender.setBufferSize(1);
 
     // first event batch should call 'send'
@@ -75,7 +75,7 @@ public class HttpAppenderTest {
 
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
     HttpAppender appender = new HttpAppender();
-    appender.setBatchingEventHandler(new MessageBuffer());
+    appender.setMessageBuffer(new MessageBuffer());
 
     appender.setHttpManager(httpManager);
     // first event should call 'send'
@@ -94,7 +94,7 @@ public class HttpAppenderTest {
 
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
     HttpAppender appender = new HttpAppender();
-    appender.setBatchingEventHandler(new MessageBuffer());
+    appender.setMessageBuffer(new MessageBuffer());
 
     appender.setHttpManager(httpManager);
     // first event should call 'send'
@@ -114,7 +114,7 @@ public class HttpAppenderTest {
 
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
     HttpAppender appender = new HttpAppender();
-    appender.setBatchingEventHandler(new MessageBuffer());
+    appender.setMessageBuffer(new MessageBuffer());
 
     appender.setHttpManager(httpManager);
     // first event should call 'send'
@@ -134,7 +134,7 @@ public class HttpAppenderTest {
     ArgumentCaptor<String> sendArgument = ArgumentCaptor.forClass(String.class);
 
     HttpAppender appender = new HttpAppender();
-    appender.setBatchingEventHandler(new MessageBuffer());
+    appender.setMessageBuffer(new MessageBuffer());
 
     appender.setHttpManager(httpManager);
     // first event should call 'send' since we are sending an error message
@@ -154,7 +154,7 @@ public class HttpAppenderTest {
 
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
     HttpAppender appender = new HttpAppender();
-    appender.setBatchingEventHandler(new MessageBuffer());
+    appender.setMessageBuffer(new MessageBuffer());
 
     appender.setHttpManager(httpManager);
     // first event should call 'send'
