@@ -34,7 +34,7 @@ public class MessageBuffer {
   }
 
   /**
-   * Whether the message queue should be flushed, based on time and size thresholds.
+   * Whether the message queue should be flushed, based on the buffer size.
    * @return Boolean decision
    */
   public boolean isFull() {
