@@ -17,11 +17,17 @@
 package io.phdata.pulse.log;
 
 import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.Level;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.LoggingEvent;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.UnknownHostException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An HTTP log appender implementation for Log4j 1.2.x
@@ -32,9 +38,12 @@ import java.net.URI;
  */
 public class HttpAppender extends AppenderSkeleton {
 
-  private final long INITIAL_BACKOFF_TIME_SECONDS = 1;
-  private JsonParser jsonParser = new JsonParser();
-  private BufferingEventHandler bufferingEventHandler = new BufferingEventHandler();
+  public static final String HOSTNAME = "hostname";
+  public static final long FLUSH_PERIOD_SECONDS = 3;
+  public final static long INITIAL_BACKOFF_TIME_SECONDS = 1;
+
+  private final JsonParser jsonParser = new JsonParser();
+  private MessageBuffer messageBuffer = new MessageBuffer();
 
   private HttpManager httpManager;
   private String address;
@@ -44,68 +53,93 @@ public class HttpAppender extends AppenderSkeleton {
 
   private long backoffTimeSeconds = INITIAL_BACKOFF_TIME_SECONDS;
 
+  private String hostname = null;
+  private final ScheduledFuture scheduledFlushTask;
+
   public HttpAppender() {
-    Runtime.getRuntime().addShutdownHook(new Thread()
-    {
-      public void run()
-      {
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      public void run() {
         close();
       }
     });
+
+    try {
+      hostname = java.net.InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      LogLog.error("Could not set hostname: " + e, e);
+    }
+
+    // Flush the buffer every second
+    int numCores = 1;
+    int initialDelay = 1;
+    final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(numCores);
+    scheduledFlushTask = scheduler.scheduleAtFixedRate(new FlusherTask(), initialDelay, FLUSH_PERIOD_SECONDS, TimeUnit.SECONDS);
   }
 
+  /**
+   * Append an event to the buffer.
+   * All events will be flushed ff the event is ERROR level or the buffer has reached its max size.
+   * @param event The log event.
+   */
   @Override
   protected void append(LoggingEvent event) {
     try {
-      bufferingEventHandler.addEvent(event);
-
-      if (shouldFlush()) {
+      messageBuffer.addEvent(event);
+      if (event.getProperty(HOSTNAME) == null) {
+        event.setProperty(HOSTNAME, hostname);
+      }
+      if (event.getLevel().isGreaterOrEqual(Level.ERROR) || messageBuffer.isFull()) {
         flush();
       }
     } catch (Throwable t) {
-      LogLog.error("Unexpected error", t);
+      LogLog.error("Unexpected error: " + t, t);
     }
   }
 
   /**
-   * Flush all log events
+   * Flush all log events. If the last flush was a failure use exponential backoff.
+   *
    * @throws Exception
    */
-  private void flush() throws Exception {
-    String json = jsonParser.marshallArray(bufferingEventHandler.getMessages());
-    lastPostSuccess = httpManager.send(json);
-    if (lastPostSuccess) {
-      lastSuccessfulPostTime = currentTimeSeconds();
-      backoffTimeSeconds = INITIAL_BACKOFF_TIME_SECONDS; // reset backoff time to original value
-    } else {
-      backoffTimeSeconds = backoffTimeSeconds * 2; // exponential backoff
+  void flush() throws Exception {
+    if (lastPostSuccess || currentTimeSeconds() >= lastSuccessfulPostTime + backoffTimeSeconds) {
+      lastPostSuccess = forceFlush();
+      if (lastPostSuccess) {
+        lastSuccessfulPostTime = currentTimeSeconds();
+        backoffTimeSeconds = INITIAL_BACKOFF_TIME_SECONDS; // reset backoff time to original value
+      } else {
+        backoffTimeSeconds = backoffTimeSeconds * 2; // exponential backoff
+      }
     }
   }
 
   /**
-   * If the log messages should be flushed based on previous errors and how many records the batching event handler contains
-   * @return Boolean decision
+   * Flush messages
+   * @throws Exception
    */
-  private boolean shouldFlush() {
-    Long currentTime = currentTimeSeconds();
-
-    return (bufferingEventHandler.shouldFlush() // The batch has grown large enough or enought time has passed
-            && lastPostSuccess // the last post was a success
-            || currentTime > lastSuccessfulPostTime + backoffTimeSeconds); // enough time has passed after the last failure that we want to try to post again
+  boolean forceFlush() throws Exception {
+    String json = jsonParser.marshallArray(messageBuffer.getMessages());
+    return httpManager.send(json);
   }
 
   @Override
-  public void close()  {
+  public void close() {
     try {
-      flush();
-
+      forceFlush();
     } catch (Exception e) {
-      LogLog.error("Unexpected exception while flushing events", e);
+      LogLog.error("Unexpected exception while flushing events: " + e, e);
+    } catch (Error e) {
+      LogLog.error("Unexpected error while flushing events: " + e, e);
+    }
+    try {
+      scheduledFlushTask.cancel(false);
+    } catch (Exception ie) {
+      LogLog.error("Unexpected exception while cancelling scheduled tryFlush task: " + ie, ie);
     }
     try {
       httpManager.close();
     } catch (IOException ie) {
-      LogLog.error("Unexpected exception while closing HttpAppender", ie);
+      LogLog.error("Unexpected exception while closing HttpAppender: " + ie, ie);
     }
   }
 
@@ -123,11 +157,7 @@ public class HttpAppender extends AppenderSkeleton {
   }
 
   public void setBufferSize(int size) {
-    bufferingEventHandler.setBufferSize(size);
-  }
-
-  public void setFlushInterval(int interval) {
-    bufferingEventHandler.setFlushIntervalMillis(interval);
+    messageBuffer.setBufferSize(size);
   }
 
   private Long currentTimeSeconds() {
@@ -136,7 +166,11 @@ public class HttpAppender extends AppenderSkeleton {
 
   @Override
   public void activateOptions() {
-    httpManager = new HttpManager(URI.create(this.address));
+    if (this.address == null) {
+      throw new NullPointerException("Logger config 'Address' not set");
+    } else {
+      httpManager = new HttpManager(URI.create(this.address));
+    }
   }
 
   /**
@@ -151,8 +185,19 @@ public class HttpAppender extends AppenderSkeleton {
   /**
    * Visible for testing
    */
-  protected void setBatchingEventHandler(BufferingEventHandler eventHandler) {
-    this.bufferingEventHandler = eventHandler;
+  protected void setMessageBuffer(MessageBuffer messageBuffer) {
+    this.messageBuffer = messageBuffer;
+  }
+
+  class FlusherTask implements Runnable {
+    @Override
+    public void run() {
+      try {
+        flush();
+      } catch (Throwable t) {
+        LogLog.error("Unexpected error: " + t, t);
+      }
+    }
   }
 }
 

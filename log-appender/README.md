@@ -1,9 +1,11 @@
+
 # Java log appenders
 
 ## Log4j 1.x appenders
 The log4j 1.x http appender will send a post message to the `log-collector` process with the
-contents of your log message.
-
+contents of your log message. The appender will batch messages into groups of 1000 records and will 
+flush when a group is available, 1 second has passed. The appender will always flush all messages
+as soon as an ERROR level message is logged.
 
 ## Special Handling 
 - MDC: Fields stored in the MDC (or Mapped Diagnostic Context) will be added as a top level searchable
@@ -34,7 +36,7 @@ log4j.logger.io.phdata.pulse.shade.org.apache.wire=off
 ```
 
 It's recommended (for now) that the logs be written to file in addition to Pulse through the http 
-appender. Pulse doesn't currently make any availability guarantees.
+appender. This appender currently doesn't currently make any availability guarantees.
 
 Example usage:
 
@@ -57,7 +59,3 @@ client configuration:
 ```bash
 export SPARK_DIST_CLASSPATH="$SPARK_DIST_CLASSPATH:/opt/cloudera/parcels/PULSE/lib/appenders/*"
 ```
-
-
-
-

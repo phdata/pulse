@@ -20,15 +20,12 @@ import org.apache.log4j.spi.LoggingEvent;
 
 import java.util.ArrayList;
 
-public class BufferingEventHandler {
+public class MessageBuffer {
   private Integer bufferSize = 1000;
-  private Integer flushIntervalMillis = 1000;
-  long lastFlushedMillis;
 
   private ArrayList<LoggingEvent> messages;
 
-  public BufferingEventHandler() {
-    lastFlushedMillis = System.currentTimeMillis();
+  public MessageBuffer() {
     messages = new ArrayList<>(bufferSize);
   }
 
@@ -37,15 +34,13 @@ public class BufferingEventHandler {
   }
 
   /**
-   * Whether the message queue should be flushed, based on time and size thresholds.
+   * Whether the message queue should be flushed, based on the buffer size.
    * @return Boolean decision
    */
-  public boolean shouldFlush() {
-    long currentTime = System.currentTimeMillis();
-    boolean exceededTimeThreshold = (lastFlushedMillis + flushIntervalMillis) < currentTime;
+  public boolean isFull() {
     boolean exceededSizeThreshold = messages.size() > bufferSize;
 
-    return (exceededTimeThreshold || exceededSizeThreshold) && messages.size() > 0;
+    return (exceededSizeThreshold) && messages.size() > 0;
   }
 
   /**
@@ -56,15 +51,10 @@ public class BufferingEventHandler {
     LoggingEvent[] bufferedEvents = new LoggingEvent[messages.size()];
     bufferedEvents = messages.toArray(bufferedEvents);
     messages.clear();
-    lastFlushedMillis = System.currentTimeMillis();
     return bufferedEvents;
   }
 
   public void setBufferSize(int size) {
     bufferSize = size;
-  }
-
-  public void setFlushIntervalMillis(int interval) {
-    flushIntervalMillis = interval;
   }
 }
