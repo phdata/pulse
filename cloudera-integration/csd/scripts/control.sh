@@ -80,7 +80,7 @@ log "CONF_DIR: $CONF_DIR"
 log "PULSE_PRINCIPAL: $PULSE_PRINCIPAL"
 log "KEYTAB_FILE: $KEYTAB_FILE"
 log "LOGBACK_CONFIG: $LOGBACK_CONFIG"
-log "CSD_JAVA_OPTS: $CSD_JAVA_OPTS
+log "CSD_JAVA_OPTS: $CSD_JAVA_OPTS"
 
 # solr zk ensemble needs to have '/solr' suffix
 IFS=', ' read -r -a zk_array <<< "$ZK_QUORUM"
