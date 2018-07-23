@@ -8,7 +8,7 @@ The 'latest' alias is used for any applications writing logs (like the Log Colle
 - an alias pointing to all collections called <application>_all. The 'all' alias is used for 
 searching all collections
 
-![collection-rolling](../images/collection-rolling.png)
+![collection-rolling](../images/collection-roller.png)
 
 If an application does not exist in Pulse the log collector will create the required aliases and
 indexes.
