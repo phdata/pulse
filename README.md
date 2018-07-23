@@ -64,10 +64,10 @@ Table of Contents
 ***Dashboarding***
 - Integration with existing dashboards for rich UIs.
 
-Works with:
-- Banana
+Visualization and search works with:
 - Hue Search
 - Arcadia Data
+- Banana
 
 ***Hadoop Native***
 - Pulse uses Solr for document indexing and search and can be deployed on your Hadoop cluster
@@ -139,6 +139,8 @@ The wizard will ask you for:
 - `smtp address`: The hostname of your smtp server
 - `smtp port`: The port of your smtp server
 
+#### Configuring Sentry for use with Pulse
+Sentry can be used with Pulse to give role based access control to your logs. In order to use 
 
 #### Deploying config
 Pulse has two configuration files, `collection-roller.yml` and `alert-engine.yml`
