@@ -139,7 +139,6 @@ The wizard will ask you for:
 - `smtp address`: The hostname of your smtp server
 - `smtp port`: The port of your smtp server
 
-
 #### Deploying config
 Pulse has two configuration files, `collection-roller.yml` and `alert-engine.yml`
 
@@ -150,6 +149,18 @@ Collection Roller Advanced Configuration Snippet (Safety Valve) for collection-r
 
 Place the `alert-engine.yml` in `
 Alert Engine Advanced Configuration Snippet (Safety Valve) for alert-engine.yml`
+
+#### Configuring Sentry for Solr
+
+If Sentry is enabled for Solr, roles and grants will need to be configured for Pulse and for each Pulse application.  
+
+Add the pulse group to the Solr admin role.  This assumes Sentry for Solr has been configured with an admin role.  This step only needs to be done once after install.  The example below assumes your admin role is named `solradmin`.
+- `solrctl sentry --add-role-group solradmin pulse`
+
+Create the role and grant for each application.  In this example, `sample_role` is the name of the Solr role granting query privileges to the collection `sample-app_all` for the Pulse application `sample-app`.  The `sample-group` group is added to that role.  
+- `solrctl sentry --create-role sample_role`
+- `solrctl sentry --grant-privilege sample_role 'collection=sample-app_all->action=Query'`
+- `solrctl sentry --add-role-group sample_role sample_group`
 
 ## Running the application manually on a cluster
 
