@@ -64,10 +64,10 @@ Table of Contents
 ***Dashboarding***
 - Integration with existing dashboards for rich UIs.
 
-Works with:
-- Banana
+Visualization and search works with:
 - Hue Search
 - Arcadia Data
+- Banana
 
 ***Hadoop Native***
 - Pulse uses Solr for document indexing and search and can be deployed on your Hadoop cluster

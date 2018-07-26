@@ -7,6 +7,9 @@ The alert engine will have
 - User defined queries
 - Send emails to a list of email addresses per query
 
+![alert-engine](../images/alert-engine.png)
+
+
 ## Config file
 Here's an example of an Alert Engine configuration file:
 
