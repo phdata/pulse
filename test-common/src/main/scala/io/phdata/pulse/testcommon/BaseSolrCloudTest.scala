@@ -18,16 +18,17 @@ package io.phdata.pulse.testcommon
 
 import java.io.File
 
+import org.apache.solr.client.solrj.impl.CloudSolrServer
 import org.apache.solr.cloud.MiniSolrCloudCluster
 import org.scalatest.{ BeforeAndAfterAll, FunSuite }
 
 trait BaseSolrCloudTest extends FunSuite with BeforeAndAfterAll {
-  val TEST_CONF_NAME       = "testconf"
-  val miniSolrCloudCluster = TestUtil.miniSolrCloudCluster
-  val solrClient           = miniSolrCloudCluster.getSolrClient
+  val TEST_CONF_NAME                             = "testconf"
+  val miniSolrCloudCluster: MiniSolrCloudCluster = TestUtil.miniSolrCloudCluster()
+  def solrClient(): CloudSolrServer              = miniSolrCloudCluster.getSolrClient
 
   override def beforeAll(): Unit =
-    solrClient.uploadConfig(
+    miniSolrCloudCluster.getSolrClient.uploadConfig(
       new File(System.getProperty("user.dir") + "/test-config/solr_configs/conf").toPath,
       TEST_CONF_NAME)
 }
