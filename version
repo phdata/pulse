@@ -1,2 +1,2 @@
 git_hash=$(git rev-parse HEAD)
-echo 1.0.4
+echo 2.0.0
