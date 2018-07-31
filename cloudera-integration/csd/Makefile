@@ -4,7 +4,7 @@ packageName = PULSE-$(csdVersion)
 csd: clean
 	mkdir -p target/$(packageName)
 	echo building jar
-	cp -r aux images scripts default-configs target/$(packageName)
+	cp -r aux images scripts target/$(packageName)
 	mkdir target/$(packageName)/descriptor
 	sed 's/{{ version }}/$(csdVersion)/' < descriptor/service.sdl > target/$(packageName)/descriptor/service.sdl
 	jar -cvf target/$(packageName).jar -C target/$(packageName) .
