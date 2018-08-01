@@ -8,7 +8,7 @@ import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.{ JsonSupport, SolrService }
 
-class KafkaConsumer(solrService: SolrService) extends JsonSupport with LazyLogging {
+class KafkaConsumerPulse(solrService: SolrService) extends JsonSupport with LazyLogging {
   implicit val solrActorSystem: ActorSystem = ActorSystem()
   implicit val solrActorMaterializer        = ActorMaterializer.create(solrActorSystem)
 
