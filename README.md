@@ -17,7 +17,6 @@
 
 # Pulse
 
-
 Table of Contents
 
 * [Intended Audience](#intended-audience)
@@ -78,9 +77,10 @@ Visualization and search works with:
 - Manage and monitor Pulse from within Cloudera Manager
 
 ## Adding an application to Pulse
-If a new application wants to use Pulse, a block should be created in the Collection Roller config.yml
-file and the Alert Engine config.yml file. See the [Alert Engine readme](./alert-engine/README.md)
-and [Collection Roller readme](./collection-roller/README.md) for more details.
+If a new application wants to use Pulse, a block should be created in the Collection Roller 
+config.yml file and the Alert Engine config.yml file. See the 
+[Alert Engine readme](./alert-engine/README.md) and 
+[Collection Roller readme](./collection-roller/README.md) for more details.
 
 ## Components
 
@@ -113,12 +113,14 @@ There are also log appenders for Bash and Python in the 'appenders' folder
 ![Arch diagram](images/pulse-arch.png)
 
 ## Installation
-Pulse can be installed as a Cloudera CSD (Custom Service Descriptor). See [CSD](./cloudera-integration/csd/README.md)
-and [PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.
+Pulse can be installed as a Cloudera CSD (Custom Service Descriptor). See 
+[CSD](./cloudera-integration/csd/README.md) and 
+[PARCEL](./cloudera-integration/parcel/README.md) READMEs for details.
 
 #### Installing the CSD
 
-1. Download the latest CSD jar from [http://downloads.phdata.io/cdh5/csd/](http://downloads.phdata.io/cdh5/csd/)
+1. Download the latest CSD jar from 
+[http://downloads.phdata.io/cdh5/csd/](http://downloads.phdata.io/cdh5/csd/)
 2. Place the jar in your Cloudera Manager CSD directory, usually `/opt/cloudera/csd`
 3. Modify the ownership of the jar `chown cloudera-scm:cloudera-scm /opt/cloudera/csd/pulse-<version>.jar`
 4. Restart Cloudera Manager to install the jar
@@ -142,7 +144,10 @@ The wizard will ask you for:
 #### Deploying config
 Pulse has two configuration files, `collection-roller.yml` and `alert-engine.yml`
 
-Both of these configs are deployed via safety valves. [Alert Engine Example](./example-configs/collection-roller/collection-roller.yml) and [Collection Roller Example](./example-configs/alert-engine/alert-engine.yml)
+Both of these configs are deployed via safety valves. 
+[Alert Engine Example](./example-configs/collection-roller/collection-roller.yml) 
+and 
+[Collection Roller Example](./example-configs/alert-engine/alert-engine.yml)
 
 Place `collection-roller.yml` in `
 Collection Roller Advanced Configuration Snippet (Safety Valve) for collection-roller.yml`
@@ -150,14 +155,25 @@ Collection Roller Advanced Configuration Snippet (Safety Valve) for collection-r
 Place the `alert-engine.yml` in `
 Alert Engine Advanced Configuration Snippet (Safety Valve) for alert-engine.yml`
 
+Another way to deploy config is the 
+['git-ops'](https://www.weave.works/blog/gitops-operations-by-pull-request) method where the locations
+of `alert-engine.yml` and `collection-roller.yml` would be changed to a location managed by a git 
+repo. This way config changes are both stored in git and a process is added for review/pull request.
+
+
 #### Configuring Sentry for Solr
 
-If Sentry is enabled for Solr, roles and grants will need to be configured for Pulse and for each Pulse application.  
+If Sentry is enabled for Solr, roles and grants will need to be configured for Pulse and for each 
+Pulse application.  
 
-Add the pulse group to the Solr admin role.  This assumes Sentry for Solr has been configured with an admin role.  This step only needs to be done once after install.  The example below assumes your admin role is named `solradmin`.
+Add the pulse group to the Solr admin role.  This assumes Sentry for Solr has been configured with 
+an admin role.  This step only needs to be done once after install.  The example below assumes your 
+admin role is named `solradmin`.
 - `solrctl sentry --add-role-group solradmin pulse`
 
-Create the role and grant for each application.  In this example, `sample_role` is the name of the Solr role granting query privileges to the collection `sample-app_all` for the Pulse application `sample-app`.  The `sample-group` group is added to that role.  
+Create the role and grant for each application.  In this example, `sample_role` is the name of the 
+Solr role granting query privileges to the collection `sample-app_all` for the Pulse application 
+`sample-app`.  The `sample-group` group is added to that role.  
 - `solrctl sentry --create-role sample_role`
 - `solrctl sentry --grant-privilege sample_role 'collection=sample-app_all->action=Query'`
 - `solrctl sentry --add-role-group sample_role sample_group`
@@ -167,7 +183,8 @@ Create the role and grant for each application.  In this example, `sample_role` 
 Remove the `.template` suffix from these two files under the `bin` directory.
 - `cp env.sh.template env.sh`
 
-Change the kerberos keyTab and principal in `jaas.conf` to your own (you need to create one if you don't have it already)
+Change the kerberos keyTab and principal in `jaas.conf` to your own (you need to create one if you 
+don't have it already)
 
 Run individual components:
 ```bash
@@ -191,8 +208,10 @@ Makefile targets are run with `make <target-name>`, some target examples are lik
 - `dist`: create a distribution (parcel and csd)
 - `test`: run all tests
 - `package`: create jars from source
-- `install`: install parcel and CSD. This is only valid on a node running Cloudera Manager and will install
-the csd/parcel to /opt/cloudera/csd and /opt/cloudera/parcel-repo. It will not distribute/activate the parcel
-or refresh/install the CSD in Cloudera Manager
+- `install`: install parcel and CSD. This is only valid on a node running Cloudera Manager and will 
+install
+the csd/parcel to /opt/cloudera/csd and /opt/cloudera/parcel-repo. It will not distribute/activate 
+the parcel or refresh/install the CSD in Cloudera Manager
 
-Before submitting a pull request, please make sure `make test` and `make dist` both pass successfully.
+Before submitting a pull request, please make sure `make test` and `make dist` both pass 
+successfully.
