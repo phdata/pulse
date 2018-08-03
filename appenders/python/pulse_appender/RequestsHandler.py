@@ -23,4 +23,5 @@ class RequestsHandler(handlers.HTTPHandler):
         """
         self.setFormatter(LogFormatter())
         log_entry = self.format(record)
+
         return requests.post(self.host+self.url, log_entry,headers={"Content-type": "application/json"}).content

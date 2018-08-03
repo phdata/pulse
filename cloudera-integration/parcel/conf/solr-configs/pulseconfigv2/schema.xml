@@ -40,6 +40,8 @@
 
         <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
 
+        <field name="hostName" type="text_general" indexed="true" stored="true" multiValued="false"/>
+
         <field name="_version_" type="long" indexed="true" stored="true"/>
 
         <dynamicField name="*" type="string" indexed="true"  stored="true"/>
@@ -64,6 +66,7 @@
     <copyField source="message" dest="text"/>
     <copyField source="threadName" dest="text"/>
     <copyField source="throwable" dest="text"/>
+    <copyField source="hostName" dest="text"/>
 
     <types>
         <!-- field type definitions. The "name" attribute is

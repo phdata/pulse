@@ -1,6 +1,7 @@
 import logging
 import datetime
 import json
+import socket
 
 class LogFormatter(logging.Formatter):
     """
@@ -24,4 +25,6 @@ class LogFormatter(logging.Formatter):
         data["level"] = record.levelname
         data["message"] = record.msg
         data["threadName"] = record.threadName
+        data["hostName"] = socket.gethostname()
+
         return json.dumps(data)
