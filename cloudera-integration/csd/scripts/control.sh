@@ -40,6 +40,24 @@ export LOGBACK_CONFIG=${LOGBACK_CONFIG:-$DEFAULT_LOGBACK_CONFIG}
 export KEYTAB_FILE=${KEYTAB_FILE:-"${CONF_DIR}/pulse.keytab"}
 export AKKA_CONF=${AKKA_CONF:-"application.conf"}
 
+if [ -f "Path to file containing COLLECTION_ROLLER_CONFIG" ]; then #Checking if file exists
+    if [ ! -s "Path to file containing COLLECTION_ROLLER_CONFIG" ]; then #Checking if file is not empty
+        export DEFAULT_COLLECTION_ROLLER_CONFIG=$(readlink -f cloudera-integration/csd/default-configs/default-collection-roller.yml)
+        export COLLECTION_ROLLER_CONFIG=${DEFAULT_COLLECTION_ROLLER_CONFIG}
+    else
+        export COLLECTION_ROLLER_CONFIG=${COLLECTION_ROLLER_CONFIG}
+    fi
+fi
+
+if [ -f Path to file containing ALERT_ENGINE_CONFIG ]; then #Checking if file exists
+    if [ ! -s Path to file containing ALERT_ENGINE_CONFIG ]; then #Checking if file is not empty
+        export DEFAULT_ALERT_ENGINE_CONFIG=$(readlink -f cloudera-integration/csd/default-configs/default-alert-engine.yml)
+        export ALERT_ENGINE_CONFIG=${DEFAULT_ALERT_ENGINE_CONFIG}
+    else
+        export ALERT_ENGINE_CONFIG=${ALERT_ENGINE_CONFIG}
+    fi
+fi
+
 export JAAS_CONFIG="Client {
    com.sun.security.auth.module.Krb5LoginModule required
    doNotPrompt=true
@@ -71,8 +89,12 @@ log "SMTP_USER: $SMTP_USER"
 log "SMTP_PASSWORD: $SMTP_PASSWORD"
 log "SMTP_PORT: $SMTP_PORT"
 log "SMTP_TLS: $SMTP_TLS"
-log "ALERT_ENGINE_CONFIG: $ALERT_ENGINE_CONFIG"
-log "COLLECTION_ROLLER_CONFIG: $COLLECTION_ROLLER_CONFIG"
+
+log "DEFAULT_COLLECTION_ROLLER_CONFIG=$DEFAULT_COLLECTION_ROLLER_CONFIG"
+log "COLLECTION_ROLLER_CONFIG=$COLLECTION_ROLLER_CONFIG"
+log "DEFAULT_ALERT_ENGINE_CONFIG=$DEFAULT_ALERT_ENGINE_CONFIG"
+log "ALERT_ENGINE_CONFIG=$ALERT_ENGINE_CONFIG"
+
 log "WEBSERVER_PORT: $WEBSERVER_PORT"
 log "AKKA_CONF: $AKKA_CONF"
 log "PULSE_DIST: $PULSE_DIST"
