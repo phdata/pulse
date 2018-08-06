@@ -10,3 +10,4 @@ lib_managed
 *.log
 dist
 jaas.conf
+bin/env.sh

@@ -8,6 +8,9 @@ class LogFormatter(logging.Formatter):
     Custom log formatter
     inherits Formatter class
     """
+
+    logging.basicConfig()
+
     def __init__(self, task_name=None):
         self.task_name = task_name
         super(LogFormatter, self).__init__()
@@ -27,7 +30,8 @@ class LogFormatter(logging.Formatter):
         data["threadName"] = record.threadName
         try:
             data["hostname"] = socket.gethostname()
-        except:
-            data["hostname"] = "No value"
+            raise RuntimeError('No HostName received via socket')
+        except Exception:
+            logging.error('Failed.', exc_info=True)
 
         return json.dumps(data)
