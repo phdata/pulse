@@ -32,7 +32,7 @@ object NotificationFormatter {
           |      Message: ${d.get("message")}
           |      Thread Name: ${d.get("threadName")}
           |      Throwable: ${d.get("throwable")}
-          |      Host Name: ${d.get("hostName")}
+          |      Host Name: ${d.get("hostname")}
            """.stripMargin
     }
 

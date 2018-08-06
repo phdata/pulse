@@ -25,6 +25,9 @@ class LogFormatter(logging.Formatter):
         data["level"] = record.levelname
         data["message"] = record.msg
         data["threadName"] = record.threadName
-        data["hostName"] = socket.gethostname()
+        try:
+            data["hostname"] = socket.gethostname()
+        except:
+            data["hostname"] = "No value"
 
         return json.dumps(data)
