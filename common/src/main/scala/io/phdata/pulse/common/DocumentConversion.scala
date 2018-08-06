@@ -17,11 +17,11 @@
 package io.phdata.pulse.common
 
 import io.phdata.pulse.common.domain.LogEvent
-import org.apache.solr.common.{ SolrDocument, SolrInputDocument }
+import org.apache.solr.common.{SolrDocument, SolrInputDocument}
 
 /**
- *
- */
+  *
+  */
 object DocumentConversion {
 
   def toSolrDocument(event: LogEvent): SolrInputDocument = {
@@ -33,6 +33,7 @@ object DocumentConversion {
     doc.addField("message", event.message)
     doc.addField("threadName", event.threadName)
     doc.addField("throwable", event.throwable.getOrElse(""))
+    doc.addField("hostname", event.hostname.getOrElse(""))
 
     // If the event properties exist, add each property to the document. The fields will be added as
     // dynamic [[String]] fields
@@ -46,10 +47,11 @@ object DocumentConversion {
   }
 
   /**
-   * Convert a [[SolrDocument]] to a [[LogEvent]]
-   * @param document SolrDocument to convert
-   * @return The document as a [[LogEvent]]
-   */
+    * Convert a [[SolrDocument]] to a [[LogEvent]]
+    *
+    * @param document SolrDocument to convert
+    * @return The document as a [[LogEvent]]
+    */
   def toLogEvent(document: SolrDocument): LogEvent =
     LogEvent(
       Option(document.get("id").toString),
@@ -58,6 +60,7 @@ object DocumentConversion {
       document.get("level").toString,
       document.get("message").toString,
       document.get("threadName").toString,
-      Some(document.get("throwable").toString)
+      Some(document.get("throwable").toString),
+      Some(document.get("hostname").toString)
     )
 }

@@ -17,16 +17,17 @@
 package io.phdata.pulse.common.domain
 
 /**
- * Describes the expected LogEvent input Object
- *
- * @param category   Fully qualified Class
- * @param timestamp  Timestamp
- * @param level      Logging Level
- * @param message    Log message
- * @param threadName Thread name
- * @param throwable  Throwable message
- * @param properties MDC properties
- */
+  * Describes the expected LogEvent input Object
+  *
+  * @param category   Fully qualified Class
+  * @param timestamp  Timestamp
+  * @param level      Logging Level
+  * @param message    Log message
+  * @param threadName Thread name
+  * @param throwable  Throwable message
+  * @param hostname   Host Name
+  * @param properties MDC properties
+  */
 case class LogEvent(id: Option[String],
                     category: String,
                     timestamp: String,
@@ -34,5 +35,5 @@ case class LogEvent(id: Option[String],
                     message: String,
                     threadName: String,
                     throwable: Option[String] = None,
-                    hostname: String,
+                    hostname: Option[String] = None,
                     properties: Option[Map[String, String]] = None)
