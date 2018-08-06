@@ -26,7 +26,7 @@ class LogFormatter(logging.Formatter):
         data["message"] = record.msg
         data["threadName"] = record.threadName
         try:
-            data["hostname"] = socket.gethostname().toString
+            data["hostname"] = socket.gethostname()
         except:
             data["hostname"] = "No value"
 
