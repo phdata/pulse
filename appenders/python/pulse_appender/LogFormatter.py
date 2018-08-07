@@ -9,8 +9,6 @@ class LogFormatter(logging.Formatter):
     inherits Formatter class
     """
 
-    logging.basicConfig()
-
     def __init__(self, task_name=None):
         self.task_name = task_name
         super(LogFormatter, self).__init__()

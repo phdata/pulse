@@ -33,7 +33,7 @@ object DocumentConversion {
     doc.addField("message", event.message)
     doc.addField("threadName", event.threadName)
     doc.addField("throwable", event.throwable.getOrElse(""))
-    doc.addField("hostname", event.hostname)
+    doc.addField("hostname", event.hostname.getOrElse(""))
 
     // If the event properties exist, add each property to the document. The fields will be added as
     // dynamic [[String]] fields
@@ -61,6 +61,6 @@ object DocumentConversion {
       document.get("message").toString,
       document.get("threadName").toString,
       Some(document.get("throwable").toString),
-      document.get("hostname").toString
+      Some(document.get("hostname").toString)
     )
 }
