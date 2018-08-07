@@ -29,6 +29,7 @@ class NotificationFormatterTest extends FunSuite {
   doc.addField("message", "The service is down.")
   doc.addField("threadName", "thread3")
   doc.addField("throwable", "NullPointerException")
+  doc.addField("hostname", "edge1.valhalla.phdata.io")
 
   val alertrule = AlertRule("query0000000000", 10, Some(0), List("a", "slack"))
 

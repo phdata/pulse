@@ -33,6 +33,7 @@ class SlackNotificationServiceTest extends FunSuite {
   doc.addField("message", "The service is down.")
   doc.addField("threadName", "thread3")
   doc.addField("throwable", "NullPointerException")
+  doc.addField("hostname", "edge1.valhalla.phdata.io")
 
   val path         = "alert-engine/scripts/slack-webhook-url.txt"
   val slackUrlFile = new File(path)
