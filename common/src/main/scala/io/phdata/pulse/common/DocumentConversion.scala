@@ -19,9 +19,6 @@ package io.phdata.pulse.common
 import io.phdata.pulse.common.domain.LogEvent
 import org.apache.solr.common.{SolrDocument, SolrInputDocument}
 
-/**
-  *
-  */
 object DocumentConversion {
 
   def toSolrDocument(event: LogEvent): SolrInputDocument = {
