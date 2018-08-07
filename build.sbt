@@ -73,6 +73,11 @@ lazy val dependencies =
     val powerMockJunit = "org.powermock" % "powermock-module-junit4" % powerMockVersion % Test
     val powerMockApi = "org.powermock" % "powermock-api-mockito" % powerMockVersion % Test
 
+    // Kafka and Zookeeper depends
+    val apacheKafka = "org.apache.kafka" % "kafka_2.11" % "0.10.1.0" % Test
+    //val apacheZookeeper = "org.apache.zookeeper" % "zookeeper" % "3.4.5" % Test
+    val apacheGeronimo = "org.apache.geronimo.specs" % "geronimo-jms_1.1_spec" % "1.1.1" % Test
+    val apacheCurator = "org.apache.curator" % "curator-test" % "4.0.1" % Test
 
 
     // Http depends
@@ -124,7 +129,9 @@ lazy val `log-collector` = project
     mainClass in Compile := Some("io.phdata.pulse.logcollector.LogCollector"),
     settings,
     retrieveManaged := true,
-    libraryDependencies ++= dependencies.http ++ Seq(dependencies.scallop)
+    libraryDependencies ++= dependencies.http ++ Seq(dependencies.scallop,
+      dependencies.apacheKafka, dependencies.apacheGeronimo, dependencies.apacheCurator
+    )
   ).dependsOn(`test-common` % "test").dependsOn(common)
 
 lazy val `collection-roller` = project
@@ -159,6 +166,7 @@ lazy val `test-common` = project
     name := "test-common",
     settings,
     libraryDependencies ++= dependencies.common ++ dependencies.solr ++ Seq(
+      "commons-io" % "commons-io" % "2.5",
       "commons-logging" % "commons-logging" % "1.2",
       "org.apache.solr" % "solr-test-framework" % solrTestFrameworkVersion,
       "org.scalatest" %% "scalatest" % scalaTestVersion
