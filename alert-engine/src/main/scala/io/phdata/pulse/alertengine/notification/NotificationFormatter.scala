@@ -25,14 +25,13 @@ object NotificationFormatter {
   def formatMessage(alert: TriggeredAlert): String = {
     val docs = alert.documents.map { d =>
       s"""
-          |      ID: ${d.get("id")}
-          |      Category: ${d.get("category")}
-          |      Timestamp: ${d.get("timestamp")}
-          |      Level: ${d.get("level")}
-          |      Message: ${d.get("message")}
-          |      Thread Name: ${d.get("threadName")}
-          |      Throwable: ${d.get("throwable")}
-          |      Host Name: ${d.get("hostname")}
+         |      ID: ${d.get("id")}
+         |      Category: ${d.get("category")}
+         |      Timestamp: ${d.get("timestamp")}
+         |      Level: ${d.get("level")}
+         |      Message: ${d.get("message")}
+         |      Thread Name: ${d.get("threadName")}
+         |      Throwable: ${d.get("throwable")}
            """.stripMargin
     }
 

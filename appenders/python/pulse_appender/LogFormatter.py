@@ -1,14 +1,12 @@
 import logging
 import datetime
 import json
-import socket
 
 class LogFormatter(logging.Formatter):
     """
     Custom log formatter
     inherits Formatter class
     """
-
     def __init__(self, task_name=None):
         self.task_name = task_name
         super(LogFormatter, self).__init__()
@@ -26,10 +24,4 @@ class LogFormatter(logging.Formatter):
         data["level"] = record.levelname
         data["message"] = record.msg
         data["threadName"] = record.threadName
-        try:
-            data["hostname"] = socket.gethostname()
-            raise RuntimeError('No HostName received via socket')
-        except Exception:
-            logging.error('Failed.', exc_info=True)
-
         return json.dumps(data)

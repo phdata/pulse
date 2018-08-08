@@ -25,7 +25,6 @@ package io.phdata.pulse.common.domain
   * @param message    Log message
   * @param threadName Thread name
   * @param throwable  Throwable message
-  * @param hostname   Host Name
   * @param properties MDC properties
   */
 case class LogEvent(id: Option[String],
@@ -35,5 +34,4 @@ case class LogEvent(id: Option[String],
                     message: String,
                     threadName: String,
                     throwable: Option[String] = None,
-                    hostname: Option[String] = None,
                     properties: Option[Map[String, String]] = None)

@@ -23,5 +23,5 @@ import spray.json.{ DefaultJsonProtocol, RootJsonFormat }
  * Provides Json serialization/deserialization for the LogEvent case class
  */
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit def logEventJsonFormat: RootJsonFormat[LogEvent] = jsonFormat9(LogEvent)
+  implicit def logEventJsonFormat: RootJsonFormat[LogEvent] = jsonFormat8(LogEvent)
 }
