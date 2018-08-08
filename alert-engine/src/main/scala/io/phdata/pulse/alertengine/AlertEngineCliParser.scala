@@ -25,10 +25,16 @@ class AlertEngineCliParser(args: Seq[String]) extends ScallopConf(args) {
     required = true,
     descr =
       "Alert Engine config yaml file. See https://github.com/phdata/pulse/blob/master/alert-engine/README.md for schema")
-  lazy val daemonize = opt[Boolean]("daemonize",
+  lazy val daemonizeFixedRate = opt[Boolean]("daemonizeFixedRate",
                                     required = false,
                                     default = Some(false),
-                                    descr = "Daemonize the process and run alerting on an interval")
+                                    descr = "Daemonize the process and run alerting on a fixed rate interval")
+
+  lazy val daemonizeScheduled = opt[Boolean]("daemonizeScheduled",
+                                    required = false,
+                                    default = Some(false),
+                                    descr = "Daemonize the process and run alerting at a specified cluster time")
+
   lazy val smtpServer = opt[String]("smtp-server", required = false, descr = "SMTP server hostmane")
   lazy val smtpUser = opt[String]("smtp-user",
                                   required = false,

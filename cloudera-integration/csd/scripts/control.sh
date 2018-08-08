@@ -22,6 +22,7 @@ set -x
 set -euo pipefail
 
 CMD=$1
+daemonizeScheduledVal=$2
 
 function log {
   timestamp=$(date)
@@ -39,6 +40,13 @@ export DEFAULT_LOGBACK_CONFIG="${CONF_DIR}/logback.xml" # This is auto-generated
 export LOGBACK_CONFIG=${LOGBACK_CONFIG:-$DEFAULT_LOGBACK_CONFIG}
 export KEYTAB_FILE=${KEYTAB_FILE:-"${CONF_DIR}/pulse.keytab"}
 export AKKA_CONF=${AKKA_CONF:-"application.conf"}
+
+if [[ ( -f ALERT_ENGINE_CONFIG ) && ( ! -s ALERT_ENGINE_CONFIG ) ]]; then #Checking if file exists AND it's non-empty
+    DEFAULT_ALERT_ENGINE_CONFIG=$(readlink -f cloudera-integration/csd/aux/default-alert-engine.yml)
+    ALERT_ENGINE_CONFIG=${DEFAULT_ALERT_ENGINE_CONFIG}
+else
+    ALERT_ENGINE_CONFIG=${ALERT_ENGINE_CONFIG}
+fi
 
 export JAAS_CONFIG="Client {
    com.sun.security.auth.module.Krb5LoginModule required
@@ -102,7 +110,8 @@ case $CMD in
     $JAVA_PROPERTIES \
     $CSD_JAVA_OPTS \
     -cp "$CLASS_PATH" io.phdata.pulse.alertengine.AlertEngineMain \
-    --daemonize \
+    --daemonizeScheduled ${daemonizeScheduledVal}\
+    --daemonizeFixedRate \
     --zk-hosts $SOLR_ZK_QUORUM \
     --smtp-server  $SMTP_SERVER  \
     --smtp-user  $SMTP_USER  \

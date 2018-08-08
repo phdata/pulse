@@ -34,7 +34,7 @@ applications:
     url: testurl.com
 
 ```
-The alert engine takes CLI arguments including a configuration file and zookeeper hosts - because we are using CloudSolrServer to connect to Solr. The solr nodes are stored in Zookkeeper, and this gives things like load balancing for free from the client.
+The alert engine takes CLI arguments including a configuration file and zookeeper hosts - because we are using CloudSolrServer to connect to Solr. The solr nodes are stored in Zookeeper, and this gives things like load balancing for free from the client.
 The top-level object of the configuration file is a list of applications.
 An application consists of two things, alerts and profiles. Alerts tell the AlertEngine what to alert on. Profiles are used to set up connections to services like email or chat clients. As many profiles can be defined as needed, so you can send alerts through both email and Slack, or any number of services.
 An alert rule consists of
@@ -58,7 +58,7 @@ Example usage of the Alert Engine:
 java -Dlogback.configurationFile=logback.xml \
     -Djava.security.auth.login.config=jaas.conf \
     -cp <path-to-alert-engine-assembly> io.phdata.pulse.alertengine.AlertEngineMain \
-    --daemonize --zk-hosts master1.valhalla.phdata.io:2181/solr \
+    --daemonizeFixedRate --zk-hosts master1.valhalla.phdata.io:2181/solr \
     --smtp-server smtp.gmail.com --smtp-user user@company.com \
     --smtp-port 25 \
     --conf example-configs/alert-engine/alert-engine.yml \
