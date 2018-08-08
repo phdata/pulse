@@ -26,6 +26,7 @@ import org.apache.solr.client.solrj.impl.{CloudSolrServer, HttpClientUtil, Krb5H
 import scala.collection.mutable
 import scala.io.Source
 import scala.util.Try
+import sys.process._
 
 object AlertEngineMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES = 1
@@ -49,38 +50,57 @@ object AlertEngineMain extends LazyLogging {
       } finally {
         executorService.shutdown()
       }
-    } else if (parsedArgs.daemonizeScheduled()) {
-      try {
-        val delay = 0
-        // Delay = Current cluster time - requested time (in 24hr format)
-        val scheduledFuture = executorService.schedule(new AlertEngineTask(parsedArgs),
-          delay,
-          TimeUnit.MINUTES)
-        Runtime.getRuntime.addShutdownHook(shutDownHook(scheduledFuture))
-        executorService.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
-      } catch {
-        case e: Exception => logger.error(s"Error running CollectionRoller", e)
-      } finally {
-        executorService.shutdown()
-      }
-    } else {
+    }
+    else if (parsedArgs.daemonizeScheduled()) {
+      val filePath = ""
+      val params = readScheduledAlertParams(filePath)
+
+      params.foreach(scheduledAlertParameter => {
+        try {
+          val cmdResult: String = "date +%H:%M" !! // Get current cluster time
+          val currentClusterTime: String = cmdResult.stripPrefix("\n").stripSuffix("\n")
+
+          val currentHour :: currentMins :: _ = currentClusterTime.split(":").toList.map(_.toInt)
+          val toExecuteHour :: toExecuteMins :: _ = scheduledAlertParameter.executeTime.split(":").toList.map(_.toInt)
+
+          val diff: Int = 60 * toExecuteHour + toExecuteMins - 60 * currentHour - currentMins
+          val delay: Int =
+            if (diff < 0) {
+              60 * 24 - diff
+            } else {
+              diff
+            }
+
+          val scheduledFuture = executorService.schedule(new AlertEngineTask(parsedArgs),
+            delay,
+            TimeUnit.MINUTES)
+          Runtime.getRuntime.addShutdownHook(shutDownHook(scheduledFuture))
+          executorService.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
+        } catch {
+          case e: Exception => logger.error(s"Error running CollectionRoller", e)
+        } finally {
+          executorService.shutdown()
+        }
+      })
+    }
+    else {
       val alertTask = new AlertEngineTask(parsedArgs)
       alertTask.run()
     }
+  }
 
-    def shutDownHook(future: ScheduledFuture[_]) = new Thread() {
-      override def run(): Unit =
-        try {
-          logger.warn("Caught exit signal, trying to cleanup tasks")
-          while (future.getDelay(TimeUnit.SECONDS) == 0) {
-            logger.info("Jobs are still executing")
-            Thread.sleep(1000)
-          }
-        } catch {
-          case e: InterruptedException =>
-            logger.error("Failed to clean up gracefully", e)
+  def shutDownHook(future: ScheduledFuture[_]): Thread = new Thread() {
+    override def run(): Unit =
+      try {
+        logger.warn("Caught exit signal, trying to cleanup tasks")
+        while (future.getDelay(TimeUnit.SECONDS) == 0) {
+          logger.info("Jobs are still executing")
+          Thread.sleep(1000)
         }
-    }
+      } catch {
+        case e: InterruptedException =>
+          logger.error("Failed to clean up gracefully", e)
+      }
   }
 
   def validateConfig(config: AlertEngineConfig): Unit =

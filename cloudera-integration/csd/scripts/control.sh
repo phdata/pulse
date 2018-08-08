@@ -42,9 +42,9 @@ export KEYTAB_FILE=${KEYTAB_FILE:-"${CONF_DIR}/pulse.keytab"}
 export AKKA_CONF=${AKKA_CONF:-"application.conf"}
 
 if [[ ( -f ALERT_ENGINE_CONFIG ) && ( ! -s ALERT_ENGINE_CONFIG ) ]]; then #Checking if file exists AND it's non-empty
-    DEFAULT_ALERT_ENGINE_CONFIG=$(readlink -f cloudera-integration/csd/aux/default-alert-engine.yml)
     ALERT_ENGINE_CONFIG=${DEFAULT_ALERT_ENGINE_CONFIG}
 else
+    DEFAULT_ALERT_ENGINE_CONFIG=$(readlink -f cloudera-integration/csd/aux/default-alert-engine.yml)
     ALERT_ENGINE_CONFIG=${ALERT_ENGINE_CONFIG}
 fi
 
