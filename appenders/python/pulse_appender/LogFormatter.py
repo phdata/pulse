@@ -28,7 +28,8 @@ class LogFormatter(logging.Formatter):
         data["threadName"] = record.threadName
         try:
             data["hostname"] = socket.gethostname()
-            raise RuntimeError('No HostName received via socket')
+            if not data["hostname"]:
+                raise RuntimeError('No HostName received via socket')
         except Exception:
             logging.error('Failed.', exc_info=True)
 
