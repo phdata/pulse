@@ -170,58 +170,17 @@ class AlertEngineImplTest
         null,
         new NotificationServices(mailNotificationService, slackNotificationService))
 
-    val yaml =
-      """---
-        |applications:
-        |- name: spark1
-        |  alertRules:
-        |  - query: "spark1query"
-        |    retryInterval: 10
-        |    resultThreshold: 0
-        |    alertProfiles:
-        |    - mailProfile1
-        |  emailProfiles:
-        |  - name: spark1profile
-        |    addresses:
-        |    - test@phdata.io
-        |- name: spark2
-        |  alertRules:
-        |  - query: "spark2query1"
-        |    retryInterval: 10
-        |    resultThreshold: 0
-        |    alertProfiles:
-        |    - mailProfile1
-        |  - query: "spark2query2"
-        |    retryInterval: 10
-        |    resultThreshold: 0
-        |    alertProfiles:
-        |    - mailProfile1
-        |  emailProfiles:
-        |  - name: spark2profile
-        |    addresses:
-        |    - test@phdata.io
-        |  """.stripMargin
+    val alertrule = AlertRule("spark1query", 10, Some(10), List("mailprofile1"))
+    val alertrule1 = AlertRule("spark2query1", 10, Some(10), List("mailprofile1"))
+    val alertrule2 = AlertRule("spark2query1", 10, Some(10), List("mailprofile1"))
+    val App1 = Application("spark1", List(alertrule), None, None)
+    val App2 = Application("spark2", List(alertrule1, alertrule2), None, None)
 
     val triggeredAlerts =
       List(
-        (AlertEngineConfigParser.convert(yaml).applications(0),
-         Option(
-           TriggeredAlert(AlertEngineConfigParser.convert(yaml).applications(0).alertRules(0),
-                          "spark1",
-                          null,
-                          1))),
-        (AlertEngineConfigParser.convert(yaml).applications(1),
-         Option(
-           TriggeredAlert(AlertEngineConfigParser.convert(yaml).applications(1).alertRules(0),
-                          "spark2",
-                          null,
-                          2))),
-        (AlertEngineConfigParser.convert(yaml).applications(1),
-         Option(
-           TriggeredAlert(AlertEngineConfigParser.convert(yaml).applications(1).alertRules(1),
-                          "spark2",
-                          null,
-                          2)))
+        (App1, Option(TriggeredAlert(alertrule, "spark1", null, 2))),
+        (App2, Option(TriggeredAlert(alertrule1, "spark2", null, 2))),
+        (App2, Option(TriggeredAlert(alertrule2, "spark2", null, 2)))
       )
 
     val groupedTriggerdAlerts =
