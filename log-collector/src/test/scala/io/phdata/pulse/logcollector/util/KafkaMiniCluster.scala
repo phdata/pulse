@@ -6,28 +6,24 @@ import java.io.File
 import java.net.{ InetSocketAddress, Socket }
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-import java.util.{ Collections, Properties }
+import java.util.Properties
 
 import com.typesafe.scalalogging.LazyLogging
-import org.apache.zookeeper.server.persistence.FileTxnSnapLog
-import org.apache.zookeeper.server.{ ServerCnxnFactory, ZooKeeperServer }
-
 import kafka.server.{ KafkaConfig, KafkaServerStartable }
 import org.apache.commons.io.FileUtils
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.{ KafkaProducer, ProducerRecord }
-
-import scala.collection.JavaConverters._
+import org.apache.zookeeper.server.{ ServerCnxnFactory, ZooKeeperServer }
+import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 
 case class ZooKafkaConfig(
     kafkaBrokerHost: String = "localhost",
     kafkaBrokerPort: Int = 11111,
     kafkaBroker: Int = 0,
     kafkaTempDir: String = "log-collector/target/embedded/kafka/" + new SimpleDateFormat(
-      "yyyyMMddhhmmss").format(new Timestamp(System.currentTimeMillis())),
+      "yyyyMMdd'T'hhmmss").format(new Timestamp(System.currentTimeMillis())),
     zookeeperConnectionString: String = "localhost:12345",
     zookeeperDir: String = "log-collector/target/embedded/zookeeper/" + new SimpleDateFormat(
-      "yyyyMMddhhmmss").format(new Timestamp(System.currentTimeMillis())),
+      "yyyyMMdd'T'hhmmss").format(new Timestamp(System.currentTimeMillis())),
     zookeeperPort: Int = 12345,
     zookeeperMinSessionTimeout: Int = 10000,
     zookeeperMaxSessionTimeout: Int = 30000)
@@ -48,7 +44,7 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
   def stop(): Unit =
     services.foreach(_.stop())
 
-  def produceMessage(topic: String): Unit = {
+  def produceMessage(topic: String, message: String): Unit = {
     val kafkaProducerProps = new Properties()
 
     kafkaProducerProps.put("bootstrap.servers", "localhost:11111")
@@ -59,44 +55,15 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
 
     val producer = new KafkaProducer[String, String](kafkaProducerProps)
 
-    for (i <- 1 to 10) {
-      val record = new ProducerRecord(topic, "key", s"i'd rate sam's kimchi a $i / 10")
-      producer.send(record)
-    }
+    val record = new ProducerRecord[String, String](topic, message)
 
-    val record = new ProducerRecord(topic, "key", "the end " + new java.util.Date)
+    println(
+      "KAFKA: Producing " + record
+        .value() + " to topic: " + topic + " on broker: " + config.kafkaBroker)
+
     producer.send(record)
 
     producer.close()
-  }
-
-  def consumeMessage(topic: String): Unit = {
-    val kafkaConsumerProps = new Properties()
-
-    kafkaConsumerProps.put("bootstrap.servers", "localhost:11111")
-    kafkaConsumerProps.put("key.deserializer",
-                           "org.apache.kafka.common.serialization.StringDeserializer")
-    kafkaConsumerProps.put("value.deserializer",
-                           "org.apache.kafka.common.serialization.StringDeserializer")
-    kafkaConsumerProps.put("auto.offset.reset", "earliest")
-    kafkaConsumerProps.put("group.id", "pulse-kafka")
-
-    val consumer = new KafkaConsumer[String, String](kafkaConsumerProps)
-
-    consumer.subscribe(Collections.singletonList(topic))
-
-    //var iter = 0
-    //could set up a thread in main function to
-    while (true) {
-      val records = consumer.poll(10)
-      for (record <- records.asScala) {
-        println(record.value())
-      }
-//      if ( records.isEmpty ) {
-//
-//      }
-    }
-
   }
 
   class Kafka extends ListeningProcess {
@@ -129,7 +96,7 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
     }
   }
 
-  private class Zookeeper extends ListeningProcess {
+  class Zookeeper extends ListeningProcess {
     override val port: Int               = config.zookeeperPort
     override val name: String            = "zookeeper"
     var zooKeeperServer: ZooKeeperServer = _

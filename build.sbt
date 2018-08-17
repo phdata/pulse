@@ -130,7 +130,7 @@ lazy val `log-collector` = project
     settings,
     retrieveManaged := true,
     libraryDependencies ++= dependencies.http ++ Seq(dependencies.scallop,
-      dependencies.apacheKafka /*, dependencies.apacheGeronimo, dependencies.apacheCurator */
+      dependencies.apacheKafka
     )
   ).dependsOn(`test-common` % "test").dependsOn(common)
 
