@@ -74,10 +74,10 @@ lazy val dependencies =
     val powerMockApi = "org.powermock" % "powermock-api-mockito" % powerMockVersion % Test
 
     // Kafka and Zookeeper depends
-    val apacheKafka = "org.apache.kafka" % "kafka_2.11" % "0.10.1.0" % Test
+    val apacheKafka = "org.apache.kafka" % "kafka_2.11" % "0.10.2-kafka-2.2.0"
     //val apacheZookeeper = "org.apache.zookeeper" % "zookeeper" % "3.4.5" % Test
-    val apacheGeronimo = "org.apache.geronimo.specs" % "geronimo-jms_1.1_spec" % "1.1.1" % Test
-    val apacheCurator = "org.apache.curator" % "curator-test" % "4.0.1" % Test
+    //val apacheGeronimo = "org.apache.geronimo.specs" % "geronimo-jms_1.1_spec" % "1.1.1" % Test
+    //val apacheCurator = "org.apache.curator" % "curator-test" % "4.0.1" % Test
 
 
     // Http depends
@@ -130,7 +130,7 @@ lazy val `log-collector` = project
     settings,
     retrieveManaged := true,
     libraryDependencies ++= dependencies.http ++ Seq(dependencies.scallop,
-      dependencies.apacheKafka, dependencies.apacheGeronimo, dependencies.apacheCurator
+      dependencies.apacheKafka /*, dependencies.apacheGeronimo, dependencies.apacheCurator */
     )
   ).dependsOn(`test-common` % "test").dependsOn(common)
 

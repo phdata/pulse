@@ -9,18 +9,18 @@ import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.{ JsonSupport, SolrService }
 
 /**
-  * Reads json from a given topic
-  * parses into a case class
-  * returns the value
-  * @param solrService
-  */
+ * Reads json from a given topic
+ * parses into a case class
+ * returns the value
+ * @param solrService
+ */
 class KafkaConsumerPulse(solrService: SolrService) extends JsonSupport with LazyLogging {
   implicit val solrActorSystem: ActorSystem = ActorSystem()
   implicit val solrActorMaterializer        = ActorMaterializer.create(solrActorSystem)
 
   val solrInputStream = new SolrCloudStreams(solrService).groupedInsert.run()
 
-  def read() =
+//  def read() =
 //    while (true /* read messages from kafka */ ) {
 //      solrInputStream ! ("app name", LogEvent) // write messages onto our solr stream
 //    }
