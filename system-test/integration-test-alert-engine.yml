@@ -10,7 +10,7 @@ applications:
   emailProfiles:
   - name: mailProfile1
     addresses:
-    - testing@phdata.io
+    - testing@company.com
   slackProfiles:
   - name: slackProfile1
     url: testurl.com
@@ -24,7 +24,7 @@ applications:
   emailProfiles:
   - name: mailProfile1
     addresses:
-    - testing@phdata.io
+    - testing@company.com
   slackProfiles:
   - name: slackProfile1
     url: testurl.com
