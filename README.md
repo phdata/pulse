@@ -164,7 +164,7 @@ Create the role and grant for each application.  In this example, `sample_role` 
 
 ## Running the application manually on a cluster
 
-Run `make package` which will collect all the jars into `target/lib`
+Run `make package` which will collect all the jars into `target/lib`.
 
 Remove the `.template` suffix from these two files under the `bin` directory.
 - `cp env.sh.template env.sh`
