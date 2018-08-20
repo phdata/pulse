@@ -19,7 +19,7 @@
 set -x
 
 # fail if variables unset, on failure, or after pipe
-set -euo pipefail
+set -eo pipefail
 
 CMD=$1
 

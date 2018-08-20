@@ -37,7 +37,7 @@ object SparkLog4jExample {
     val conf = new SparkConf().setAppName("Pulse Spark Logging Example")
     val sc   = SparkContext.getOrCreate(conf)
 
-    val testData = 1 to 10000
+    val testData = 1 to 1000000
     val testRdd  = sc.parallelize(testData)
 
     // put the applicationId in a variable so it can be serialized and sent to the executors where [[sc]] is not available.
@@ -68,6 +68,7 @@ object SparkLog4jExample {
     }
 
     log.info("Shutting down the spark logging example")
+    sc.stop()
   }
 
 }

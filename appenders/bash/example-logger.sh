@@ -2,7 +2,7 @@
 # This script will print info and error messages to the Pulse Log Collector.
 # Modify these variables for your own envirinmnet:
 export PULSE_COLLECTOR_HOST=localhost
-export PULSE_COLLECTOR_PORT=9015
+export PULSE_COLLECTOR_PORT=9001
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source $CWD/logger.sh
@@ -19,7 +19,7 @@ i=0
 while [ $i -lt $numEvents ]
     do
     logger --category=category --level=INFO --message=Info --threadName=1 --application=pulse-test-default
-    if (( $numEvents % 300 == 0 ))
+    if (( $i % 300 == 0 ))
     then
         logger --category=category --level=ERROR --message=Error --threadName=1 --application=pulse-test-default
     fi
