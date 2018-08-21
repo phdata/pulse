@@ -35,7 +35,6 @@ import org.apache.log4j.spi.LoggingEvent;
 public class HttpAppender extends AppenderSkeleton {
 
   private static final String HOSTNAME = "hostname";
-  public static final long FLUSH_PERIOD_SECONDS = 3;
 
   private final List<LoggingEvent> buffer = new ArrayList<>();
 
@@ -91,56 +90,66 @@ public class HttpAppender extends AppenderSkeleton {
       return;
     }
 
+    // Set the NDC and thread name for the calling thread as these
+    // LoggingEvent fields were not set at event creation time.
+    event.getNDC();
+    event.getThreadName();
+    // Get a copy of this thread's MDC.
+    event.getMDCCopy();
+    event.getRenderedMessage();
+    event.getThrowableStrRep();
 
-    while (true) {
-      int previousSize = buffer.size();
+    synchronized (buffer) {
+      while (true) {
+        int previousSize = buffer.size();
 
-      if (previousSize < bufferSize) {
-        buffer.add(event);
+        if (previousSize < bufferSize) {
+          buffer.add(event);
 
-        //
-        //   if buffer had been empty
-        //       signal all threads waiting on buffer
-        //       to check their conditions.
-        //
-        if (previousSize == 0) {
-          buffer.notifyAll();
-        }
-
-        break;
-      }
-
-      //
-      //   Following code is only reachable if buffer is full
-      //
-      //
-      //   if blocking and thread is not already interrupted
-      //      and not the dispatcher then
-      //      wait for a buffer notification
-      boolean discard = true;
-      if (blocking
-          && !Thread.interrupted()
-          && Thread.currentThread() != dispatcher) {
-        try {
-          buffer.wait();
-          discard = false;
-        } catch (InterruptedException e) {
           //
-          //  reset interrupt status so
-          //    calling code can see interrupt on
-          //    their next wait or sleep.
-          Thread.currentThread().interrupt();
+          //   if buffer had been empty
+          //       signal all threads waiting on buffer
+          //       to check their conditions.
+          //
+          if (previousSize == 0) {
+            buffer.notifyAll();
+          }
+
+          break;
         }
-      }
 
-      //
-      //   if blocking is false or thread has been interrupted print warning.
-      //
-      if (discard) {
-        String loggerName = event.getLoggerName();
-        LogLog.warn("Discarding LoggingEvent from: " + loggerName);
+        //
+        //   Following code is only reachable if buffer is full
+        //
+        //
+        //   if blocking and thread is not already interrupted
+        //      and not the dispatcher then
+        //      wait for a buffer notification
+        boolean discard = true;
+        if (blocking
+            && !Thread.interrupted()
+            && Thread.currentThread() != dispatcher) {
+          try {
+            buffer.wait();
+            discard = false;
+          } catch (InterruptedException e) {
+            //
+            //  reset interrupt status so
+            //    calling code can see interrupt on
+            //    their next wait or sleep.
+            Thread.currentThread().interrupt();
+          }
+        }
 
-        break;
+        //
+        //   if blocking is false or thread has been interrupted print warning.
+        //
+        if (discard) {
+          String loggerName = event.getLoggerName();
+          LogLog.warn("Discarding LoggingEvent from: " + loggerName);
+
+          break;
+        }
       }
     }
   }
