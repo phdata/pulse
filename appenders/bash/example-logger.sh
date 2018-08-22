@@ -2,7 +2,7 @@
 # This script will print info and error messages to the Pulse Log Collector.
 # Modify these variables for your own envirinmnet:
 export PULSE_COLLECTOR_HOST=localhost
-export PULSE_COLLECTOR_PORT=9001
+export PULSE_COLLECTOR_PORT=9015
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source $CWD/logger.sh
