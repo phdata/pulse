@@ -106,11 +106,7 @@ public class HttpAppender extends AppenderSkeleton {
         if (previousSize < bufferSize) {
           buffer.add(event);
 
-          //
-          //   if buffer had been empty
-          //       signal all threads waiting on buffer
-          //       to check their conditions.
-          //
+          // if buffer had been empty signal all threads waiting on buffer to check their conditions.
           if (previousSize == 0) {
             buffer.notifyAll();
           }
@@ -118,13 +114,9 @@ public class HttpAppender extends AppenderSkeleton {
           break;
         }
 
-        //
         //   Following code is only reachable if buffer is full
         //
-        //
-        //   if blocking and thread is not already interrupted
-        //      and not the dispatcher then
-        //      wait for a buffer notification
+        //   if blocking and thread is not already interrupted and not the dispatcher then wait for a buffer notification
         boolean discard = true;
         if (blocking
             && !Thread.interrupted()
@@ -133,17 +125,12 @@ public class HttpAppender extends AppenderSkeleton {
             buffer.wait();
             discard = false;
           } catch (InterruptedException e) {
-            //
-            //  reset interrupt status so
-            //    calling code can see interrupt on
-            //    their next wait or sleep.
+            //  reset interrupt status so calling code can see interrupt on their next wait or sleep.
             Thread.currentThread().interrupt();
           }
         }
 
-        //
-        //   if blocking is false or thread has been interrupted print warning.
-        //
+        // if blocking is false or thread has been interrupted print warning.
         if (discard) {
           String loggerName = event.getLoggerName();
           LogLog.warn("Discarding LoggingEvent from: " + loggerName);
@@ -206,6 +193,10 @@ public class HttpAppender extends AppenderSkeleton {
     }
   }
 
+  /**
+   * Determine if the appender should block when the buffer is full. Default value is true.
+   * @param blocking boolean
+   */
   public void setBlocking(boolean blocking) {
     synchronized (buffer) {
       this.blocking = blocking;
@@ -235,13 +226,8 @@ public class HttpAppender extends AppenderSkeleton {
     this.httpManager = httpManager;
   }
 
-
-
-
-
-
   /**
-   * Logging event dispatcher.
+   * Logging event dispatcher. Operates on Object#wait() and Object#notifiy();
    */
   private static class Dispatcher implements Runnable {
 
@@ -281,20 +267,13 @@ public class HttpAppender extends AppenderSkeleton {
     public void run() {
       boolean isActive = true;
 
-      //
-      //   if interrupted (unlikely), end thread
-      //
+      // if interrupted, end thread
       try {
-        //
-        //   loop until the HttpAppender is closed.
-        //
+        // loop until the HttpAppender is closed.
         while (isActive) {
           LoggingEvent[] events = null;
 
-          //
-          //   extract pending events while synchronized
-          //       on buffer
-          //
+          // extract pending events while synchronized on buffer
           synchronized (buffer) {
             int bufferSize = buffer.size();
             isActive = !parent.closed;
@@ -309,20 +288,14 @@ public class HttpAppender extends AppenderSkeleton {
               events = new LoggingEvent[bufferSize];
               buffer.toArray(events);
 
-              //
-              //    clear buffer
-              //
               buffer.clear();
 
-              //
-              //    allow blocked appends to continue
+              // allow blocked appends to continue
               buffer.notifyAll();
             }
           }
 
-          //
-          //   process events after lock on buffer is released.
-          //
+          // process events after lock on buffer is released.
           if (events != null) {
             flush(events);
           }
@@ -333,7 +306,7 @@ public class HttpAppender extends AppenderSkeleton {
     }
 
     /**
-     * Flush all log events. If the last flush was a failure use exponential backoff.
+     * Serialize the log events to JSON and post to the HTTP service.
      */
     void flush(LoggingEvent[] events) {
       String json;
