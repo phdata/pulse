@@ -4,6 +4,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.*;
 
@@ -21,52 +22,6 @@ public class HttpAppenderTest {
   }
 
   @Test
-  public void testStopPostingOnFailure() throws Exception {
-    // there was an error
-    Mockito.when(httpManager.send(Matchers.any())).thenReturn(false);
-    HttpAppender appender = new HttpAppender();
-    appender.setHttpManager(httpManager);
-    appender.setMessageBuffer(new MessageBuffer());
-    appender.setBufferSize(1);
-
-    // first event batch should call 'send'
-    appender.append(TestUtils.getEvent());
-
-    // flush manually because the scheduled task might not have run
-    appender.flush();
-
-    // second event batch should not call 'send'
-    appender.append(TestUtils.getEvent());
-
-    // verify 'send' was called only once
-    Mockito.verify(httpManager, times(1)).send(Matchers.any());
-  }
-
-  @Test
-  public void testRecoverAfterExponentialBackoff() throws Exception {
-    // there was an error
-    Mockito.when(httpManager.send(Matchers.any())).thenReturn(false);
-    HttpAppender appender = new HttpAppender();
-    appender.setHttpManager(httpManager);
-    appender.setMessageBuffer(new MessageBuffer());
-    appender.setBufferSize(1);
-
-    // first event batch should call 'send'
-    appender.append(TestUtils.getEvent());
-
-    // flush manually because the scheduled task might not have run
-    appender.flush();
-    // sleep past the 2 second backoff time
-    Thread.sleep(3000);
-    // second event batch should call send after
-    appender.append(TestUtils.getEvent());
-    appender.flush();
-
-    // appender backoff recovered and sent the second message. Verify 'send' was called twice
-    Mockito.verify(httpManager, atLeast(2)).send(Matchers.any());
-  }
-
-  @Test
   public void dontPostWhenBatchingHandlerIsntReady() {
     Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
 
@@ -75,31 +30,10 @@ public class HttpAppenderTest {
 
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
     HttpAppender appender = new HttpAppender();
-    appender.setMessageBuffer(new MessageBuffer());
 
     appender.setHttpManager(httpManager);
     // first event should call 'send'
     appender.append(event);
-
-    // verify 'send' was called only once
-    Mockito.verify(httpManager, times(0)).send(Matchers.any());
-  }
-
-  @Test
-  public void flushEventsOnClose() {
-    Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
-
-    LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, 1, Level.INFO, "Hello, World",
-            "main", null, "ndc", null, null);
-
-    Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
-    HttpAppender appender = new HttpAppender();
-    appender.setMessageBuffer(new MessageBuffer());
-
-    appender.setHttpManager(httpManager);
-    // first event should call 'send'
-    appender.append(event);
-    appender.close();
 
     // verify 'send' was called only once
     Mockito.verify(httpManager, times(1)).send(Matchers.any());
@@ -114,7 +48,6 @@ public class HttpAppenderTest {
 
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
     HttpAppender appender = new HttpAppender();
-    appender.setMessageBuffer(new MessageBuffer());
 
     appender.setHttpManager(httpManager);
     // first event should call 'send'
@@ -134,7 +67,6 @@ public class HttpAppenderTest {
     ArgumentCaptor<String> sendArgument = ArgumentCaptor.forClass(String.class);
 
     HttpAppender appender = new HttpAppender();
-    appender.setMessageBuffer(new MessageBuffer());
 
     appender.setHttpManager(httpManager);
     // first event should call 'send' since we are sending an error message
@@ -145,26 +77,6 @@ public class HttpAppenderTest {
     assert (sendArgument.getValue().contains("\"hostname\":"));
   }
 
-  @Test
-  public void flushEventsAfterFlushPeriodPasses() throws Exception {
-    Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
-
-    LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, 1, Level.INFO, "Hello, World",
-            "main", null, "ndc", null, null);
-
-    Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
-    HttpAppender appender = new HttpAppender();
-    appender.setMessageBuffer(new MessageBuffer());
-
-    appender.setHttpManager(httpManager);
-    // first event should call 'send'
-    appender.append(event);
-
-    // sleep past the flush period
-    Thread.sleep(appender.FLUSH_PERIOD_SECONDS + 2000);
-    // verify 'send' was called only once
-    Mockito.verify(httpManager, atLeast(1)).send(Matchers.any());
-  }
 }
 
 /**
