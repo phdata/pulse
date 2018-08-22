@@ -61,9 +61,9 @@ object SparkLog4jExample {
     testRdd.foreach { num =>
       LoggingConfiguration.init // initialized once on first record, value is thrown away an nothing done for other records
       if (num % 100 == 0) {
-        log.warn(s"found num: " + num)
+        log.warn(s"XXXXX warning! num: " + num)
       } else {
-        log.info(s"error: " + num)
+        log.info(s"XXXXX found: " + num)
       }
     }
 
