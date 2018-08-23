@@ -2,21 +2,23 @@
 
 package io.phdata.pulse.logcollector
 
-import java.nio.file.Paths
+import org.scalatest.{ BeforeAndAfterEach, FunSuite }
 import java.util.Properties
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import io.phdata.pulse.common.{ JsonSupport, SolrService }
-import io.phdata.pulse.common.domain.LogEvent
-import org.scalatest.{ BeforeAndAfterEach, FunSuite }
-import io.phdata.pulse.logcollector.util.{ KafkaMiniCluster, ZooKafkaConfig }
-import io.phdata.pulse.testcommon.BaseSolrCloudTest
+import spray.json._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.solr.client.solrj.SolrQuery
-import org.apache.solr.client.solrj.impl.CloudSolrServer
-import org.apache.solr.cloud.MiniSolrCloudCluster
-import spray.json._
+
+import scala.concurrent.{ Await, Future }
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+
+import io.phdata.pulse.logcollector.util.{ KafkaMiniCluster, ZooKafkaConfig }
+import io.phdata.pulse.testcommon.BaseSolrCloudTest
+import io.phdata.pulse.common.{ JsonSupport, SolrService }
+import io.phdata.pulse.common.domain.LogEvent
 
 class KafkaConsumerPulseTest
     extends FunSuite
@@ -30,8 +32,8 @@ class KafkaConsumerPulseTest
   implicit var actorSystem: ActorSystem             = _
   implicit var actorMaterializer: ActorMaterializer = _
 
-  var solrService: SolrService          = _
-  var streamProcessor: SolrCloudStreams = _
+  var solrService: SolrService            = _
+  var streamProcessor: KafkaConsumerPulse = _
 
   override def beforeEach(): Unit = {
     zooKafkaConfig = new ZooKafkaConfig
@@ -43,7 +45,7 @@ class KafkaConsumerPulseTest
 
     solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress, solrClient)
 
-    streamProcessor = new SolrCloudStreams(solrService)
+    streamProcessor = new KafkaConsumerPulse(solrService)
   }
 
   override def afterEach(): Unit = {
@@ -61,12 +63,13 @@ class KafkaConsumerPulseTest
       |{
       | "id": "1",
       | "category": "cat1",
-      | "timestamp": "8/7/18",
+      | "timestamp": "1970-01-01T00:00:00Z",
       | "level": "ERROR",
       | "message": "Out of Bounds Exception",
       | "threadName": "thread1",
       | "throwable": "Exception in thread main",
-      | "properties": {"key":"value"}
+      | "properties": {"key":"value"},
+      | "application": "pulse-kafka-test"
       |}
     """.stripMargin
 
@@ -75,12 +78,13 @@ class KafkaConsumerPulseTest
       |{
       | "id": "2",
       | "category": "cat1",
-      | "timestamp": "8/13/18",
-      | "level": "ERROR",
+      | "timestamp": "1970-01-01T00:00:00Z",
+      | "level": "INFO",
       | "message": "Null Pointer Exception",
       | "threadName": "thread2",
       | "throwable": "Exception in thread main",
-      | "properties": {"key":"value"}
+      | "properties": {"key":"value"},
+      | "application": "pulse-kafka-test"
       |}
     """.stripMargin
 
@@ -89,12 +93,13 @@ class KafkaConsumerPulseTest
       |{
       | "id": "3",
       | "category": "cat2",
-      | "timestamp": "8/20/18",
+      | "timestamp": "1970-01-01T00:00:00Z",
       | "level": "ERROR",
       | "message": "File Not Found Exception",
       | "threadName": "thread1",
       | "throwable": "Exception in thread main",
-      | "properties": {"key":"value"}
+      | "properties": {"key":"value"},
+      | "application": "pulse-kafka-test"
       |}
     """.stripMargin
 
@@ -106,7 +111,8 @@ class KafkaConsumerPulseTest
                                "message 1",
                                "thread oxb",
                                Some("Exception in thread main"),
-                               None)
+                               None,
+                               Some("pulse-kafka-test"))
 
   val document2 = new LogEvent(None,
                                "ERROR",
@@ -115,7 +121,8 @@ class KafkaConsumerPulseTest
                                "message 2",
                                "thread oxb",
                                Some("Exception in thread main"),
-                               None)
+                               None,
+                               Some("pulse-kafka-test"))
 
   val document3 = new LogEvent(None,
                                "ERROR",
@@ -124,7 +131,8 @@ class KafkaConsumerPulseTest
                                "message 3",
                                "thread oxb",
                                Some("Exception in thread main"),
-                               None)
+                               None,
+                               Some("pulse-kafka-test"))
 
 //  test("read messages from Kafka topic") {
 //    // write json onto topic
@@ -139,15 +147,15 @@ class KafkaConsumerPulseTest
 //
 //    kafkaConsumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:11111")
 //    kafkaConsumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-//      "org.apache.kafka.common.serialization.StringDeserializer")
+//                           "org.apache.kafka.common.serialization.StringDeserializer")
 //    kafkaConsumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-//      "org.apache.kafka.common.serialization.StringDeserializer")
-//    kafkaConsumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest")
-//    kafkaConsumerProps.put(ConsumerConfig.GROUP_ID_CONFIG,"pulse-kafka")
+//                           "org.apache.kafka.common.serialization.StringDeserializer")
+//    kafkaConsumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+//    kafkaConsumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "pulse-kafka")
 //
 //    val kafkaConsumerPulse = new KafkaConsumerPulse(solrService)
 //
-//    val consumedMessage: LogEvent = kafkaConsumerPulse.consumeMessage(kafkaConsumerProps,TOPIC1)
+//    val consumedMessage: LogEvent = kafkaConsumerPulse.consumeMessage(kafkaConsumerProps, TOPIC1)
 //
 //    val logMessageCC: LogEvent = logMessage1.parseJson.convertTo[LogEvent]
 //
@@ -155,7 +163,7 @@ class KafkaConsumerPulseTest
 //    println("actual:   " + consumedMessage)
 //
 //    // Check whether consumed message equals expected message
-//    assert( logMessageCC == consumedMessage )
+//    assert(logMessageCC == consumedMessage)
 //  }
 
   test("write to solr cloud") {
@@ -163,44 +171,39 @@ class KafkaConsumerPulseTest
     // send to solr cloud
 
     // Write messages to local Kafka broker
-    //kafkaMiniCluster.produceMessage(TOPIC2, logMessage1)
+    val messageList = List(logMessage1, logMessage2, logMessage3)
+    kafkaMiniCluster.produceMessages(TOPIC2, messageList)
 
     // Set Kafka consumer properties
-//    val kafkaConsumerProps = new Properties()
-//
-//    kafkaConsumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:11111")
-//    kafkaConsumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-//      "org.apache.kafka.common.serialization.StringDeserializer")
-//    kafkaConsumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-//      "org.apache.kafka.common.serialization.StringDeserializer")
-//    kafkaConsumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,"earliest")
-//    kafkaConsumerProps.put(ConsumerConfig.GROUP_ID_CONFIG,"pulse-kafka")
+    val kafkaConsumerProps = new Properties()
+
+    kafkaConsumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:11111")
+    kafkaConsumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                           "org.apache.kafka.common.serialization.StringDeserializer")
+    kafkaConsumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                           "org.apache.kafka.common.serialization.StringDeserializer")
+    kafkaConsumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+    kafkaConsumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "pulse-kafka")
 
     val app1Name       = "pulse-kafka-test"
     val app1Collection = s"${app1Name}_1"
     val app1Alias      = s"${app1Name}_latest"
 
-    println("Setting up Solr collection")
     solrService.createCollection(app1Collection, 1, 1, "testconf", null)
     solrService.createAlias(app1Alias, app1Collection)
-    //streamProcessor.read(kafkaConsumerProps,TOPIC2)
-    println("Sending to solr")
 
-    val solrStream = streamProcessor.groupedInsert.run()
-
-    solrStream ! (app1Name, document1)
-
-    println("Finished consuming")
-    Thread.sleep(streamProcessor.GROUP_MAX_TIME.toMillis + 5000)
+    val f = Future {
+      streamProcessor.read(kafkaConsumerProps, TOPIC2)
+    }
+    //Await.result(f, 30000 millis)
+    Thread.sleep(10000)
 
     val app1Query = new SolrQuery("level: ERROR")
     app1Query.set("collection", app1Alias)
-    println("Setting up SolrQuery")
 
     val query1Result = solrClient.query(app1Query)
-    println("Setting up query result")
 
-    assertResult(1)(query1Result.getResults.getNumFound)
+    assertResult(2)(query1Result.getResults.getNumFound)
   }
 
 //  test("read from kafka topic") {

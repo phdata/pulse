@@ -73,12 +73,8 @@ lazy val dependencies =
     val powerMockJunit = "org.powermock" % "powermock-module-junit4" % powerMockVersion % Test
     val powerMockApi = "org.powermock" % "powermock-api-mockito" % powerMockVersion % Test
 
-    // Kafka and Zookeeper depends
+    // Kafka depends
     val apacheKafka = "org.apache.kafka" % "kafka_2.11" % "0.10.2-kafka-2.2.0"
-    //val apacheZookeeper = "org.apache.zookeeper" % "zookeeper" % "3.4.5" % Test
-    //val apacheGeronimo = "org.apache.geronimo.specs" % "geronimo-jms_1.1_spec" % "1.1.1" % Test
-    //val apacheCurator = "org.apache.curator" % "curator-test" % "4.0.1" % Test
-
 
     // Http depends
     val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion

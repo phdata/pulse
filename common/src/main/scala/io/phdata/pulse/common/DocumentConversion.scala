@@ -33,6 +33,7 @@ object DocumentConversion {
     doc.addField("message", event.message)
     doc.addField("threadName", event.threadName)
     doc.addField("throwable", event.throwable.getOrElse(""))
+    doc.addField("application", event.application)
 
     // If the event properties exist, add each property to the document. The fields will be added as
     // dynamic [[String]] fields

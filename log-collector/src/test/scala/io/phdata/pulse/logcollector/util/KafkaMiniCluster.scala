@@ -66,6 +66,30 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
     producer.close()
   }
 
+  def produceMessages(topic: String, messages: List[String]): Unit = {
+    val kafkaProducerProps = new Properties()
+
+    kafkaProducerProps.put("bootstrap.servers", "localhost:11111")
+    kafkaProducerProps.put("key.serializer",
+                           "org.apache.kafka.common.serialization.StringSerializer")
+    kafkaProducerProps.put("value.serializer",
+                           "org.apache.kafka.common.serialization.StringSerializer")
+
+    val producer = new KafkaProducer[String, String](kafkaProducerProps)
+
+    messages.foreach(msg => {
+      val record = new ProducerRecord[String, String](topic, msg)
+
+      println(
+        "KAFKA: Producing " + record
+          .value() + " to topic: " + topic + " on broker: " + config.kafkaBroker)
+
+      producer.send(record)
+    })
+
+    producer.close()
+  }
+
   class Kafka extends ListeningProcess {
     override val port: Int                        = config.kafkaBrokerPort
     override val name: String                     = "kafka"
@@ -117,6 +141,7 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
 
     override def close: Unit =
       if (zooKeeperServer != null) {
+        println("Stopping Zookeeper...")
         zooKeeperServer.shutdown()
       }
   }

@@ -34,12 +34,16 @@ class KafkaConsumerPulse(solrService: SolrService) extends JsonSupport with Lazy
 
     var recordList = new ListBuffer[String]
 
-    while (recordList.isEmpty) {
+    while (true) {
       val records: ConsumerRecords[String, String] = consumer.poll(100)
       for (record <- records.asScala) {
         println("KAFKA: Consuming " + record.value() + " from topic: " + topic)
         recordList += record.value()
-        solrInputStream ! ("pulse-kafka-test", record
+        solrInputStream ! (record
+          .value()
+          .parseJson
+          .convertTo[LogEvent]
+          .application, record
           .value()
           .parseJson
           .convertTo[LogEvent]) // write messages onto our solr stream

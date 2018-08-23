@@ -34,4 +34,5 @@ case class LogEvent(id: Option[String],
                     message: String,
                     threadName: String,
                     throwable: Option[String] = None,
-                    properties: Option[Map[String, String]] = None)
+                    properties: Option[Map[String, String]] = None,
+                    application: Option[String] = None)
