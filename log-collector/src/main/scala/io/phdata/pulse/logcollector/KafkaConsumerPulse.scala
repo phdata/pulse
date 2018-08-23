@@ -39,14 +39,11 @@ class KafkaConsumerPulse(solrService: SolrService) extends JsonSupport with Lazy
       for (record <- records.asScala) {
         println("KAFKA: Consuming " + record.value() + " from topic: " + topic)
         recordList += record.value()
-        solrInputStream ! (record
+        val logEvent = record
           .value()
           .parseJson
           .convertTo[LogEvent]
-          .application, record
-          .value()
-          .parseJson
-          .convertTo[LogEvent]) // write messages onto our solr stream
+        solrInputStream ! (logEvent.application.get, logEvent) // write messages onto our solr stream
       }
     }
   }
@@ -68,17 +65,4 @@ class KafkaConsumerPulse(solrService: SolrService) extends JsonSupport with Lazy
     }
     recordList.head.parseJson.convertTo[LogEvent]
   }
-
-//  def read() =
-//    while (true /* read messages from kafka */ ) {
-//      solrInputStream ! ("app name", LogEvent) // write messages onto our solr stream
-//    }
-
-  /* TODO:
-   1) start kafka mini cluster
-   2) write JSON messages to kafka broker
-   3) read JSON messages and parse into case classes
-   4) send messages to solr (read over solrcloudstreams class and tests) and sleep
-   5) assert message received in solr (test cases already made for this)
- */
 }

@@ -11,9 +11,8 @@ import spray.json._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.solr.client.solrj.SolrQuery
 
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 
 import io.phdata.pulse.logcollector.util.{ KafkaMiniCluster, ZooKafkaConfig }
 import io.phdata.pulse.testcommon.BaseSolrCloudTest
@@ -158,9 +157,6 @@ class KafkaConsumerPulseTest
 //    val consumedMessage: LogEvent = kafkaConsumerPulse.consumeMessage(kafkaConsumerProps, TOPIC1)
 //
 //    val logMessageCC: LogEvent = logMessage1.parseJson.convertTo[LogEvent]
-//
-//    println("expected: " + logMessageCC)
-//    println("actual:   " + consumedMessage)
 //
 //    // Check whether consumed message equals expected message
 //    assert(logMessageCC == consumedMessage)

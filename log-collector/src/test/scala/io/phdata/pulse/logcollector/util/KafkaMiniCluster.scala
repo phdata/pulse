@@ -3,16 +3,16 @@
 package io.phdata.pulse.logcollector.util
 
 import java.io.File
-import java.net.{ InetSocketAddress, Socket }
+import java.net.{InetSocketAddress, Socket}
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Properties
 
 import com.typesafe.scalalogging.LazyLogging
-import kafka.server.{ KafkaConfig, KafkaServerStartable }
+import kafka.server.{KafkaConfig, KafkaServerStartable}
 import org.apache.commons.io.FileUtils
-import org.apache.kafka.clients.producer.{ KafkaProducer, ProducerRecord }
-import org.apache.zookeeper.server.{ ServerCnxnFactory, ZooKeeperServer }
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+import org.apache.zookeeper.server.{ServerCnxnFactory, ZooKeeperServer}
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 
 case class ZooKafkaConfig(
@@ -45,6 +45,7 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
     services.foreach(_.stop())
 
   def produceMessage(topic: String, message: String): Unit = {
+    // Produces single messages
     val kafkaProducerProps = new Properties()
 
     kafkaProducerProps.put("bootstrap.servers", "localhost:11111")
@@ -67,6 +68,7 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
   }
 
   def produceMessages(topic: String, messages: List[String]): Unit = {
+    // Produces multiple messages
     val kafkaProducerProps = new Properties()
 
     kafkaProducerProps.put("bootstrap.servers", "localhost:11111")
@@ -135,6 +137,7 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
       zooKeeperServer.setMaxSessionTimeout(config.zookeeperMaxSessionTimeout)
       val cnxnFactory = ServerCnxnFactory.createFactory()
       cnxnFactory.configure(new InetSocketAddress(config.zookeeperPort), 10)
+      println("Starting Zookeeper on port: " + config.zookeeperPort)
       cnxnFactory.startup(zooKeeperServer)
       cnxnFactory.join()
     }

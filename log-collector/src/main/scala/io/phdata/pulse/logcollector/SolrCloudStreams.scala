@@ -28,7 +28,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 class SolrCloudStreams(solrService: SolrService) extends LazyLogging {
-  val GROUP_SIZE     = 1 // Number of elements to put into a group
+  val GROUP_SIZE     = 1000 // Number of elements to put into a group
   val GROUP_MAX_TIME = 1 seconds // If a grouping exceeds this time it will stop short of GROUP_SIZE
   val MAX_SUBSTREAMS = 1000 // If the number of apps being processed exceeds this some will be dropped
 
