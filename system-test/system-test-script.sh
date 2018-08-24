@@ -47,8 +47,8 @@ else
       #exit 0
 fi
 
-cd /home/mgeorge/pulse/log-example/
-./spark-logging 2>&1 > $spark_log &
+
+./log-example/spark-logging 2>&1 > $spark_log &
 
 echo "Curling the Solr API"
 # Asking for edge node credentials
