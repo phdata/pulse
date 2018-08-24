@@ -19,7 +19,7 @@ i=0
 while [ $i -lt $numEvents ]
     do
     logger --category=category --level=INFO --message=Info --threadName=1 --application=pulse-test-default
-    if (( $numEvents % 300 == 0 ))
+    if (( $i % 300 == 0 ))
     then
         logger --category=category --level=ERROR --message=Error --threadName=1 --application=pulse-test-default
     fi

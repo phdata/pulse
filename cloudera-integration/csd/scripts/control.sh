@@ -19,7 +19,7 @@
 set -x
 
 # fail if variables unset, on failure, or after pipe
-set -euo pipefail
+set -eo pipefail
 
 CMD=$1
 
@@ -65,7 +65,6 @@ log "KEYTAB_FILE : $KEYTAB_FILE"
 log "AKKA_CONF : $AKKA_CONF"
 log "CLASS_PATH: $CLASS_PATH"
 log "ZK_QUORUM: $ZK_QUORUM"
-log "ZK_QUORUM_SOLR: $ZK_QUORUM_SOLR"
 log "SMTP_SERVER: $SMTP_SERVER"
 log "SMTP_USER: $SMTP_USER"
 log "SMTP_PASSWORD: $SMTP_PASSWORD"
