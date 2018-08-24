@@ -17,7 +17,7 @@ then
       exit 1
 fi
 echo "Starting alert engine....."
-bin/alert-engine 2>&1 > $alert_engine_log &
+bin/alert-engine 2>&1 > $alert_engine_Log &
 # Getting process of alert engine
 alert_engine_pid=$!
 # Checking if the alert engine service has started
@@ -64,6 +64,6 @@ killing_all_services(){
 echo "Killing service PIDS"
 kill -9 $log_collector_pid
 kill -9 $collection_roller_pid
-kill -9 $alert_engine_pid
+kill -9 $alert_engine_pid$alert_engine_pid
 }
 killing
