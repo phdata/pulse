@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Stopping the script if any command fails
 set -euo pipefail
-export collection_roller_log="system-test/collectionrollerLog"
-export alert_engine_log="system-test/alertengineLogfile"
-export log_collector_log="system-test/logcollectorLog"
+export collection_roller_log="system-test/collection_roller_log"
+export alert_engine_log="system-test/alert_engine_log"
+export log_collector_log="system-test/log_collector_log"
 
 echo "Starting collection roller....."
 bin/collection-roller 2>&1 > $collection_roller_log &
