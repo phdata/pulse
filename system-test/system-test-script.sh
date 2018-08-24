@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-#Stopping the script if any command fails
+# Stopping the script if any command fails
 set -euo pipefail
 export collectionrollerLog="system-test/collectionrollerLog"
 export alertengineLog="system-test/alertengineLogfile"
 export logcollectorLog="system-test/logcollectorLog"
 
-#collection=$(grep -m4 "name:" /home/mgeorge/pulse/system-test/alert-engine.yml | tail -n1 |awk '{print $3}')
-#name="_latest"
-#colName="${collection}_latest"
-#echo "Collection Name: " $colName
+# collection=$(grep -m4 "name:" /home/mgeorge/pulse/system-test/alert-engine.yml | tail -n1 |awk '{print $3}')
+# name="_latest"
+# colName="${collection}_latest"
+# echo "Collection Name: " $colName
 echo "Starting collection roller....."
 bin/collection-roller 2>&1 > $collection_roller_log &
 # Getting the process id of collection roller
@@ -43,7 +43,7 @@ then
       exit 1
 fi
 
-#cd /home/mgeorge/pulse/log-example/
+# cd /home/mgeorge/pulse/log-example/
 ./spark-logging 2>&1 > $spark_log &
 
 echo "Curling the Solr API"
