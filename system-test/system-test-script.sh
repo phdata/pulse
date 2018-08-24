@@ -49,7 +49,6 @@ http_status_collection=$(echo "$query_response" | grep HTTP |  awk '{print $2}')
 echo $http_status_collection
 # Checking if the collection exists and if documents are collected
 if [[  "$http_status_collection" == 200 ]]; then
-       #echo "Passed"
        if [[ "query_response" =~ "\"numFound\":0" ]]; then
                 echo "Failed!"
        else
