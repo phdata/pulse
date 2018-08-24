@@ -64,6 +64,6 @@ killing_all_services(){
 echo "Killing service PIDS"
 kill -9 $log_collector_pid
 kill -9 $collection_roller_pid
-kill -9 $alert_engine_pid$alert_engine_pid
+kill -9 
 }
 killing
