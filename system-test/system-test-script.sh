@@ -1,56 +1,61 @@
 #!/usr/bin/env bash
 #Stopping the script if any command fails
 set -euo pipefail
-export myvar="system-test/logfile"
-cd ..
- echo "Starting collection roller....."
-bin/collection-roller 2>&1 > $myvar &
-#Getting the process id of collection roller
-pid1=$!
-#Checking if the collection roller service has started
-if [ -z "$pid1" ]
+export collectionrollerLog="system-test/collectionrollerLog"
+export alertengineLog="system-test/alertengineLogfile"
+export logcollectorLog="system-test/logcollectorLog"
+
+#collection=$(grep -m4 "name:" /home/mgeorge/pulse/system-test/alert-engine.yml | tail -n1 |awk '{print $3}')
+#name="_latest"
+#colName="${collection}_latest"
+#echo "Collection Name: " $colName
+echo "Starting collection roller....."
+bin/collection-roller 2>&1 > $collection_roller_log &
+# Getting the process id of collection roller
+collection_roller_pid=$!
+# Checking if the collection roller service has started
+if [ -z "$collection_roller_pid" ]
 then
       echo "Collection Roller is not running"
-else
-      echo "Collection Roller is running....."
+      killing
+      exit 1
 fi
 echo "Starting alert engine....."
-bin/alert-engine 2>&1 > $myvar &
-#Getting process of alert engine
-pid2=$!
-#Checking if the alert engine service has started
-if [ -z "$pid2" ]
+bin/alert-engine 2>&1 > $alert_engine_log &
+# Getting process of alert engine
+alert_engine_pid=$!
+# Checking if the alert engine service has started
+if [ -z "$alert_engine_pid" ]
 then
       echo "Alert Engine is not running"
-else
-      echo "Alert Engine is running...."
+      killing
+      exit 1
 fi
 echo "Starting log collector...."
-bin/log-collector 2>&1 > $myvar &
-#Getting process of log collector
-pid3=$!
-#Checking if the log collector service has started
-if [ -z "$pid3" ]
+bin/log-collector 2>&1 > $log_collector_log &
+# Getting process of log collector
+log_collector_pid=$!
+# Checking if the log collector service has started
+if [ -z "log_collector_pid" ]
 then
       echo "Log collector is not running"
-else
-      echo "Log Collector is running...."
+      killing
+      exit 1
 fi
-echo "Collection roller PID: " $pid1
-echo "Log Collector PID:" $pid3
-echo "Alert Engine PID:" $pid2
-echo "Starting spark application...."
-cd /home/mgeorge/pulse/log-example/
-./spark-logging 2>&1 > $myvar &
-sleep 10 &
+
+#cd /home/mgeorge/pulse/log-example/
+./spark-logging 2>&1 > $spark_log &
+
 echo "Curling the Solr API"
-#Asking for edge node credentials
-read -p "Username: " CURLUSER
-response=$(curl -su ${CURLUSER} 'http://master3.valhalla.phdata.io:8983/solr/logging-pulse_latest/select?q=*%3A*&wt=json&indent=true')
-#Checking if the collection exists and if documents are collected
-if [[ $(curl -su ${CURLUSER} 'http://master3.valhalla.phdata.io:8983/solr/logging-pulse_latest/select?q=*%3A*&wt=json&indent=true' -o /dev/null -w '%{http_code}\n' -s) == 200 ]]; then
+# Asking for edge node credentials
+read -p "Username: " USER
+query_response=$(curl -i -o - --silent -X GET -u $USER "http://master3.valhalla.phdata.io:8983/solr/logging-pulse_latest/select?q=*%3A*&wt=json&indent=true")
+http_status_collection=$(echo "$query_response" | grep HTTP |  awk '{print $2}')
+echo $http_status_collection
+# Checking if the collection exists and if documents are collected
+if [[  "$http_status_collection" == 200 ]]; then
        #echo "Passed"
-       if [[ "$response" =~ "\"numFound\":0" ]]; then
+       if [[ "query_response" =~ "\"numFound\":0" ]]; then
                 echo "Failed!"
        else
                 echo "Passed!"
@@ -58,8 +63,10 @@ if [[ $(curl -su ${CURLUSER} 'http://master3.valhalla.phdata.io:8983/solr/loggin
 else
         echo "Failed"
 fi
-#Killing service PIDs
+
+# Killing service PIDs
+killing(){
 echo "Killing service PIDS"
-sudo kill -13 $pid1
-sudo kill -13 $pid2
-sudo kill -13 $pid3
+kill -9 $log_collector_pid | kill -9 $collection_roller_pid | kill -9 $alert_engine_pid
+}
+killing
