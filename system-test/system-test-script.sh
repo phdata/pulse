@@ -44,7 +44,7 @@ then
 fi
 
 # cd /home/mgeorge/pulse/log-example/
-./spark-logging
+./log-example/spark-logging
 
 echo "Curling the Solr API"
 # Asking for edge node credentials
