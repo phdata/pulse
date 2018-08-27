@@ -4,10 +4,10 @@
 set -e
 function cleanup {
   echo "Removing /tmp/foo"
-  rm  -r /tmp/foo
+  rm  -r /tmp/system-check
 }
 trap cleanup EXIT
-mkdir /tmp/foo
+mkdir /tmp/system-check
 
 export collection_roller_log="system-test/log_files/collectionroller.log"
 export alert_engine_log="system-test/log_files/alertengine.log"
@@ -31,7 +31,7 @@ alert_engine_pid=$!
 # Checking if the alert engine service has started
 if [ -z "$alert_engine_pid" ]
 then
-      echo "Alert Engine is not running"
+      echo "Alert Engine is not running"s
       killing
       exit 1
 fi
@@ -65,13 +65,4 @@ if [[  "$http_status_collection" == 200 ]]; then
 else
         echo "Failed"
 fi
-
-# Killing service PIDs
-#killing_all_services(){
-#echo "Killing service PIDS"
-#kill -9 $log_collector_pid
-#kill -9 $collection_roller_pid
-#kill -9 $alert_engine_pid
-#}
-#killing
 
