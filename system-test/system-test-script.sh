@@ -1,12 +1,20 @@
 #!/usr/bin/env bash
 # Stopping the script if any command fails
-set -euo pipefail
-export collection_roller_Log="system-test/collectionrollerLog"
-export alert_engine_Log="system-test/alertengineLogfile"
-export log_collector_Log="system-test/logcollectorLog"
+#set -euo pipefail
+set -e
+function cleanup {
+  echo "Removing /tmp/foo"
+  rm  -r /tmp/foo
+}
+trap cleanup EXIT
+mkdir /tmp/foo
+
+export collection_roller_log="system-test/log_files/collectionroller.log"
+export alert_engine_log="system-test/log_files/alertengine.log"
+export log_collector_log="system-test/log_files/logcollector.log"
 
 echo "Starting collection roller....."
-bin/collection-roller 2>&1 > $collection_roller_log &
+bin/collection-roller 2>&1 > $collection_roller_log
 # Getting the process id of collection roller
 collection_roller_pid=$!
 # Checking if the collection roller service has started
@@ -17,7 +25,7 @@ then
       exit 1
 fi
 echo "Starting alert engine....."
-bin/alert-engine 2>&1 > $alert_engine_Log &
+bin/alert-engine 2>&1 > $alert_engine_log &
 # Getting process of alert engine
 alert_engine_pid=$!
 # Checking if the alert engine service has started
@@ -28,7 +36,7 @@ then
       exit 1
 fi
 echo "Starting log collector...."
-bin/log-collector 2>&1 > $log_collector_log &
+bin/log-collector 2>&1 > $log_collector_log
 # Getting process of log collector
 log_collector_pid=$!
 # Checking if the log collector service has started
@@ -59,10 +67,11 @@ else
 fi
 
 # Killing service PIDs
-killing_all_services(){
-echo "Killing service PIDS"
-kill -9 $log_collector_pid
-kill -9 $collection_roller_pid
-kill -9 $alert_engine_pid
-}
-killing
+#killing_all_services(){
+#echo "Killing service PIDS"
+#kill -9 $log_collector_pid
+#kill -9 $collection_roller_pid
+#kill -9 $alert_engine_pid
+#}
+#killing
+
