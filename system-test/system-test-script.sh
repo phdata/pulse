@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Stopping the script if any command fails
 set -euo pipefail
+source bin/env.sh
 export collection_roller_log="system-test/collection_roller_log"
 export alert_engine_log="system-test/alert_engine_log"
 export log_collector_log="system-test/log_collector_log"
@@ -44,7 +45,7 @@ fi
 echo "Curling the Solr API"
 # Asking for edge node credentials
 read -p "Username: " USER
-query_response=$(curl -i -o - --silent -X GET -u $USER "http://master3.valhalla.phdata.io:8983/solr/logging-pulse_latest/select?q=*%3A*&wt=json&indent=true")
+query_response=$(curl -i -o - --silent -X GET -u ${SOLR_USR}:${SOLR_PWD} "http://master3.valhalla.phdata.io:8983/solr/${colName}/select?q=*%3A*&wt=json&indent=true")
 http_status_collection=$(echo "$query_response" | grep HTTP |  awk '{print $2}')
 echo $http_status_collection
 # Checking if the collection exists and if documents are collected
