@@ -7,7 +7,7 @@ function cleanup {
   rm  -r /tmp/pulse-system-test
 }
 trap cleanup EXIT
-mkdir /tmp/foo
+mkdir /tmp/pulse-system-test
 
 export collection_roller_log="system-test/log_files/collectionroller.log"
 export alert_engine_log="system-test/log_files/alertengine.log"
