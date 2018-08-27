@@ -14,7 +14,7 @@ export alert_engine_log="system-test/log_files/alertengine.log"
 export log_collector_log="system-test/log_files/logcollector.log"
 
 echo "Starting collection roller....."
-bin/collection-roller 2>&1 > $collection_roller_log
+bin/collection-roller 2>&1 > $collection_roller_log &
 # Getting the process id of collection roller
 collection_roller_pid=$!
 # Checking if the collection roller service has started
@@ -34,7 +34,7 @@ then
       exit 1
 fi
 echo "Starting log collector...."
-bin/log-collector 2>&1 > $log_collector_log
+bin/log-collector 2>&1 > $log_collector_log &
 # Getting process of log collector
 log_collector_pid=$!
 # Checking if the log collector service has started
