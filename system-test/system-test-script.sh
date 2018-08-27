@@ -1,20 +1,27 @@
 #!/usr/bin/env bash
 # Stopping the script if any command fails
-set -euo pipefail
+set -e
 source bin/env.sh
-export collection_roller_log="system-test/collection_roller_log"
-export alert_engine_log="system-test/alert_engine_log"
-export log_collector_log="system-test/log_collector_log"
+function cleanup {
+  echo "Removing /tmp/foo"
+  rm  -r /tmp/pulse-system-test
+}
+trap cleanup EXIT
+mkdir /tmp/foo
+
+export collection_roller_log="system-test/log_files/collectionroller.log"
+export alert_engine_log="system-test/log_files/alertengine.log"
+export log_collector_log="system-test/log_files/logcollector.log"
 
 echo "Starting collection roller....."
-bin/collection-roller 2>&1 > $collection_roller_log &
+bin/collection-roller 2>&1 > $collection_roller_log
 # Getting the process id of collection roller
 collection_roller_pid=$!
 # Checking if the collection roller service has started
 if [ -z "$collection_roller_pid" ]
 then
       echo "Collection Roller is not running"
-      kill_all_services
+      killing
       exit 1
 fi
 echo "Starting alert engine....."
@@ -25,18 +32,18 @@ alert_engine_pid=$!
 if [ -z "$alert_engine_pid" ]
 then
       echo "Alert Engine is not running"
-      kill_all_services
+      killing
       exit 1
 fi
 echo "Starting log collector...."
-bin/log-collector 2>&1 > $log_collector_log &
+bin/log-collector 2>&1 > $log_collector_log
 # Getting process of log collector
 log_collector_pid=$!
 # Checking if the log collector service has started
 if [ -z "log_collector_pid" ]
 then
       echo "Log collector is not running"
-      kill_all_services
+      killing
       exit 1
 fi
 
@@ -58,12 +65,3 @@ if [[  "$http_status_collection" == 200 ]]; then
 else
         echo "Failed"
 fi
-
-# Killing service PIDs
-kill_all_services(){
-echo "Killing service PIDS"
-kill -9 $log_collector_pid
-kill -9 $collection_roller_pid
-kill -9 $alert_engine_pid
-}
-kill_all_services
