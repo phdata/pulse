@@ -7,7 +7,7 @@ function cleanup {
   rm  -r /tmp/pulse-system-test
 }
 trap cleanup EXIT
-mkdir /tmp/foo
+mkdir /tmp/pulse-system-test
 
 export collection_roller_log="system-test/log_files/collectionroller.log"
 export alert_engine_log="system-test/log_files/alertengine.log"
@@ -21,7 +21,6 @@ collection_roller_pid=$!
 if [ -z "$collection_roller_pid" ]
 then
       echo "Collection Roller is not running"
-      killing
       exit 1
 fi
 echo "Starting alert engine....."
@@ -32,7 +31,6 @@ alert_engine_pid=$!
 if [ -z "$alert_engine_pid" ]
 then
       echo "Alert Engine is not running"
-      killing
       exit 1
 fi
 echo "Starting log collector...."
@@ -43,7 +41,6 @@ log_collector_pid=$!
 if [ -z "log_collector_pid" ]
 then
       echo "Log collector is not running"
-      killing
       exit 1
 fi
 
