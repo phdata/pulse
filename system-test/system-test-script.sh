@@ -3,7 +3,7 @@
 set -e
 source bin/env.sh
 function cleanup {
-  echo "Removing /tmp/foo"
+  echo "Removing /tmp/pulse-system-test"
   rm  -r /tmp/pulse-system-test
 }
 trap cleanup EXIT
