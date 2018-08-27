@@ -45,7 +45,7 @@ fi
 echo "Curling the Solr API"
 # Asking for edge node credentials
 read -p "Username: " USER
-query_response=$(curl -i -o - --silent -X GET -u ${SOLR_USR}:${SOLR_PWD} "http://master3.valhalla.phdata.io:8983/solr/logging-pulse-_latest/select?q=*%3A*&wt=json&indent=true")
+query_response=$(curl -i -o - --silent -X GET -u ${SOLR_USR}:${SOLR_PWD} "http://master3.valhalla.phdata.io:8983/solr/logging-pulse_latest/select?q=*%3A*&wt=json&indent=true")
 http_status_collection=$(echo "$query_response" | grep HTTP |  awk '{print $2}')
 echo $http_status_collection
 # Checking if the collection exists and if documents are collected
