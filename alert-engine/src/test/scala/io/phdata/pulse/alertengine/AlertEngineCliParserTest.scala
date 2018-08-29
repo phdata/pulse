@@ -23,7 +23,7 @@ class AlertEngineCliParserTest extends FunSuite {
   /*
    *function to set environmental variables for testing
    */
-  def setEnv(key: String, value: String): String = {
+  private def setEnv(key: String, value: String): String = {
     val field = System.getenv().getClass.getDeclaredField("m")
     field.setAccessible(true)
     val map =
@@ -31,7 +31,7 @@ class AlertEngineCliParserTest extends FunSuite {
     map.put(key, value)
   }
 
-  def unsetEnv(key: String): String = {
+  private def unsetEnv(key: String): String = {
     val field = System.getenv().getClass.getDeclaredField("m")
     field.setAccessible(true)
     val map =
