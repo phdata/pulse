@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # Stopping the script if any command fails
 set -e
-
 source bin/env.sh
+
 function cleanup {
   echo "Removing /tmp/pulse-system-test"
   rm  -r /tmp/pulse-system-test
   # killing_services
-  kill_service_af
+  kill_service
   echo "Sevices are terminated/killed"
 }
+
 trap cleanup EXIT
 mkdir -p /tmp/pulse-system-test
 
@@ -18,7 +19,7 @@ export alert_engine_log="system-test/log_files/alertengine.log"
 export log_collector_log="system-test/log_files/logcollector.log"
 export application_log="system-test/log_files/application.log"
 
-kill_service_af(){
+kill_service(){
   echo "killing service by parent ID"
   PGID=$(ps -o pgid= $$)
   kill -9 -- -$PGID
@@ -27,7 +28,6 @@ kill_service_af(){
 
 echo "Starting collection roller....."
 bin/collection-roller 2>&1> $collection_roller_log &
-
 
 echo "Starting alert engine....."
 bin/alert-engine 2>&1> $alert_engine_log &
