@@ -170,11 +170,11 @@ class AlertEngineImplTest
         null,
         new NotificationServices(mailNotificationService, slackNotificationService))
 
-    val alertrule = AlertRule("spark1query", 10, Some(10), List("mailprofile1"))
+    val alertrule  = AlertRule("spark1query", 10, Some(10), List("mailprofile1"))
     val alertrule1 = AlertRule("spark2query1", 10, Some(10), List("mailprofile1"))
     val alertrule2 = AlertRule("spark2query1", 10, Some(10), List("mailprofile1"))
-    val App1 = Application("spark1", List(alertrule), None, None)
-    val App2 = Application("spark2", List(alertrule1, alertrule2), None, None)
+    val App1       = Application("spark1", List(alertrule), None, None)
+    val App2       = Application("spark2", List(alertrule1, alertrule2), None, None)
 
     val triggeredAlerts =
       List(
