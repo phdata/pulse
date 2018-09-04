@@ -65,6 +65,9 @@ object SparkLog4jExample {
       } else {
         log.info(s"XXXXX found: " + num)
       }
+      if (num % 500 == 0) {
+        log.error(s"XXXXX error! num: " + num)
+      }
     }
 
     log.info("Shutting down the spark logging example")
