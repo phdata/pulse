@@ -50,11 +50,14 @@ echo $http_status_collection
 # Checking if the collection exists and if documents are collected
 
 if [[ "$http_status_collection" == 200 ]]; then
+
        if [[ "query_response" =~ "\"numFound\":0" ]]; then
                 echo "Records assertion in Solr collection Failed!"
+                exit 1
        else
                 echo "Records assertion in Solr collection Passed!"
        fi
 else
         echo "Records assertion in Solr collection Failed"
+        exit 1
 fi
