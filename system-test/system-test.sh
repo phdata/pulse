@@ -4,9 +4,9 @@ set -e
 source bin/env.sh
 
 function cleanup {
-  echo "Removing /tmp/pulse-system-test"
+  echo "Removing pulse-system-test from tmp directory"
   rm  -r /tmp/pulse-system-test
-  # killing services
+  # killing log-collector, collection-roller, Alert-engine, Example application.
   kill_services
   echo "Sevices are terminated/killed"
 }
@@ -48,7 +48,6 @@ http_status_collection=$(echo "$query_response" | grep HTTP |  awk '{print $2}')
 echo $http_status_collection
 
 # Checking if the collection exists and if documents are collected
-
 
 if [[ "$http_status_collection" == 200 ]]; then
 
