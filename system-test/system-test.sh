@@ -6,8 +6,8 @@ source bin/env.sh
 function cleanup {
   echo "Removing /tmp/pulse-system-test"
   rm  -r /tmp/pulse-system-test
-  # killing_services
-  kill_service
+  # killing services
+  kill_services
   echo "Sevices are terminated/killed"
 }
 
@@ -15,12 +15,12 @@ trap cleanup EXIT
 mkdir -p /tmp/pulse-system-test
 
 # Writing logs to local directory
-export collection_roller_log="system-test/log_files/collectionroller.log"
-export alert_engine_log="system-test/log_files/alertengine.log"
-export log_collector_log="system-test/log_files/logcollector.log"
+export collection_roller_log="system-test/log_files/collection_roller.log"
+export alert_engine_log="system-test/log_files/alert_engine.log"
+export log_collector_log="system-test/log_files/log_collector.log"
 export application_log="system-test/log_files/application.log"
 
-kill_service(){
+kill_services(){
   echo "killing service by parent ID"
   PGID=$(ps -o pgid= $$)
   kill -9 -- -$PGID
@@ -54,9 +54,11 @@ if [[ "$http_status_collection" == 200 ]]; then
 
        if [[ "query_response" =~ "\"numFound\":0" ]]; then
                 echo "Records assertion in Solr collection Failed!"
+                exit 1
        else
                 echo "Records assertion in Solr collection Passed!"
        fi
 else
         echo "Records assertion in Solr collection Failed"
+        exit 1
 fi

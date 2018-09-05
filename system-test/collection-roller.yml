@@ -1,5 +1,5 @@
 ---
-solrConfigSetDir: /etc/pulse-logging/solr-configs/
+solrConfigSetDir: /cloudera-integration/parcel/conf/solr-configs/
 applications:
 - name: logging-pulse-test
   solrConfigSetName: pulseconfigv2
