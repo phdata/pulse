@@ -39,8 +39,6 @@ object TestTriggers {
       case "slackWithSparkAppAndTotalNumFound12" => slackWithSparkAppAndTotalNumFound12
       case "slackWithPipeWrenchAppAndTotalNumFound14" => slackWithPipeWrenchAppAndTotalNumFound14
       case "slackWithSparkAppWithNullDocAndTotalNumFound1" => slackWithSparkAppWithNullDocAndTotalNumFound1
-      // case _                                            => slackWithSparkAppAndTotalNumFound20
-
     }
   }
 
