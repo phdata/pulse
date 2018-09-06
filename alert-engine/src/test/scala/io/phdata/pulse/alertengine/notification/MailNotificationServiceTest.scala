@@ -16,31 +16,23 @@
 
 package io.phdata.pulse.alertengine.notification
 
-import io.phdata.pulse.alertengine.{ AlertRule, MailAlertProfile, TriggeredAlert }
-import org.apache.solr.common.SolrDocument
+import io.phdata.pulse.alertengine._
 import org.scalatest.FunSuite
 
 import scala.io.Source._
 
 class MailNotificationServiceTest extends FunSuite {
 
-  val doc: SolrDocument = new SolrDocument()
-  doc.addField("id", "123")
-  doc.addField("category", "test")
-  doc.addField("timestamp", "2018-04-06 10:15:00Z")
-  doc.addField("level", "FATAL")
-  doc.addField("message", "The service is down.")
-  doc.addField("threadName", "thread3")
-  doc.addField("throwable", "NullPointerException")
+  val doc = TestSolrDocuments("fatal")
 
-  val alertrule  = AlertRule("query0000000000", 10, Some(0), List("a", "slack"))
-  val alertrule2 = AlertRule("query222222", 20, Some(0), List("a", "slack"))
+  val alertrule = TestAlertrules("slackWithRetryInterval10")
+  val alertrule2 = TestAlertrules("slackWithRetryInterval20")
 
-  val profile  = MailAlertProfile("a", List("testing@phdata.io"))
-  val profile2 = MailAlertProfile("b", List("testing1@phdata.io", "testing@phdata.io"))
+  val profile = TestMailAlertProfiles("withOneAddress")
+  val profile2 = TestMailAlertProfiles("withTwoAddresses")
 
-  val triggeredalert  = TriggeredAlert(alertrule, "Spark", Seq(doc), 23)
-  val triggeredalert2 = TriggeredAlert(alertrule2, "PipeWrench", Seq(doc), 15)
+  val triggeredalert = TestTriggers("slackWithSparkAppAndTotalNumFound23")
+  val triggeredalert2 = TestTriggers("slackWithSparkAppAndTotalNumFound15")
 
   test("sending one email to an address") {
     if (new java.io.File("alert-engine/scripts/mail-password.txt").exists) {
