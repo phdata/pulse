@@ -44,7 +44,7 @@ echo "Curling the Solr API"
 
 query_response=$(curl -i -o - --silent -X GET -u ${SOLR_USR}:${SOLR_PWD} "http://master3.valhalla.phdata.io:8983/solr/logging-pulse-test_latest/select?q=*%3A*&wt=json&indent=true")
 http_status_collection=$(echo "$query_response" | grep HTTP |  awk '{print $2}')
-
+numfound=$(echo $query_response | grep "numFound" |awk -F  "," '/1/ {print $8}'|awk -F':' '{print $3}')
 echo $http_status_collection
 
 # Checking if the collection exists and if documents are collected
@@ -52,7 +52,7 @@ echo $http_status_collection
 
 if [[ "$http_status_collection" == 200 ]]; then
 
-       if [[ "query_response" =~ "\"numFound\":0" ]]; then
+       if [[ "$numfound" == 0 ]]; then
                 echo "Records assertion in Solr collection Failed!"
                 exit 1
        else
