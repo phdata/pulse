@@ -18,21 +18,14 @@ package io.phdata.pulse.alertengine.notification
 
 import java.io.File
 
-import io.phdata.pulse.alertengine.{ AlertRule, SlackAlertProfile, TriggeredAlert }
+import io.phdata.pulse.alertengine.{AlertRule, SlackAlertProfile, TestObjectGenerator, TriggeredAlert}
 import org.apache.solr.common.SolrDocument
 import org.scalatest.FunSuite
 
 import scala.io.Source.fromFile
 
 class SlackNotificationServiceTest extends FunSuite {
-  val doc: SolrDocument = new SolrDocument()
-  doc.addField("id", "123")
-  doc.addField("category", "test")
-  doc.addField("timestamp", "2018-04-06 10:15:00")
-  doc.addField("level", "FATAL")
-  doc.addField("message", "The service is down.")
-  doc.addField("threadName", "thread3")
-  doc.addField("throwable", "NullPointerException")
+  val doc: SolrDocument = TestObjectGenerator.solrDocumentTestObject(threadName = "OXB Thread")
 
   val path         = "alert-engine/scripts/slack-webhook-url.txt"
   val slackUrlFile = new File(path)
