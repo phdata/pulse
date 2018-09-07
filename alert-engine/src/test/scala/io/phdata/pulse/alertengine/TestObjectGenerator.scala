@@ -26,7 +26,8 @@ import org.apache.solr.common.SolrDocument
 object TestObjectGenerator {
 
   /**
-    * solrDocumentTestObject is used for generating defualt and custom solr document test objects.
+    * solrDocumentTestObject is used for generating default and custom solr document test objects
+    * based on parameters passed : if no parameter is passed it returns a default solr document.
     *
     * @param id
     * @param category
