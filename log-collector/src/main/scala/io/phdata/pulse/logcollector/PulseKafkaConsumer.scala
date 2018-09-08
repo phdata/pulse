@@ -12,7 +12,6 @@ import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.{ JsonSupport, SolrService }
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ListBuffer
 import spray.json._
 
 /**
@@ -21,7 +20,7 @@ import spray.json._
  * returns the value
  * @param solrService
  */
-class KafkaConsumerPulse(solrService: SolrService) extends JsonSupport with LazyLogging {
+class PulseKafkaConsumer(solrService: SolrService) extends JsonSupport with LazyLogging {
   implicit val solrActorSystem: ActorSystem             = ActorSystem()
   implicit val solrActorMaterializer: ActorMaterializer = ActorMaterializer.create(solrActorSystem)
 
@@ -32,37 +31,16 @@ class KafkaConsumerPulse(solrService: SolrService) extends JsonSupport with Lazy
 
     consumer.subscribe(Collections.singletonList(topic))
 
-    var recordList = new ListBuffer[String]
-
     while (true) {
       val records: ConsumerRecords[String, String] = consumer.poll(100)
       for (record <- records.asScala) {
-        println("KAFKA: Consuming " + record.value() + " from topic: " + topic)
-        recordList += record.value()
+        logger.trace("KAFKA: Consuming " + record.value() + " from topic: " + topic)
         val logEvent = record
           .value()
           .parseJson
           .convertTo[LogEvent]
-        solrInputStream ! (logEvent.application.get, logEvent) // write messages onto our solr stream
+        solrInputStream ! (logEvent.application.get, logEvent)
       }
     }
-  }
-
-  def consumeMessage(consumerProperties: Properties, topic: String): LogEvent = {
-
-    val consumer = new KafkaConsumer[String, String](consumerProperties)
-
-    consumer.subscribe(Collections.singletonList(topic))
-
-    var recordList = new ListBuffer[String]
-
-    while (recordList.isEmpty) {
-      val records: ConsumerRecords[String, String] = consumer.poll(100)
-      for (record <- records.asScala) {
-        println("KAFKA: Consuming " + record.value() + " from topic " + topic)
-        recordList += record.value()
-      }
-    }
-    recordList.head.parseJson.convertTo[LogEvent]
   }
 }

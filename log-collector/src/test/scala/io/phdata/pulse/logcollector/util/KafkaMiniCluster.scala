@@ -3,16 +3,16 @@
 package io.phdata.pulse.logcollector.util
 
 import java.io.File
-import java.net.{InetSocketAddress, Socket}
+import java.net.{ InetSocketAddress, Socket }
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Properties
 
 import com.typesafe.scalalogging.LazyLogging
-import kafka.server.{KafkaConfig, KafkaServerStartable}
+import kafka.server.{ KafkaConfig, KafkaServerStartable }
 import org.apache.commons.io.FileUtils
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import org.apache.zookeeper.server.{ServerCnxnFactory, ZooKeeperServer}
+import org.apache.kafka.clients.producer.{ KafkaProducer, ProducerRecord, ProducerConfig}
+import org.apache.zookeeper.server.{ ServerCnxnFactory, ZooKeeperServer }
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 
 case class ZooKafkaConfig(
@@ -48,19 +48,13 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
     // Produces single messages
     val kafkaProducerProps = new Properties()
 
-    kafkaProducerProps.put("bootstrap.servers", "localhost:11111")
-    kafkaProducerProps.put("key.serializer",
-                           "org.apache.kafka.common.serialization.StringSerializer")
-    kafkaProducerProps.put("value.serializer",
-                           "org.apache.kafka.common.serialization.StringSerializer")
+    kafkaProducerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:11111")
+    kafkaProducerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
+    kafkaProducerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
 
     val producer = new KafkaProducer[String, String](kafkaProducerProps)
 
     val record = new ProducerRecord[String, String](topic, message)
-
-    println(
-      "KAFKA: Producing " + record
-        .value() + " to topic: " + topic + " on broker: " + config.kafkaBroker)
 
     producer.send(record)
 
@@ -71,20 +65,14 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
     // Produces multiple messages
     val kafkaProducerProps = new Properties()
 
-    kafkaProducerProps.put("bootstrap.servers", "localhost:11111")
-    kafkaProducerProps.put("key.serializer",
-                           "org.apache.kafka.common.serialization.StringSerializer")
-    kafkaProducerProps.put("value.serializer",
-                           "org.apache.kafka.common.serialization.StringSerializer")
+    kafkaProducerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:11111")
+    kafkaProducerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
+    kafkaProducerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
 
     val producer = new KafkaProducer[String, String](kafkaProducerProps)
 
     messages.foreach(msg => {
       val record = new ProducerRecord[String, String](topic, msg)
-
-      println(
-        "KAFKA: Producing " + record
-          .value() + " to topic: " + topic + " on broker: " + config.kafkaBroker)
 
       producer.send(record)
     })
@@ -112,12 +100,12 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
       //Start local Kafka broker
       val kafkaServer = new KafkaServerStartable(kafkaConf)
 
-      println("KAFKA: Starting Kafka on port: " + config.kafkaBrokerPort)
+      logger.trace("KAFKA: Starting Kafka on port: " + config.kafkaBrokerPort)
       kafkaServer.startup()
     }
 
     override def close: Unit = {
-      println("Stopping Kafka...")
+      logger.trace("Stopping Kafka...")
       kafkaServer.shutdown()
     }
   }
@@ -137,14 +125,14 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
       zooKeeperServer.setMaxSessionTimeout(config.zookeeperMaxSessionTimeout)
       val cnxnFactory = ServerCnxnFactory.createFactory()
       cnxnFactory.configure(new InetSocketAddress(config.zookeeperPort), 10)
-      println("Starting Zookeeper on port: " + config.zookeeperPort)
+      logger.trace("Starting Zookeeper on port: " + config.zookeeperPort)
       cnxnFactory.startup(zooKeeperServer)
       cnxnFactory.join()
     }
 
     override def close: Unit =
       if (zooKeeperServer != null) {
-        println("Stopping Zookeeper...")
+        logger.trace("Stopping Zookeeper...")
         zooKeeperServer.shutdown()
       }
   }
