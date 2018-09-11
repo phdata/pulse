@@ -6,21 +6,21 @@ In Arcadia Enterprise, you can import dashboards exported from another system.
 All you need the is appropriate JSON file that captures the definitions of these visual artifacts and all their dpendencies (such as datasets and custom styles).
 
 1. Click **Data** in the top navigation menu
-2. Select the connection(`Apache Solr connection`) where to import the artifacts.\
+2. Select the connection(`Apache Solr connection`), where to import the artifacts.\
 We selected **Solr1**, because that is name of our solr connection created in Arcadia.
 3. At the top of the screen, click the  (supplemental) menu.
 4. In the  (supplemental) menu, click the **Import Visual Artifacts** option.\
 \
-![import visual artifact](images/)
+![import visual artifact](images/import-visual-artifact.png)
 
 5. The **Import Visual Artifacts** window modal appears.
 6. Click **Choose File**.\
 \
 ![choose file](images/choose-file.png)
 
-7. Select the backup file in your file system. Here, we are getting `visuals_only_param_population.json`, the file created in [Exporting Dashboards](http://documentation.arcadiadata.com/4.3.0.0/pages/topics/export-dash.html#export-dash).\
+7. Select the exported file in your file system. Here, we are getting `Pulse.json`, the file created in [Exporting Dashboards](http://documentation.arcadiadata.com/4.3.0.0/pages/topics/export-dash.html#export-dash).\
 \
-![image](images/)
+![image](images/choose-pulse.png)
 
 8. In the updated **Import Visual Artifacts** modal, notice the three import options:
 
