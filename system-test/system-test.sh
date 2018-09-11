@@ -22,8 +22,8 @@ export application_log="system-test/log_files/application.log"
 
 kill_services(){
   echo "killing service by parent ID"
-  PGID=$(ps -o pgid= $$)
-  kill -9 -- -$PGID
+  PGID=$(ps -o pgid=$$)
+  for pid in $PGID; do kill -9 -$pid; done
   echo "kill service end"
 }
 
