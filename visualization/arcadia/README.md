@@ -1,6 +1,6 @@
 # Arcadia Data
 
-##Importing Dashboard
+## Importing Dashboard
 
 In Arcadia Enterprise, you can import dashboards exported from another system. 
 All you need the is appropriate JSON file that captures the definitions of these visual artifacts and all their dpendencies (such as datasets and custom styles).
@@ -18,7 +18,7 @@ We selected **Solr1**, because that is name of our solr connection created in Ar
 \
 ![choose file](images/choose-file.png)
 
-7. Select the exported file in your file system. Here, we are getting `Pulse.json`, the file created in [Exporting Dashboards](http://documentation.arcadiadata.com/4.3.0.0/pages/topics/export-dash.html#export-dash).\
+7. Select the exported dashboard JSON file in your file system. Here, we are getting `Pulse.json`, the file created in [Exporting Dashboards](http://documentation.arcadiadata.com/4.3.0.0/pages/topics/export-dash.html#export-dash).\
 \
 ![choose pulse](images/choose-pulse.png)
 
@@ -58,3 +58,4 @@ In the list view of the catalog, the dashboard appears at the top of the list; n
 12. Lastly, if you examine the same visual in edit mode, you can confirm that it is not part of any dashboard in the new system.
 \
 ![image](images/examine-visuals.png)
+13. Dataset connections, Solr collection table names, Visuals are all editable for customization.
