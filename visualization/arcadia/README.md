@@ -36,7 +36,7 @@ We selected **Solr1**, because that is name of our solr connection created in Ar
     This is a 'sanity check' that confirms that tables suitable for the incoming dataset(s) exist on the system. This means that the database and tables have the same names on the source and target systems.\
    After making the appropriate selections, click **Import**.\
    \
-   ![image](images/choose-pulse.png)
+   ![choose pulse](images/choose-pulse.png)
 9. After processing the import `pulse.json` file, Arcadia Enterprise opens the Import interface to show its visual artifacts. Here, it displays the eight visuals and the dataset that used for creating dashboard.
 \
 Notice also that the **Planned Action** column shows that this is a new import for all artifacts. At this point, none of them have an assigned ID.\
@@ -57,5 +57,5 @@ In the list view of the catalog, the dashboard appears at the top of the list; n
 ![image](images/check-import-success.png)
 12. Lastly, if you examine the same visual in edit mode, you can confirm that it is not part of any dashboard in the new system.
 \
-![image](images/examine-visuals.png)
+![visual examine](images/examine-visuals.png)
 13. Dataset connections, Solr collection table names, Visuals are all editable for customization.
