@@ -3,7 +3,7 @@
 ## Importing Dashboard
 
 In Arcadia Enterprise, you can import dashboards exported from another system. 
-All you need the is appropriate JSON file that captures the definitions of these visual artifacts and all their dpendencies (such as datasets and custom styles).
+All you need is appropriate JSON file that captures the definitions of these visual artifacts and all their dpendencies (such as datasets and custom styles).
 
 1. Click **Data** in the top navigation menu
 2. Select the connection(`Apache Solr connection`), where to import the artifacts.\
@@ -18,7 +18,7 @@ We selected **Solr1**, because that is name of our solr connection created in Ar
 \
 ![choose file](images/choose-file.png)
 
-7. Select the exported dashboard JSON file in your file system. Here, we are getting `Pulse.json`, the file created in [Exporting Dashboards](http://documentation.arcadiadata.com/4.3.0.0/pages/topics/export-dash.html#export-dash).\
+7. Select the exported dashboard JSON file in your file system. Here, we are getting `pulse.json`, the file created in [Exporting Dashboards](http://documentation.arcadiadata.com/4.3.0.0/pages/topics/export-dash.html#export-dash).\
 \
 ![choose pulse](images/choose-pulse.png)
 
@@ -37,7 +37,7 @@ We selected **Solr1**, because that is name of our solr connection created in Ar
    After making the appropriate selections, click **Import**.\
    \
    ![image](images/choose-pulse.png)
-9. After processing the import `Pulse.json` file, Arcadia Enterprise opens the Import interface to show its visual artifacts. Here, it displays the eight visuals and the dataset that used for creating dashboard.
+9. After processing the import `pulse.json` file, Arcadia Enterprise opens the Import interface to show its visual artifacts. Here, it displays the eight visuals and the dataset that used for creating dashboard.
 \
 Notice also that the **Planned Action** column shows that this is a new import for all artifacts. At this point, none of them have an assigned ID.\
 \
