@@ -18,18 +18,13 @@ package io.phdata.pulse.alertengine
 
 import java.io.File
 
-import io.phdata.pulse.alertengine.notification.{
-  MailNotificationService,
-  NotificationServices,
-  SlackNotificationService
-}
-import io.phdata.pulse.common.domain.LogEvent
-import io.phdata.pulse.common.{ DocumentConversion, SolrService }
-import io.phdata.pulse.testcommon.{ BaseSolrCloudTest, TestUtil }
+import io.phdata.pulse.alertengine.notification.{MailNotificationService, NotificationServices, SlackNotificationService}
+import io.phdata.pulse.common.{DocumentConversion, SolrService}
+import io.phdata.pulse.testcommon.{BaseSolrCloudTest, TestUtil}
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 import org.mockito.Mockito
-import org.scalatest.{ BeforeAndAfterEach, FunSuite }
 import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
 class AlertEngineImplTest
     extends FunSuite
@@ -65,25 +60,8 @@ class AlertEngineImplTest
     solrClient.setDefaultCollection(alias)
     val result = solrService.createCollection(alias, 1, 1, CONF_NAME, null)
 
-    val document = DocumentConversion.toSolrDocument(
-      LogEvent(Some("id"),
-               "ALERT",
-               "1970-01-01T00:00:00Z",
-               "ERROR",
-               "message",
-               "thread oxb",
-               Some("Exception in thread main"),
-               None))
-
-    val documentError = DocumentConversion.toSolrDocument(
-      LogEvent(None,
-               "ERROR",
-               "1972-01-01T22:00:00Z",
-               "ERROR2",
-               "message2",
-               "thread2 oxb",
-               Some("Exception in thread main2"),
-               None))
+    val document = DocumentConversion.toSolrDocument(TestObjectGenerator.logEventTestObject())
+    val documentError = DocumentConversion.toSolrDocument(TestObjectGenerator.logEventTestObject(level = "ERROR2", message = "message2"))
 
     solrClient.add(document)
 

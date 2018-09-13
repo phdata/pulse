@@ -16,6 +16,7 @@
 
 package io.phdata.pulse.alertengine
 
+import io.phdata.pulse.common.domain.LogEvent
 import org.apache.solr.common.SolrDocument
 
 /**
@@ -60,4 +61,37 @@ object TestObjectGenerator {
 
     doc
   }
+
+  /**
+    * Method for creating logEvent test ojects
+    *
+    * @param id
+    * @param category
+    * @param timestamp
+    * @param level
+    * @param message
+    * @param threadName
+    * @param throwable
+    * @param properties
+    * @return LogEvent
+    */
+  def logEventTestObject(id: Option[String] = Some("id"),
+                         category: String = "ALERT",
+                         timestamp: String = "1970-01-01T00:00:00Z",
+                         level: String = "ERROR",
+                         message: String = "message",
+                         threadName: String = "thread oxb",
+                         throwable: Option[String] = Some("Exception in thread main"),
+                         properties: Option[Map[String, String]] = None): LogEvent = {
+    LogEvent(id,
+      category,
+      timestamp,
+      level,
+      message,
+      threadName,
+      throwable,
+      properties)
+  }
+
+
 }
