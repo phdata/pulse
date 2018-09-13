@@ -16,7 +16,7 @@
 
 package io.phdata.pulse.alertengine.notification
 
-import io.phdata.pulse.alertengine.{AlertRule, MailAlertProfile, TestObjectGenerator, TriggeredAlert}
+import io.phdata.pulse.alertengine.TestObjectGenerator
 import org.apache.solr.common.SolrDocument
 import org.scalatest.FunSuite
 
@@ -25,14 +25,14 @@ import scala.io.Source._
 class MailNotificationServiceTest extends FunSuite {
   val doc: SolrDocument = TestObjectGenerator.solrDocumentTestObject()
 
-  val alertrule  = AlertRule("query0000000000", 10, Some(0), List("a", "slack"))
-  val alertrule2 = AlertRule("query222222", 20, Some(0), List("a", "slack"))
+  val alertrule = TestObjectGenerator.alertRuleTestObject()
+  val alertrule2 = TestObjectGenerator.alertRuleTestObject(retryInterval = 20)
 
-  val profile  = MailAlertProfile("a", List("testing@phdata.io"))
-  val profile2 = MailAlertProfile("b", List("testing1@phdata.io", "testing@phdata.io"))
+  val profile = TestObjectGenerator.mailAlertProfileTestObject(name = "a", addresses = List("testing@phdata.io"))
+  val profile2 = TestObjectGenerator.mailAlertProfileTestObject(name = "b", addresses = List("testing1@phdata.io", "testing@phdata.io"))
 
-  val triggeredalert  = TriggeredAlert(alertrule, "Spark", Seq(doc), 23)
-  val triggeredalert2 = TriggeredAlert(alertrule2, "PipeWrench", Seq(doc), 15)
+  val triggeredalert = TestObjectGenerator.triggeredAlertTestObject(applicationName = "Spark", totalNumFound = 23)
+  val triggeredalert2 = TestObjectGenerator.triggeredAlertTestObject(applicationName = "Pipewrench", totalNumFound = 15)
 
   test("sending one email to an address") {
     if (new java.io.File("alert-engine/scripts/mail-password.txt").exists) {

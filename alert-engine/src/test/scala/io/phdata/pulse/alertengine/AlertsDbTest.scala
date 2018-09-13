@@ -18,7 +18,7 @@ package io.phdata.pulse.alertengine
 
 import java.time.ZonedDateTime
 
-import org.scalatest.{ BeforeAndAfterEach, FunSuite }
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
 class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
   override def beforeEach(): Unit = {
@@ -27,7 +27,7 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("adding a duplicate alert to the db updates the sleep time") {
-    val alert      = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
+    val alert = TestObjectGenerator.alertRuleTestObject()
     val firstTime  = ZonedDateTime.now()
     val secondTime = firstTime.plusMinutes(6)
 
@@ -37,14 +37,14 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("notify on an unseen alert") {
-    val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
+    val alert = TestObjectGenerator.alertRuleTestObject()
     val now   = ZonedDateTime.now()
 
     assertResult(true)(AlertsDb.shouldCheck("app1", alert, now))
   }
 
   test("don't notify inside alert window") {
-    val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
+    val alert = TestObjectGenerator.alertRuleTestObject()
     val now   = ZonedDateTime.now()
 
     AlertsDb.markTriggered("app1", alert, now)
@@ -53,7 +53,7 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("notify on second application with the same alert rule") {
-    val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
+    val alert = TestObjectGenerator.alertRuleTestObject()
     val now   = ZonedDateTime.now()
 
     AlertsDb.markTriggered("app1", alert, now)
@@ -62,7 +62,7 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("don't alert on an alert that was just checked") {
-    val alert = AlertRule("query", 1, Some(0), List("tony@phdata.io"))
+    val alert = TestObjectGenerator.alertRuleTestObject()
     val now   = ZonedDateTime.now()
 
     AlertsDb.markTriggered("app1", alert, now)

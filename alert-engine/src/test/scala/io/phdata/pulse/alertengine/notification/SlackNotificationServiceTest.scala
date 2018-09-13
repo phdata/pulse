@@ -18,7 +18,7 @@ package io.phdata.pulse.alertengine.notification
 
 import java.io.File
 
-import io.phdata.pulse.alertengine.{AlertRule, SlackAlertProfile, TestObjectGenerator, TriggeredAlert}
+import io.phdata.pulse.alertengine.TestObjectGenerator
 import org.apache.solr.common.SolrDocument
 import org.scalatest.FunSuite
 
@@ -30,16 +30,16 @@ class SlackNotificationServiceTest extends FunSuite {
   val path         = "alert-engine/scripts/slack-webhook-url.txt"
   val slackUrlFile = new File(path)
 
-  val alertrule  = AlertRule("query0000000000", 10, Some(0), List("a", "slack"))
-  val alertrule2 = AlertRule("query222222", 20, Some(0), List("a", "slack"))
+  val alertrule = TestObjectGenerator.alertRuleTestObject()
+  val alertrule2 = TestObjectGenerator.alertRuleTestObject(retryInterval = 20)
 
-  val triggeredalert  = TriggeredAlert(alertrule, "Spark", Seq(doc), 12)
-  val triggeredalert2 = TriggeredAlert(alertrule2, "PipeWrench", Seq(doc), 14)
+  val triggeredalert = TestObjectGenerator.triggeredAlertTestObject(totalNumFound = 12)
+  val triggeredalert2 = TestObjectGenerator.triggeredAlertTestObject(totalNumFound = 14)
 
   test("sending a triggered alert to a slack profile") {
     if (slackUrlFile.exists) {
       val token        = fromFile(path).getLines.mkString
-      val profile      = SlackAlertProfile("a", token)
+      val profile = TestObjectGenerator.slackAlertProfile(name = "a", url = token)
       val slackService = new SlackNotificationService()
       slackService.notify(Seq(triggeredalert), profile)
     } else {
@@ -50,7 +50,7 @@ class SlackNotificationServiceTest extends FunSuite {
   test("sending two triggered alerts to a slack profile") {
     if (slackUrlFile.exists) {
       val token        = fromFile(path).getLines.mkString
-      val profile      = SlackAlertProfile("b", token)
+      val profile = TestObjectGenerator.slackAlertProfile(name = "b", url = token)
       val slackService = new SlackNotificationService()
       slackService.notify(Seq(triggeredalert, triggeredalert2), profile)
     } else {
