@@ -66,6 +66,7 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     val secondTime  = initialTime.plusDays(1)
     val thirdTime   = initialTime.plusDays(2)
     val fourthTime  = initialTime.plusDays(3)
+    val fifthTime   = initialTime.plusDays(4)
 
     val collectionRoller = new CollectionRoller(solrService, initialTime)
 
@@ -74,7 +75,7 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     collectionRoller.run(List(app))
     collectionRoller.rollApplications(List(app))
 
-    val times = List(secondTime, thirdTime, fourthTime)
+    val times = List(secondTime, thirdTime, fourthTime, fifthTime)
 
     times foreach { timestamp =>
       val collectionRoller =
@@ -91,13 +92,15 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
         .listCollections()
         .contains(s"${app.name}_${secondTime.toInstant.getEpochSecond}"))
     assert(
-      solrService.listCollections().contains(s"${app.name}_${thirdTime.toInstant.getEpochSecond}"))
+      !solrService.listCollections().contains(s"${app.name}_${thirdTime.toInstant.getEpochSecond}"))
     assert(
       solrService.listCollections().contains(s"${app.name}_${fourthTime.toInstant.getEpochSecond}"))
+    assert(
+      solrService.listCollections().contains(s"${app.name}_${fifthTime.toInstant.getEpochSecond}"))
 
     assertResult(
-      Some(Set(s"${app.name}_${fourthTime.toInstant.getEpochSecond}",
-               s"${app.name}_${thirdTime.toInstant.getEpochSecond}")))(
+      Some(Set(s"${app.name}_${fifthTime.toInstant.getEpochSecond}",
+               s"${app.name}_${fourthTime.toInstant.getEpochSecond}")))(
       solrService.getAlias(s"${app.name}_all"))
   }
 
