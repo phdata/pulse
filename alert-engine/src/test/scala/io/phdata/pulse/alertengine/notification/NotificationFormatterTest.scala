@@ -16,23 +16,15 @@
 
 package io.phdata.pulse.alertengine.notification
 
-import io.phdata.pulse.alertengine.{ AlertRule, TriggeredAlert }
-import org.apache.solr.common.SolrDocument
+import io.phdata.pulse.alertengine._
 import org.scalatest.FunSuite
 
 class NotificationFormatterTest extends FunSuite {
-  val doc: SolrDocument = new SolrDocument()
-  doc.addField("id", "1970-01-01T00:00:00Z")
-  doc.addField("category", "test")
-  doc.addField("timestamp", "2018-04-06 10:15:00Z")
-  doc.addField("level", "FATAL")
-  doc.addField("message", "The service is down.")
-  doc.addField("threadName", "thread3")
-  doc.addField("throwable", "NullPointerException")
 
-  val alertrule = AlertRule("query0000000000", 10, Some(0), List("a", "slack"))
 
-  val triggeredalert = TriggeredAlert(alertrule, "Spark", Seq(doc), 20)
+  val doc = TestSolrDocuments("fatal")
+  val alertrule = TestAlertrules("slackWithRetryInterval10")
+  val triggeredalert = TestTriggers("slackWithSparkAppAndTotalNumFound20")
 
   test("format subject content") {
     assertResult("Pulse alert triggered for 'Spark'")(

@@ -18,18 +18,13 @@ package io.phdata.pulse.alertengine
 
 import java.io.File
 
-import io.phdata.pulse.alertengine.notification.{
-  MailNotificationService,
-  NotificationServices,
-  SlackNotificationService
-}
-import io.phdata.pulse.common.domain.LogEvent
-import io.phdata.pulse.common.{ DocumentConversion, SolrService }
-import io.phdata.pulse.testcommon.{ BaseSolrCloudTest, TestUtil }
+import io.phdata.pulse.alertengine.notification.{MailNotificationService, NotificationServices, SlackNotificationService}
+import io.phdata.pulse.common.{DocumentConversion, SolrService}
+import io.phdata.pulse.testcommon.{BaseSolrCloudTest, TestUtil}
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 import org.mockito.Mockito
-import org.scalatest.{ BeforeAndAfterEach, FunSuite }
 import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
 class AlertEngineImplTest
     extends FunSuite
@@ -65,25 +60,9 @@ class AlertEngineImplTest
     solrClient.setDefaultCollection(alias)
     val result = solrService.createCollection(alias, 1, 1, CONF_NAME, null)
 
-    val document = DocumentConversion.toSolrDocument(
-      LogEvent(Some("id"),
-               "ALERT",
-               "1970-01-01T00:00:00Z",
-               "ERROR",
-               "message",
-               "thread oxb",
-               Some("Exception in thread main"),
-               None))
+    val document = DocumentConversion.toSolrDocument(TestLogEvents("alertError"))
+    val documentError = DocumentConversion.toSolrDocument(TestLogEvents("errorError2"))
 
-    val documentError = DocumentConversion.toSolrDocument(
-      LogEvent(None,
-               "ERROR",
-               "1972-01-01T22:00:00Z",
-               "ERROR2",
-               "message2",
-               "thread2 oxb",
-               Some("Exception in thread main2"),
-               None))
 
     solrClient.add(document)
 
@@ -111,7 +90,7 @@ class AlertEngineImplTest
   }
 
   test("trigger alert when threshold is set to '-1' and there are no results") {
-    val alert = AlertRule("category: DOESNOTEXIST", 1, Some(-1), List("tony@phdata.io"))
+    val alert = TestAlertrules("emailWithRetryInterval1")
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -123,7 +102,7 @@ class AlertEngineImplTest
   }
 
   test("don't match non alert") {
-    val alert = AlertRule("id: notexists", 1, Some(0), List("tony@phdata.io"))
+    val alert = TestAlertrules("emailWithRetryInterval1AndQueryIsNotexists")
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -132,7 +111,7 @@ class AlertEngineImplTest
   }
 
   test("Mail profile is matched from AlertRule to Application") {
-    val mailAlertProfile = MailAlertProfile("mailprofile1", List("person@phdata.io"))
+    val mailAlertProfile = TestMailAlertProfiles("withAddressMailProfile1")
 
     val alertrule = AlertRule("id: id", 1, Some(0), List("mailprofile1"))
     val engine =
@@ -151,11 +130,12 @@ class AlertEngineImplTest
     val profileName       = "slackProfile1"
     val slackAlertProfile = SlackAlertProfile(profileName, "https://slack.com")
 
-    val alertrule = AlertRule("id: id", 1, Some(0), List(profileName))
+    val alertrule = TestAlertrules("emailWithRetryInterval1AndQueryIsId")
     val engine =
       new AlertEngineImpl(null, new NotificationServices(null, slackNotificationService))
 
-    val triggeredalert  = TriggeredAlert(alertrule, "Spark", null, 1)
+    val triggeredalert = TestTriggers("slackWithSparkAppWithNullDocAndTotalNumFound1")
+
     val app             = Application("a", List(alertrule), None, Some(List(slackAlertProfile)))
     val triggeredAlerts = List(triggeredalert)
 
@@ -170,9 +150,12 @@ class AlertEngineImplTest
         null,
         new NotificationServices(mailNotificationService, slackNotificationService))
 
-    val alertrule  = AlertRule("spark1query", 10, Some(10), List("mailprofile1"))
-    val alertrule1 = AlertRule("spark2query1", 10, Some(10), List("mailprofile1"))
-    val alertrule2 = AlertRule("spark2query1", 10, Some(10), List("mailprofile1"))
+
+    val alertrule = TestAlertrules("emailWithRetryInterval1AndQueryIsSpark1query")
+    val alertrule1 = TestAlertrules("emailWithRetryInterval1AndQueryIsSpark1query1")
+    val alertrule2 = TestAlertrules("emailWithRetryInterval1AndQueryIsSpark1query1")
+
+
     val App1       = Application("spark1", List(alertrule), None, None)
     val App2       = Application("spark2", List(alertrule1, alertrule2), None, None)
 
@@ -193,9 +176,9 @@ class AlertEngineImplTest
   }
 
   test("Silenced applications alerts aren't checked") {
-    val mailAlertProfile = MailAlertProfile("mailprofile1", List("person@phdata.io"))
+    val mailAlertProfile = TestMailAlertProfiles("withAddressMailProfile1")
 
-    val alertrule = AlertRule("id: id", 1, Some(0), List("mailprofile1"))
+    val alertrule = TestAlertrules("emailWithRetryInterval1AndQueryIsSpark1query")
 
     val activeApp        = Application("activeApp", List(alertrule), None, None)
     val silencedApp      = Application("silencedApp", List(alertrule), None, None)
@@ -211,7 +194,7 @@ class AlertEngineImplTest
   }
 
   test("mark alert triggered on results found > 0") {
-    val alert = AlertRule("category: ERROR", 1, Some(0), List("testing@tester.com"))
+    val alert = TestAlertrules("emailWithRetryInterval1")
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -221,7 +204,8 @@ class AlertEngineImplTest
   }
 
   test("mark alert triggered when results are found") {
-    val alert = AlertRule("category: ERROR", 1, Some(-1), List("tony@phdata.io"))
+    val alert = TestAlertrules("emailWithRetryInterval1")
+
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -231,7 +215,8 @@ class AlertEngineImplTest
   }
 
   test("mark alert triggered when no results are found") {
-    val alert = AlertRule("category: DOESNOTEXIST", 1, Some(-1), List("tony@phdata.io"))
+    val alert = TestAlertrules("emailWithRetryInterval1")
+
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -241,7 +226,8 @@ class AlertEngineImplTest
   }
 
   test("don't mark alert triggered when no results are found") {
-    val alert = AlertRule("category: DOESNOTEXIST", 1, Some(1), List("tony@phdata.io"))
+    val alert = TestAlertrules("emailWithRetryInterval1AndresultThreshold1")
+
     val engine =
       new AlertEngineImpl(
         solrClient,

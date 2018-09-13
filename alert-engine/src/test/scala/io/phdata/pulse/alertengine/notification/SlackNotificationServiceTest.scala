@@ -18,30 +18,23 @@ package io.phdata.pulse.alertengine.notification
 
 import java.io.File
 
-import io.phdata.pulse.alertengine.{ AlertRule, SlackAlertProfile, TriggeredAlert }
-import org.apache.solr.common.SolrDocument
+import io.phdata.pulse.alertengine._
 import org.scalatest.FunSuite
 
 import scala.io.Source.fromFile
 
 class SlackNotificationServiceTest extends FunSuite {
-  val doc: SolrDocument = new SolrDocument()
-  doc.addField("id", "123")
-  doc.addField("category", "test")
-  doc.addField("timestamp", "2018-04-06 10:15:00")
-  doc.addField("level", "FATAL")
-  doc.addField("message", "The service is down.")
-  doc.addField("threadName", "thread3")
-  doc.addField("throwable", "NullPointerException")
+
+  val doc = TestSolrDocuments("fatal")
 
   val path         = "alert-engine/scripts/slack-webhook-url.txt"
   val slackUrlFile = new File(path)
 
-  val alertrule  = AlertRule("query0000000000", 10, Some(0), List("a", "slack"))
-  val alertrule2 = AlertRule("query222222", 20, Some(0), List("a", "slack"))
+  val alertrule = TestAlertrules("slackWithRetryInterval10")
+  val alertrule2 = TestAlertrules("slackWithRetryInterval20")
 
-  val triggeredalert  = TriggeredAlert(alertrule, "Spark", Seq(doc), 12)
-  val triggeredalert2 = TriggeredAlert(alertrule2, "PipeWrench", Seq(doc), 14)
+  val triggeredalert = TestTriggers("slackWithSparkAppAndTotalNumFound12")
+  val triggeredalert2 = TestTriggers("slackWithPipeWrenchAppAndTotalNumFound14")
 
   test("sending a triggered alert to a slack profile") {
     if (slackUrlFile.exists) {
