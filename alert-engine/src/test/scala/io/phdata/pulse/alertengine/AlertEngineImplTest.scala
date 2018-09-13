@@ -60,8 +60,8 @@ class AlertEngineImplTest
     solrClient.setDefaultCollection(alias)
     val result = solrService.createCollection(alias, 1, 1, CONF_NAME, null)
 
-    val document = DocumentConversion.toSolrDocument(TestObjectGenerator.logEventTestObject())
-    val documentError = DocumentConversion.toSolrDocument(TestObjectGenerator.logEventTestObject(id = None, category = "ERROR", level = "ERROR2", message = "message2", throwable = Some("Exception in thread main")))
+    val document = DocumentConversion.toSolrDocument(TestObjectGenerator.logEvent())
+    val documentError = DocumentConversion.toSolrDocument(TestObjectGenerator.logEvent(id = None, category = "ERROR", level = "ERROR2", message = "message2", throwable = Some("Exception in thread main")))
 
     solrClient.add(document)
 
@@ -75,7 +75,7 @@ class AlertEngineImplTest
   }
 
   test("get active alert") {
-    val a = TestObjectGenerator.alertRuleTestObject(query = "category: ERROR", retryInterval = 1, resultThreshold = Some(1), alertProfiles = List("test@phdata.io"))
+    val a = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1, resultThreshold = Some(1), alertProfiles = List("test@phdata.io"))
 
     val engine =
       new AlertEngineImpl(
@@ -90,7 +90,7 @@ class AlertEngineImplTest
   }
 
   test("trigger alert when threshold is set to '-1' and there are no results") {
-    val alert = TestObjectGenerator.alertRuleTestObject(resultThreshold = Some(-1))
+    val alert = TestObjectGenerator.alertRule(resultThreshold = Some(-1))
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -102,7 +102,7 @@ class AlertEngineImplTest
   }
 
   test("don't match non alert") {
-    val alert = TestObjectGenerator.alertRuleTestObject()
+    val alert = TestObjectGenerator.alertRule()
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -111,13 +111,13 @@ class AlertEngineImplTest
   }
 
   test("Mail profile is matched from AlertRule to Application") {
-    val mailAlertProfile = TestObjectGenerator.mailAlertProfileTestObject()
+    val mailAlertProfile = TestObjectGenerator.mailAlertProfile()
 
-    val alertrule = TestObjectGenerator.alertRuleTestObject()
+    val alertrule = TestObjectGenerator.alertRule()
     val engine =
       new AlertEngineImpl(null, new NotificationServices(mailNotificationService, null))
 
-    val triggeredalert = TestObjectGenerator.triggeredAlertTestObject(documents = null)
+    val triggeredalert = TestObjectGenerator.triggeredAlert(documents = null)
     val app             = Application("a", List(alertrule), Some(List(mailAlertProfile)), None)
     val triggeredAlerts = List(triggeredalert)
 
@@ -130,7 +130,7 @@ class AlertEngineImplTest
     val profileName       = "slackProfile1"
     val slackAlertProfile = TestObjectGenerator.slackAlertProfile(name = profileName, url = "https://slack.com")
 
-    val alertrule = TestObjectGenerator.alertRuleTestObject()
+    val alertrule = TestObjectGenerator.alertRule()
     val engine =
       new AlertEngineImpl(null, new NotificationServices(null, slackNotificationService))
 
@@ -149,17 +149,17 @@ class AlertEngineImplTest
         null,
         new NotificationServices(mailNotificationService, slackNotificationService))
 
-    val alertrule = TestObjectGenerator.alertRuleTestObject(query = "spark1query")
-    val alertrule1 = TestObjectGenerator.alertRuleTestObject(query = "spark2query1")
-    val alertrule2 = TestObjectGenerator.alertRuleTestObject(query = "spark2query2")
+    val alertrule = TestObjectGenerator.alertRule(query = "spark1query")
+    val alertrule1 = TestObjectGenerator.alertRule(query = "spark2query1")
+    val alertrule2 = TestObjectGenerator.alertRule(query = "spark2query2")
     val App1       = Application("spark1", List(alertrule), None, None)
     val App2       = Application("spark2", List(alertrule1, alertrule2), None, None)
 
     val triggeredAlerts =
       List(
-        (App1, Option(TestObjectGenerator.triggeredAlertTestObject(applicationName = "spark"))),
-        (App2, Option(TestObjectGenerator.triggeredAlertTestObject(applicationName = "spark1"))),
-        (App2, Option(TestObjectGenerator.triggeredAlertTestObject(applicationName = "spark2")))
+        (App1, Option(TestObjectGenerator.triggeredAlert(applicationName = "spark"))),
+        (App2, Option(TestObjectGenerator.triggeredAlert(applicationName = "spark1"))),
+        (App2, Option(TestObjectGenerator.triggeredAlert(applicationName = "spark2")))
       )
 
     val groupedTriggerdAlerts =
@@ -172,9 +172,9 @@ class AlertEngineImplTest
   }
 
   test("Silenced applications alerts aren't checked") {
-    val mailAlertProfile = TestObjectGenerator.mailAlertProfileTestObject()
+    val mailAlertProfile = TestObjectGenerator.mailAlertProfile()
 
-    val alertrule = TestObjectGenerator.alertRuleTestObject()
+    val alertrule = TestObjectGenerator.alertRule()
 
     val activeApp        = Application("activeApp", List(alertrule), None, None)
     val silencedApp      = Application("silencedApp", List(alertrule), None, None)
@@ -190,7 +190,7 @@ class AlertEngineImplTest
   }
 
   test("mark alert triggered on results found > 0") {
-    val alert = TestObjectGenerator.alertRuleTestObject(query = "category: ERROR", retryInterval = 1, alertProfiles = List("testing@tester.com"))
+    val alert = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1, alertProfiles = List("testing@tester.com"))
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -200,7 +200,7 @@ class AlertEngineImplTest
   }
 
   test("mark alert triggered when results are found") {
-    val alert = TestObjectGenerator.alertRuleTestObject(query = "category: ERROR", retryInterval = 1)
+    val alert = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1)
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -210,7 +210,7 @@ class AlertEngineImplTest
   }
 
   test("mark alert triggered when no results are found") {
-    val alert = TestObjectGenerator.alertRuleTestObject(resultThreshold = Some(-1))
+    val alert = TestObjectGenerator.alertRule(resultThreshold = Some(-1))
     val engine =
       new AlertEngineImpl(
         solrClient,
@@ -220,7 +220,7 @@ class AlertEngineImplTest
   }
 
   test("don't mark alert triggered when no results are found") {
-    val alert = TestObjectGenerator.alertRuleTestObject(resultThreshold = Some(1))
+    val alert = TestObjectGenerator.alertRule(resultThreshold = Some(1))
     val engine =
       new AlertEngineImpl(
         solrClient,

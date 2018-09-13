@@ -25,16 +25,16 @@ import org.scalatest.FunSuite
 import scala.io.Source.fromFile
 
 class SlackNotificationServiceTest extends FunSuite {
-  val doc: SolrDocument = TestObjectGenerator.solrDocumentTestObject(threadName = "OXB Thread")
+  val doc: SolrDocument = TestObjectGenerator.solrDocument(threadName = "OXB Thread")
 
   val path         = "alert-engine/scripts/slack-webhook-url.txt"
   val slackUrlFile = new File(path)
 
-  val alertrule = TestObjectGenerator.alertRuleTestObject()
-  val alertrule2 = TestObjectGenerator.alertRuleTestObject(retryInterval = 20)
+  val alertrule = TestObjectGenerator.alertRule()
+  val alertrule2 = TestObjectGenerator.alertRule(retryInterval = 20)
 
-  val triggeredalert = TestObjectGenerator.triggeredAlertTestObject(totalNumFound = 12)
-  val triggeredalert2 = TestObjectGenerator.triggeredAlertTestObject(totalNumFound = 14)
+  val triggeredalert = TestObjectGenerator.triggeredAlert(totalNumFound = 12)
+  val triggeredalert2 = TestObjectGenerator.triggeredAlert(totalNumFound = 14)
 
   test("sending a triggered alert to a slack profile") {
     if (slackUrlFile.exists) {

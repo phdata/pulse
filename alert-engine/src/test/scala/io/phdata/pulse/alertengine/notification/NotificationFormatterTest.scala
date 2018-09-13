@@ -21,12 +21,12 @@ import org.apache.solr.common.SolrDocument
 import org.scalatest.FunSuite
 
 class NotificationFormatterTest extends FunSuite {
-  val doc: SolrDocument = TestObjectGenerator.solrDocumentTestObject(level = "FATAL", message = "Service is down......")
+  val doc: SolrDocument = TestObjectGenerator.solrDocument(level = "FATAL", message = "Service is down......")
 
 
-  val alertrule = TestObjectGenerator.alertRuleTestObject()
+  val alertrule = TestObjectGenerator.alertRule()
 
-  val triggeredalert = TestObjectGenerator.triggeredAlertTestObject()
+  val triggeredalert = TestObjectGenerator.triggeredAlert()
 
   test("format subject content") {
     assertResult("Pulse alert triggered for 'Spark'")(

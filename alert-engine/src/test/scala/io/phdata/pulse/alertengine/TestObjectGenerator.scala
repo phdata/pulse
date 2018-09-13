@@ -27,7 +27,7 @@ import org.apache.solr.common.SolrDocument
 object TestObjectGenerator {
 
   /**
-    * solrDocumentTestObject is used for generating default and custom solr document test objects
+    * Method used for generating default and custom solr document test objects
     * based on parameters passed : if no parameter is passed it returns a default solr document.
     *
     * @param id
@@ -39,7 +39,7 @@ object TestObjectGenerator {
     * @param throwable
     * @return solrDocument
     */
-  def solrDocumentTestObject(
+  def solrDocument(
                               id: String = "123",
                               category: String = "test",
                               timestamp: String = "2018-04-06 10:15:00",
@@ -75,14 +75,14 @@ object TestObjectGenerator {
     * @param properties
     * @return LogEvent
     */
-  def logEventTestObject(id: Option[String] = Some("id"),
-                         category: String = "ALERT",
-                         timestamp: String = "1970-01-01T00:00:00Z",
-                         level: String = "ERROR",
-                         message: String = "message",
-                         threadName: String = "thread oxb",
-                         throwable: Option[String] = Some("Exception in thread main"),
-                         properties: Option[Map[String, String]] = None): LogEvent = {
+  def logEvent(id: Option[String] = Some("id"),
+               category: String = "ALERT",
+               timestamp: String = "1970-01-01T00:00:00Z",
+               level: String = "ERROR",
+               message: String = "message",
+               threadName: String = "thread oxb",
+               throwable: Option[String] = Some("Exception in thread main"),
+               properties: Option[Map[String, String]] = None): LogEvent = {
     LogEvent(id,
       category,
       timestamp,
@@ -100,8 +100,8 @@ object TestObjectGenerator {
     * @param addresses
     * @return MailAlertProfile
     */
-  def mailAlertProfileTestObject(name: String = "mailprofile1",
-                                 addresses: List[String] = List("person@phdata.io")): MailAlertProfile = {
+  def mailAlertProfile(name: String = "mailprofile1",
+                       addresses: List[String] = List("person@phdata.io")): MailAlertProfile = {
     MailAlertProfile(name, addresses)
   }
 
@@ -126,10 +126,10 @@ object TestObjectGenerator {
     * @param alertProfiles
     * @return AlertRule
     */
-  def alertRuleTestObject(query: String = "id : testId",
-                          retryInterval: Int = 10,
-                          resultThreshold: Option[Int] = None,
-                          alertProfiles: List[String] = List("mailprofile1")): AlertRule = {
+  def alertRule(query: String = "id : testId",
+                retryInterval: Int = 10,
+                resultThreshold: Option[Int] = None,
+                alertProfiles: List[String] = List("mailprofile1")): AlertRule = {
     AlertRule(query,
       retryInterval,
       resultThreshold,
@@ -146,10 +146,10 @@ object TestObjectGenerator {
     * @param totalNumFound
     * @return TriggeredAlert
     */
-  def triggeredAlertTestObject(rule: AlertRule = alertRuleTestObject(),
-                               applicationName: String = "Spark",
-                               documents: Seq[SolrDocument] = Seq(solrDocumentTestObject()),
-                               totalNumFound: Long = 20): TriggeredAlert = {
+  def triggeredAlert(rule: AlertRule = alertRule(),
+                     applicationName: String = "Spark",
+                     documents: Seq[SolrDocument] = Seq(solrDocument()),
+                     totalNumFound: Long = 20): TriggeredAlert = {
     TriggeredAlert(rule,
       applicationName,
       documents,
