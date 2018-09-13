@@ -117,5 +117,45 @@ object TestObjectGenerator {
     SlackAlertProfile(name, url)
   }
 
+  /**
+    * Method for creating test alert rules
+    *
+    * @param query
+    * @param retryInterval
+    * @param resultThreshold
+    * @param alertProfiles
+    * @return AlertRule
+    */
+  def alertRuleTestObject(query: String = "id : testId",
+                          retryInterval: Int = 10,
+                          resultThreshold: Option[Int] = None,
+                          alertProfiles: List[String] = List("mailprofile1")): AlertRule = {
+    AlertRule(query,
+      retryInterval,
+      resultThreshold,
+      alertProfiles)
+
+  }
+
+  /**
+    * Method for creating test triggered alerts
+    *
+    * @param rule
+    * @param applicationName
+    * @param documents
+    * @param totalNumFound
+    * @return TriggeredAlert
+    */
+  def triggeredAlertTestObject(rule: AlertRule = alertRuleTestObject(),
+                               applicationName: String = "Spark",
+                               documents: Seq[SolrDocument] = Seq(solrDocumentTestObject()),
+                               totalNumFound: Long = 20): TriggeredAlert = {
+    TriggeredAlert(rule,
+      applicationName,
+      documents,
+      totalNumFound)
+
+
+  }
 
 }
