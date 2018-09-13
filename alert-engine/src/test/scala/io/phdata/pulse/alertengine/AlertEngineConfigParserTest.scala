@@ -35,7 +35,7 @@ class AlertEngineConfigParserTest extends FunSuite {
         |  emailProfiles:
         |  - name: mailProfile1
         |    addresses:
-        |    - tony@phdata.io
+        |    - test@phdata.io
         |  slackProfiles:
         |  - name: slackProfile1
         |    url : testurl.com
@@ -47,7 +47,7 @@ class AlertEngineConfigParserTest extends FunSuite {
           Application(
             "application1",
             List(TestObjectGenerator.alertRule(query = "query", retryInterval = 10, resultThreshold = Some(0), alertProfiles = List("mailProfile1", "slackProfile1"))),
-            Some(List(TestObjectGenerator.mailAlertProfile(name = "mailProfile1", addresses = List("tony@phdata.io")))),
+            Some(List(TestObjectGenerator.mailAlertProfile(name = "mailProfile1", addresses = List("test@phdata.io")))),
             Some(List(TestObjectGenerator.slackAlertProfile()))
           ))
       )
