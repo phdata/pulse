@@ -47,8 +47,8 @@ class AlertEngineConfigParserTest extends FunSuite {
           Application(
             "application1",
             List(AlertRule("query", 10, Some(0), List("mailProfile1", "slackProfile1"))),
-            Some(List(MailAlertProfile("mailProfile1", List("tony@phdata.io")))),
-            Some(List(SlackAlertProfile("slackProfile1", "testurl.com")))
+            Some(List(TestObjectGenerator.mailAlertProfileTestObject(name = "mailProfile1", addresses = List("tony@phdata.io")))),
+            Some(List(TestObjectGenerator.slackAlertProfile()))
           ))
       )
     println(yaml)

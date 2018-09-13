@@ -110,7 +110,7 @@ class AlertEngineImplTest
   }
 
   test("Mail profile is matched from AlertRule to Application") {
-    val mailAlertProfile = MailAlertProfile("mailprofile1", List("person@phdata.io"))
+    val mailAlertProfile = TestObjectGenerator.mailAlertProfileTestObject()
 
     val alertrule = AlertRule("id: id", 1, Some(0), List("mailprofile1"))
     val engine =
@@ -127,7 +127,7 @@ class AlertEngineImplTest
 
   test("Slack profile is matched from AlertRule to Application") {
     val profileName       = "slackProfile1"
-    val slackAlertProfile = SlackAlertProfile(profileName, "https://slack.com")
+    val slackAlertProfile = TestObjectGenerator.slackAlertProfile(name = profileName, url = "https://slack.com")
 
     val alertrule = AlertRule("id: id", 1, Some(0), List(profileName))
     val engine =
@@ -171,7 +171,7 @@ class AlertEngineImplTest
   }
 
   test("Silenced applications alerts aren't checked") {
-    val mailAlertProfile = MailAlertProfile("mailprofile1", List("person@phdata.io"))
+    val mailAlertProfile = TestObjectGenerator.mailAlertProfileTestObject()
 
     val alertrule = AlertRule("id: id", 1, Some(0), List("mailprofile1"))
 

@@ -93,5 +93,29 @@ object TestObjectGenerator {
       properties)
   }
 
+  /**
+    * Method for creating test mail alert profiles
+    *
+    * @param name
+    * @param addresses
+    * @return MailAlertProfile
+    */
+  def mailAlertProfileTestObject(name: String = "mailprofile1",
+                                 addresses: List[String] = List("person@phdata.io")): MailAlertProfile = {
+    MailAlertProfile(name, addresses)
+  }
+
+  /**
+    * Method for creating test slack alert profiles
+    *
+    * @param name
+    * @param url
+    * @return SlackAlertProfile
+    */
+  def slackAlertProfile(name: String = "slackProfile1",
+                        url: String = "testurl.com"): SlackAlertProfile = {
+    SlackAlertProfile(name, url)
+  }
+
 
 }
