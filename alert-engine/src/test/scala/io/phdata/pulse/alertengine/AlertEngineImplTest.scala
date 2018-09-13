@@ -75,14 +75,14 @@ class AlertEngineImplTest
   }
 
   test("get active alert") {
-    val a = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1, resultThreshold = Some(1), alertProfiles = List("test@phdata.io"))
+    val alert = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1, resultThreshold = Some(1), alertProfiles = List("test@phdata.io"))
 
     val engine =
       new AlertEngineImpl(
         solrClient,
         new NotificationServices(mailNotificationService, slackNotificationService))
-    val result = engine.triggeredAlert(APPLICATION_NAME, a).get
-    assertResult(a)(result.rule)
+    val result = engine.triggeredAlert(APPLICATION_NAME, alert).get
+    assertResult(alert)(result.rule)
     // @TODO why is this 2 instead of 1 sometimes?
     assert(result.documents.lengthCompare(0) > 0)
     assert(result.applicationName == APPLICATION_NAME)
@@ -118,7 +118,7 @@ class AlertEngineImplTest
       new AlertEngineImpl(null, new NotificationServices(mailNotificationService, null))
 
     val triggeredalert = TestObjectGenerator.triggeredAlert(documents = null)
-    val app             = Application("a", List(alertrule), Some(List(mailAlertProfile)), None)
+    val app = Application("testApp", List(alertrule), Some(List(mailAlertProfile)), None)
     val triggeredAlerts = List(triggeredalert)
 
     engine.sendAlert(app, "mailprofile1", triggeredAlerts)
@@ -135,7 +135,7 @@ class AlertEngineImplTest
       new AlertEngineImpl(null, new NotificationServices(null, slackNotificationService))
 
     val triggeredalert  = TriggeredAlert(alertrule, "Spark", null, 1)
-    val app             = Application("a", List(alertrule), None, Some(List(slackAlertProfile)))
+    val app = Application("testApp", List(alertrule), None, Some(List(slackAlertProfile)))
     val triggeredAlerts = List(triggeredalert)
 
     engine.sendAlert(app, profileName, triggeredAlerts)

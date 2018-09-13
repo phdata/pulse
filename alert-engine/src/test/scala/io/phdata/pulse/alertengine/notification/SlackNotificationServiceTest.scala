@@ -39,7 +39,7 @@ class SlackNotificationServiceTest extends FunSuite {
   test("sending a triggered alert to a slack profile") {
     if (slackUrlFile.exists) {
       val token        = fromFile(path).getLines.mkString
-      val profile = TestObjectGenerator.slackAlertProfile(name = "a", url = token)
+      val profile = TestObjectGenerator.slackAlertProfile(name = "testProfile", url = token)
       val slackService = new SlackNotificationService()
       slackService.notify(Seq(triggeredalert), profile)
     } else {
@@ -50,7 +50,7 @@ class SlackNotificationServiceTest extends FunSuite {
   test("sending two triggered alerts to a slack profile") {
     if (slackUrlFile.exists) {
       val token        = fromFile(path).getLines.mkString
-      val profile = TestObjectGenerator.slackAlertProfile(name = "b", url = token)
+      val profile = TestObjectGenerator.slackAlertProfile(name = "testProfile", url = token)
       val slackService = new SlackNotificationService()
       slackService.notify(Seq(triggeredalert, triggeredalert2), profile)
     } else {

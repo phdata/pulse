@@ -28,8 +28,8 @@ class MailNotificationServiceTest extends FunSuite {
   val alertrule = TestObjectGenerator.alertRule()
   val alertrule2 = TestObjectGenerator.alertRule(retryInterval = 20)
 
-  val profile = TestObjectGenerator.mailAlertProfile(name = "a", addresses = List("testing@phdata.io"))
-  val profile2 = TestObjectGenerator.mailAlertProfile(name = "b", addresses = List("testing1@phdata.io", "testing@phdata.io"))
+  val profile = TestObjectGenerator.mailAlertProfile(name = "testProfile1", addresses = List("testing@phdata.io"))
+  val profile2 = TestObjectGenerator.mailAlertProfile(name = "testProfile2", addresses = List("testing1@phdata.io", "testing@phdata.io"))
 
   val triggeredalert = TestObjectGenerator.triggeredAlert(applicationName = "Spark", totalNumFound = 23)
   val triggeredalert2 = TestObjectGenerator.triggeredAlert(applicationName = "Pipewrench", totalNumFound = 15)
