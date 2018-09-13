@@ -222,18 +222,20 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
       solrService
         .listCollections()
         .filter(_.startsWith(application.name))
-    if (appCollections.lengthCompare(application.numCollections.getOrElse(DEFAULT_NUM_COLLECTIONS)) <= 0) {
+
+    val numCollectionsToKeep = application.numCollections.getOrElse(DEFAULT_NUM_COLLECTIONS)
+    if (numCollectionsToKeep >= appCollections.length) {
+      logger.info(s"No collections need to be deleted for '${application.name}'")
       Seq()
     } else {
-      val collectionsToKeep = application.numCollections.getOrElse(DEFAULT_NUM_COLLECTIONS)
-      val collectionToDelete = appCollections
+      val collectionsToDelete = appCollections
         .sortBy { coll =>
           CollectionNameParser.parseTimestamp(coll)
         }
         .reverse
-        .drop(appCollections.length - collectionsToKeep)
+        .drop(numCollectionsToKeep)
 
-      collectionToDelete.map { coll =>
+      collectionsToDelete.foreach { coll =>
         logger.info(s"deleting collection $coll")
         solrService.deleteCollection(coll)
         logger.info(s"successfully deleted collection $coll")
@@ -243,10 +245,8 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
         .listCollections()
         .filter(_.startsWith(application.name))
 
-      if (collections.length != collectionsToKeep) {
-        logger.error(
-          s"Collections are not being successfully deleted. Keeping collections ${collectionsToKeep} but found collections $collections")
-      }
+      assert(collections.length == numCollectionsToKeep,
+             s"expected $numCollectionsToKeep collections but found ${collections.length}")
     }
   }
 
