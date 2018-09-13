@@ -75,9 +75,7 @@ class AlertEngineImplTest
   }
 
   test("get active alert") {
-    val a = TestObjectGenerator.alertRuleTestObject(query = "category: ERROR", retryInterval = 1, resultThreshold = Some(1), alertProfiles = List("tony@phdata.io"))
-    //val alertRule = AlertRule("category: ERROR", 1, Some(0), List("tony@phdata.io"))
-    //val alert = AlertRule("category: ERROR", 1, Some(0), List("tony@phdata.io"))
+    val a = TestObjectGenerator.alertRuleTestObject(query = "category: ERROR", retryInterval = 1, resultThreshold = Some(1), alertProfiles = List("test@phdata.io"))
 
     val engine =
       new AlertEngineImpl(
