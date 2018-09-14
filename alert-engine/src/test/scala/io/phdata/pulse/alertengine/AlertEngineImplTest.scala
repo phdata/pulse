@@ -75,14 +75,14 @@ class AlertEngineImplTest
   }
 
   test("get active alert") {
-    val alert = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1, resultThreshold = Some(1), alertProfiles = List("test@phdata.io"))
+    val alertRule = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1, resultThreshold = Some(1), alertProfiles = List("test@phdata.io"))
 
     val engine =
       new AlertEngineImpl(
         solrClient,
         new NotificationServices(mailNotificationService, slackNotificationService))
-    val result = engine.triggeredAlert(APPLICATION_NAME, alert).get
-    assertResult(alert)(result.rule)
+    val result = engine.triggeredAlert(APPLICATION_NAME, alertRule).get
+    assertResult(alertRule)(result.rule)
     // @TODO why is this 2 instead of 1 sometimes?
     assert(result.documents.lengthCompare(0) > 0)
     assert(result.applicationName == APPLICATION_NAME)
@@ -90,36 +90,36 @@ class AlertEngineImplTest
   }
 
   test("trigger alert when threshold is set to '-1' and there are no results") {
-    val alert = TestObjectGenerator.alertRule(resultThreshold = Some(-1))
+    val alertRule = TestObjectGenerator.alertRule(resultThreshold = Some(-1))
     val engine =
       new AlertEngineImpl(
         solrClient,
         new NotificationServices(mailNotificationService, slackNotificationService))
-    val result = engine.triggeredAlert(APPLICATION_NAME, alert).get
-    assertResult(alert)(result.rule)
+    val result = engine.triggeredAlert(APPLICATION_NAME, alertRule).get
+    assertResult(alertRule)(result.rule)
     assert(result.documents.isEmpty)
     assert(result.applicationName == APPLICATION_NAME)
   }
 
   test("don't match non alert") {
-    val alert = TestObjectGenerator.alertRule()
+    val alertRule = TestObjectGenerator.alertRule()
     val engine =
       new AlertEngineImpl(
         solrClient,
         new NotificationServices(mailNotificationService, slackNotificationService))
-    assertResult(None)(engine.triggeredAlert(APPLICATION_NAME, alert))
+    assertResult(None)(engine.triggeredAlert(APPLICATION_NAME, alertRule))
   }
 
   test("Mail profile is matched from AlertRule to Application") {
     val mailAlertProfile = TestObjectGenerator.mailAlertProfile()
 
-    val alertrule = TestObjectGenerator.alertRule()
+    val alertRule = TestObjectGenerator.alertRule()
     val engine =
       new AlertEngineImpl(null, new NotificationServices(mailNotificationService, null))
 
-    val triggeredalert = TestObjectGenerator.triggeredAlert(documents = null)
-    val app = Application("testApp", List(alertrule), Some(List(mailAlertProfile)), None)
-    val triggeredAlerts = List(triggeredalert)
+    val triggeredAlert = TestObjectGenerator.triggeredAlert(documents = null)
+    val app = Application("testApp", List(alertRule), Some(List(mailAlertProfile)), None)
+    val triggeredAlerts = List(triggeredAlert)
 
     engine.sendAlert(app, "mailprofile1", triggeredAlerts)
 
@@ -130,13 +130,13 @@ class AlertEngineImplTest
     val profileName       = "slackProfile1"
     val slackAlertProfile = TestObjectGenerator.slackAlertProfile(name = profileName, url = "https://slack.com")
 
-    val alertrule = TestObjectGenerator.alertRule()
+    val alertRule = TestObjectGenerator.alertRule()
     val engine =
       new AlertEngineImpl(null, new NotificationServices(null, slackNotificationService))
 
-    val triggeredalert  = TriggeredAlert(alertrule, "Spark", null, 1)
-    val app = Application("testApp", List(alertrule), None, Some(List(slackAlertProfile)))
-    val triggeredAlerts = List(triggeredalert)
+    val triggeredAlert = TriggeredAlert(alertRule, "Spark", null, 1)
+    val app = Application("testApp", List(alertRule), None, Some(List(slackAlertProfile)))
+    val triggeredAlerts = List(triggeredAlert)
 
     engine.sendAlert(app, profileName, triggeredAlerts)
 
@@ -149,11 +149,11 @@ class AlertEngineImplTest
         null,
         new NotificationServices(mailNotificationService, slackNotificationService))
 
-    val alertrule = TestObjectGenerator.alertRule(query = "spark1query")
-    val alertrule1 = TestObjectGenerator.alertRule(query = "spark2query1")
-    val alertrule2 = TestObjectGenerator.alertRule(query = "spark2query2")
-    val App1       = Application("spark1", List(alertrule), None, None)
-    val App2       = Application("spark2", List(alertrule1, alertrule2), None, None)
+    val alertRule = TestObjectGenerator.alertRule(query = "spark1query")
+    val alertRule1 = TestObjectGenerator.alertRule(query = "spark2query1")
+    val alertRule2 = TestObjectGenerator.alertRule(query = "spark2query2")
+    val App1 = Application("spark1", List(alertRule), None, None)
+    val App2 = Application("spark2", List(alertRule1, alertRule2), None, None)
 
     val triggeredAlerts =
       List(
@@ -174,10 +174,10 @@ class AlertEngineImplTest
   test("Silenced applications alerts aren't checked") {
     val mailAlertProfile = TestObjectGenerator.mailAlertProfile()
 
-    val alertrule = TestObjectGenerator.alertRule()
+    val alertRule = TestObjectGenerator.alertRule()
 
-    val activeApp        = Application("activeApp", List(alertrule), None, None)
-    val silencedApp      = Application("silencedApp", List(alertrule), None, None)
+    val activeApp = Application("activeApp", List(alertRule), None, None)
+    val silencedApp = Application("silencedApp", List(alertRule), None, None)
     val silencedAppNames = List("silencedApp")
 
     val engine =
@@ -190,42 +190,42 @@ class AlertEngineImplTest
   }
 
   test("mark alert triggered on results found > 0") {
-    val alert = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1, alertProfiles = List("testing@tester.com"))
+    val alertRule = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1, alertProfiles = List("testing@tester.com"))
     val engine =
       new AlertEngineImpl(
         solrClient,
         new NotificationServices(mailNotificationService, slackNotificationService))
-    val result = engine.triggeredAlert(APPLICATION_NAME, alert).get
-    assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alert))
+    val result = engine.triggeredAlert(APPLICATION_NAME, alertRule).get
+    assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alertRule))
   }
 
   test("mark alert triggered when results are found") {
-    val alert = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1)
+    val alertRule = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1)
     val engine =
       new AlertEngineImpl(
         solrClient,
         new NotificationServices(mailNotificationService, slackNotificationService))
-    assert(engine.triggeredAlert(APPLICATION_NAME, alert).isDefined)
-    assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alert))
+    assert(engine.triggeredAlert(APPLICATION_NAME, alertRule).isDefined)
+    assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alertRule))
   }
 
   test("mark alert triggered when no results are found") {
-    val alert = TestObjectGenerator.alertRule(resultThreshold = Some(-1))
+    val alertRule = TestObjectGenerator.alertRule(resultThreshold = Some(-1))
     val engine =
       new AlertEngineImpl(
         solrClient,
         new NotificationServices(mailNotificationService, slackNotificationService))
-    assert(engine.triggeredAlert(APPLICATION_NAME, alert).isDefined)
-    assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alert))
+    assert(engine.triggeredAlert(APPLICATION_NAME, alertRule).isDefined)
+    assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alertRule))
   }
 
   test("don't mark alert triggered when no results are found") {
-    val alert = TestObjectGenerator.alertRule(resultThreshold = Some(1))
+    val alertRule = TestObjectGenerator.alertRule(resultThreshold = Some(1))
     val engine =
       new AlertEngineImpl(
         solrClient,
         new NotificationServices(mailNotificationService, slackNotificationService))
-    assertResult(None)(engine.triggeredAlert(APPLICATION_NAME, alert))
-    assertResult(true)(AlertsDb.shouldCheck(APPLICATION_NAME, alert))
+    assertResult(None)(engine.triggeredAlert(APPLICATION_NAME, alertRule))
+    assertResult(true)(AlertsDb.shouldCheck(APPLICATION_NAME, alertRule))
   }
 }

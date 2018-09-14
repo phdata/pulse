@@ -24,17 +24,17 @@ class NotificationFormatterTest extends FunSuite {
   val doc: SolrDocument = TestObjectGenerator.solrDocument(level = "FATAL", message = "Service is down......")
 
 
-  val alertrule = TestObjectGenerator.alertRule()
+  val alertRule = TestObjectGenerator.alertRule()
 
-  val triggeredalert = TestObjectGenerator.triggeredAlert()
+  val triggeredAlert = TestObjectGenerator.triggeredAlert()
 
   test("format subject content") {
     assertResult("Pulse alert triggered for 'Spark'")(
-      NotificationFormatter.formatSubject(triggeredalert))
+      NotificationFormatter.formatSubject(triggeredAlert))
   }
 
   test("format body (print only)") {
-    println(NotificationFormatter.formatMessage(triggeredalert))
+    println(NotificationFormatter.formatMessage(triggeredAlert))
   }
 
 }

@@ -40,15 +40,15 @@ object TestObjectGenerator {
     * @return solrDocument
     */
   def solrDocument(
-                              id: String = "123",
-                              category: String = "test",
-                              timestamp: String = "2018-04-06 10:15:00",
-                              level: String = "FATAL",
-                              message: String = "The service is down.",
-                              threadName: String = "thread3",
-                              throwable: String = "NullPointerException"
+                    id: String = "123",
+                    category: String = "test",
+                    timestamp: String = "2018-04-06 10:15:00",
+                    level: String = "FATAL",
+                    message: String = "The service is down.",
+                    threadName: String = "thread3",
+                    throwable: String = "NullPointerException"
 
-                            ): SolrDocument = {
+                  ): SolrDocument = {
 
     val doc: SolrDocument = new SolrDocument()
     doc.addField("id", id)
@@ -154,8 +154,5 @@ object TestObjectGenerator {
       applicationName,
       documents,
       totalNumFound)
-
-
   }
-
 }
