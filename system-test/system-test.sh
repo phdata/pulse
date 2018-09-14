@@ -13,6 +13,7 @@ function cleanup {
 
 trap cleanup EXIT
 mkdir -p /tmp/pulse-system-test
+mkdir -p /system-test/log_files
 
 # Writing logs to local directory
 export collection_roller_log="system-test/log_files/collection_roller.log"
