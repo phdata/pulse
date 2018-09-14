@@ -13,6 +13,7 @@ function cleanup {
 
 trap cleanup EXIT
 mkdir -p /tmp/pulse-system-test
+mkdir -p /system-test/log_files
 
 # Writing logs to local directory
 export collection_roller_log="system-test/log_files/collection_roller.log"
@@ -22,8 +23,8 @@ export application_log="system-test/log_files/application.log"
 
 kill_services(){
   echo "killing service by parent ID"
-  PGID=$(ps -o pgid= $$)
-  kill -9 -- -$PGID
+  PGID=$(ps -o pgid=$$)
+  for pid in $PGID; do kill -9 -$pid; done
   echo "kill service end"
 }
 
@@ -44,17 +45,18 @@ echo "Curling the Solr API"
 
 query_response=$(curl -i -o - --silent -X GET -u ${SOLR_USR}:${SOLR_PWD} "http://master3.valhalla.phdata.io:8983/solr/logging-pulse-test_latest/select?q=*%3A*&wt=json&indent=true")
 http_status_collection=$(echo "$query_response" | grep HTTP |  awk '{print $2}')
-
+numfound=$(echo $query_response | grep "numFound" |awk -F  "," '/1/ {print $8}'|awk -F':' '{print $3}')
 echo $http_status_collection
 
 # Checking if the collection exists and if documents are collected
-
 if [[ "$http_status_collection" == 200 ]]; then
-       if [[ "query_response" =~ "\"numFound\":0" ]]; then
+       if [[ "$numfound" == 0 ]]; then
                 echo "Records assertion in Solr collection Failed!"
+                exit 1
        else
                 echo "Records assertion in Solr collection Passed!"
        fi
 else
         echo "Records assertion in Solr collection Failed"
+        exit 1
 fi
