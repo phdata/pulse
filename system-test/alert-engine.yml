@@ -1,6 +1,6 @@
 ---
 applications:
-- name: logging-pulse
+- name: logging-pulse-test
   alertRules:
   - query: "timestamp:[NOW-10MINUTES TO NOW] AND level: ERROR"
     retryInterval: 10
