@@ -39,7 +39,7 @@ bin/log-collector 2>&1> $log_collector_log &
 
 while [[ `(echo >/dev/tcp/127.0.0.1/{WEBSERVER_PORT}) &>/dev/null && echo "open" || echo "close"` == 'open' ]]; do sleep 1; done
 
-./log-example/spark-logging 2>&1 > system-test/log_files/spark-example.log
+./system-test/spark-logging 2>&1 > system-test/log_files/spark-example.log
 
 echo "Curling the Solr API"
 
