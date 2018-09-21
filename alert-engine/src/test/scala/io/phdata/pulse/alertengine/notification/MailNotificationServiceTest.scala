@@ -16,38 +16,30 @@
 
 package io.phdata.pulse.alertengine.notification
 
-import io.phdata.pulse.alertengine.{ AlertRule, MailAlertProfile, TriggeredAlert }
+import io.phdata.pulse.alertengine.TestObjectGenerator
 import org.apache.solr.common.SolrDocument
 import org.scalatest.FunSuite
 
 import scala.io.Source._
 
 class MailNotificationServiceTest extends FunSuite {
+  val doc: SolrDocument = TestObjectGenerator.solrDocument()
 
-  val doc: SolrDocument = new SolrDocument()
-  doc.addField("id", "123")
-  doc.addField("category", "test")
-  doc.addField("timestamp", "2018-04-06 10:15:00Z")
-  doc.addField("level", "FATAL")
-  doc.addField("message", "The service is down.")
-  doc.addField("threadName", "thread3")
-  doc.addField("throwable", "NullPointerException")
+  val alertRule = TestObjectGenerator.alertRule()
+  val alertRule2 = TestObjectGenerator.alertRule(retryInterval = 20)
 
-  val alertrule  = AlertRule("query0000000000", 10, Some(0), List("a", "slack"))
-  val alertrule2 = AlertRule("query222222", 20, Some(0), List("a", "slack"))
+  val profile = TestObjectGenerator.mailAlertProfile(name = "testProfile1", addresses = List("testing@phdata.io"))
+  val profile2 = TestObjectGenerator.mailAlertProfile(name = "testProfile2", addresses = List("testing1@phdata.io", "testing@phdata.io"))
 
-  val profile  = MailAlertProfile("a", List("testing@phdata.io"))
-  val profile2 = MailAlertProfile("b", List("testing1@phdata.io", "testing@phdata.io"))
-
-  val triggeredalert  = TriggeredAlert(alertrule, "Spark", Seq(doc), 23)
-  val triggeredalert2 = TriggeredAlert(alertrule2, "PipeWrench", Seq(doc), 15)
+  val triggeredAlert = TestObjectGenerator.triggeredAlert(applicationName = "Spark", totalNumFound = 23)
+  val triggeredAlert2 = TestObjectGenerator.triggeredAlert(applicationName = "Pipewrench", totalNumFound = 15)
 
   test("sending one email to an address") {
     if (new java.io.File("alert-engine/scripts/mail-password.txt").exists) {
       val pwd = fromFile("alert-engine/scripts/mail-password.txt").getLines.mkString
       val mail =
         new MailNotificationService("smtp.gmail.com", 25, "testing@phdata.io", Some(pwd), true)
-      mail.notify(Seq(triggeredalert), profile)
+      mail.notify(Seq(triggeredAlert), profile)
     } else {
       println("no password, skip the test")
     }
@@ -58,7 +50,7 @@ class MailNotificationServiceTest extends FunSuite {
       val pwd = fromFile("alert-engine/scripts/mail-password.txt").getLines.mkString
       val mail =
         new MailNotificationService("smtp.gmail.com", 587, "testing@phdata.io", Some(pwd), true)
-      mail.notify(Seq(triggeredalert), profile2)
+      mail.notify(Seq(triggeredAlert), profile2)
     } else {
       println("no password, skip the test")
     }
@@ -69,7 +61,7 @@ class MailNotificationServiceTest extends FunSuite {
       val pwd = fromFile("alert-engine/scripts/mail-password.txt").getLines.mkString
       val mail =
         new MailNotificationService("smtp.gmail.com", 587, "testing@phdata.io", Some(pwd), true)
-      mail.notify(Seq(triggeredalert, triggeredalert2), profile)
+      mail.notify(Seq(triggeredAlert, triggeredAlert2), profile)
     } else {
       println("no password, skip the test")
     }
@@ -80,7 +72,7 @@ class MailNotificationServiceTest extends FunSuite {
       val pwd = fromFile("alert-engine/scripts/mail-password.txt").getLines.mkString
       val mail =
         new MailNotificationService("smtp.gmail.com", 587, "testing@phdata.io", Some(pwd), true)
-      mail.notify(Seq(triggeredalert, triggeredalert2), profile2)
+      mail.notify(Seq(triggeredAlert, triggeredAlert2), profile2)
     } else {
       println("no password, skip the test")
     }
