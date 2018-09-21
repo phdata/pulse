@@ -1,0 +1,7 @@
+#!/bin/bash
+spark2-submit \
+--master local[2] \
+--files system-test/log4j.properties \
+--conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:system-test/log4j.properties" \
+--conf "spark.executor.extraJavaOptions=-Dlog4j.configuration=file:log4j.properties" \
+--class io.phdata.pams.example.SparkLog4jExample log-example/target/scala-2.11/log-example-assembly-2.0.2-cdh5.jar
