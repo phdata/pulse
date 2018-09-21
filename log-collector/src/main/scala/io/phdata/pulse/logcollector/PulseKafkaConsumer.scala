@@ -15,12 +15,14 @@ import scala.collection.JavaConverters._
 import spray.json._
 
 /**
- * Reads json from a given topic
- * parses into a case class
- * returns the value
+  * Consumes JSON strings from a given broker and topic
+  * parses into LogEvent
+  * sends to Solr Cloud
  * @param solrService
  */
 class PulseKafkaConsumer(solrService: SolrService) extends JsonSupport with LazyLogging {
+  val MAX_TIMEOUT = 100
+
   implicit val solrActorSystem: ActorSystem             = ActorSystem()
   implicit val solrActorMaterializer: ActorMaterializer = ActorMaterializer.create(solrActorSystem)
 
@@ -32,14 +34,19 @@ class PulseKafkaConsumer(solrService: SolrService) extends JsonSupport with Lazy
     consumer.subscribe(Collections.singletonList(topic))
 
     while (true) {
-      val records: ConsumerRecords[String, String] = consumer.poll(100)
-      for (record <- records.asScala) {
-        logger.trace("KAFKA: Consuming " + record.value() + " from topic: " + topic)
-        val logEvent = record
-          .value()
-          .parseJson
-          .convertTo[LogEvent]
-        solrInputStream ! (logEvent.application.get, logEvent)
+      try {
+        val records = consumer.poll(MAX_TIMEOUT)
+        for (record <- records.asScala) {
+          logger.trace("KAFKA: Consuming " + record.value() + " from topic: " + topic)
+          val logEvent = record
+            .value()
+            .parseJson
+            .convertTo[LogEvent]
+          solrInputStream ! (logEvent.application.get, logEvent)
+        }
+      } catch {
+        // TODO: add more specific cases for parsing, connecting to Kafka, consuming
+        case e: Exception => logger.error("Error consuming messages from kafka broker", e)
       }
     }
   }

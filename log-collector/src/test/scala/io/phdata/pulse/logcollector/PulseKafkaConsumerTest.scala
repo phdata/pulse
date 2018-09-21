@@ -54,107 +54,112 @@ class PulseKafkaConsumerTest
   val TOPIC1 = "pulse_test"
   val TOPIC2 = "solr_test"
 
-  def generateLogMessage ( event : LogEvent ) : String = {
+  // Generates string JSON messages
+  def generateLogMessage ( eventProperties : List[String] ) : String = {
     """
-      |{
-      | "id": """ + event.id + """
-      | "category": """ + event.category + """
-      | "timestamp": """ + event.timestamp + """
-      | "level": """ + event.level + """
-      | "message": """ + event.message + """
-      | "threadName": """ + event.threadName + """
-      | "throwable": """ + event.throwable + """
-      | "properties": """ + event.properties + """
-      | "application": """ + event.application + """
-      |}
+      {
+       "id": """" + eventProperties(0) + """",
+       "category": """" + eventProperties(1) + """",
+       "timestamp": """" + eventProperties(2) + """",
+       "level": """" + eventProperties(3) + """",
+       "message": """" + eventProperties(4) + """",
+       "threadName": """" + eventProperties(5) + """",
+       "throwable": """" + eventProperties(6) + """",
+       "properties": """ + eventProperties(7) + """,
+       "application": """" + eventProperties(8) + """"
+      }
     """.stripMargin
   }
 
-  // String JSON messages
-  val document1 = LogEvent(None,
+  // Define lists to pass into generateLogMessage
+  val document1 = List("1",
     "ERROR",
     "1970-01-01T00:00:00Z",
     "ERROR",
     "message 1",
     "thread oxb",
-    Some("Exception in thread main"),
-    None,
-    Some("pulse-kafka-test"))
+    "Exception in thread main",
+    "{\"key\":\"value\"}",
+    "pulse-kafka-test")
 
-  val document2 = LogEvent(None,
+  val document2 = List("2",
     "ERROR",
     "1971-01-01T01:00:00Z",
     "INFO",
     "message 2",
     "thread oxb",
-    Some("Exception in thread main"),
-    None,
-    Some("pulse-kafka-test"))
+    "Exception in thread main",
+    "{\"key\":\"value\"}",
+    "pulse-kafka-test")
 
-  val document3 = LogEvent(None,
+  val document3 = List("3",
     "ERROR",
     "1972-01-01T02:00:00Z",
     "ERROR",
     "message 3",
     "thread oxb",
-    Some("Exception in thread main"),
-    None,
-    Some("pulse-kafka-test"))
+    "Exception in thread main",
+    "{\"key\":\"value\"}",
+    "pulse-kafka-test")
 
-//  val logMessage1: String = generateLogMessage(document1)
-//
-//  val logMessage2: String = generateLogMessage(document2)
-//
-//  val logMessage3: String = generateLogMessage(document3)
-  val logMessage1: String =
-  """
-    |{
-    | "id": "1",
-    | "category": "cat1",
-    | "timestamp": "1970-01-01T00:00:00Z",
-    | "level": "ERROR",
-    | "message": "Out of Bounds Exception",
-    | "threadName": "thread1",
-    | "throwable": "Exception in thread main",
-    | "properties": {"key":"value"},
-    | "application": "pulse-kafka-test"
-    |}
-  """.stripMargin
+  val logMessage1: String = generateLogMessage(document1)
 
-  val logMessage2: String =
-    """
-      |{
-      | "id": "2",
-      | "category": "cat1",
-      | "timestamp": "1970-01-01T00:00:00Z",
-      | "level": "INFO",
-      | "message": "Null Pointer Exception",
-      | "threadName": "thread2",
-      | "throwable": "Exception in thread main",
-      | "properties": {"key":"value"},
-      | "application": "pulse-kafka-test"
-      |}
-    """.stripMargin
+  val logMessage2: String = generateLogMessage(document2)
 
-  val logMessage3: String =
-    """
-      |{
-      | "id": "3",
-      | "category": "cat2",
-      | "timestamp": "1970-01-01T00:00:00Z",
-      | "level": "ERROR",
-      | "message": "File Not Found Exception",
-      | "threadName": "thread1",
-      | "throwable": "Exception in thread main",
-      | "properties": {"key":"value"},
-      | "application": "pulse-kafka-test"
-      |}
-    """.stripMargin
+  val logMessage3: String = generateLogMessage(document3)
 
 
-  test("write to solr cloud") {
-    // consume messages from kafka topic
-    // send to solr cloud
+  test("Send two message batches to Solr Cloud") {
+    // Write first message batch to local Kafka broker
+    val messageList1 = List(logMessage1)
+    kafkaMiniCluster.produceMessages(TOPIC2, messageList1)
+
+    // Set Kafka consumer properties
+    val kafkaConsumerProps = new Properties()
+
+    kafkaConsumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:11111")
+    kafkaConsumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+      "org.apache.kafka.common.serialization.StringDeserializer")
+    kafkaConsumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+      "org.apache.kafka.common.serialization.StringDeserializer")
+    kafkaConsumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+    kafkaConsumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "pulse-kafka")
+
+    val app1Name       = "pulse-kafka-test"
+    val app1Collection = s"${app1Name}_1"
+    val app1Alias      = s"${app1Name}_latest"
+
+    solrService.createCollection(app1Collection, 1, 1, "testconf", null)
+    solrService.createAlias(app1Alias, app1Collection)
+
+    // run kafka consumer in separate thread for first
+    val f1 = Future {
+      streamProcessor.read(kafkaConsumerProps, TOPIC2)
+    }
+
+    // sleep until documents are flushed
+    Thread.sleep(6000)
+
+    val messageList2 = List(logMessage2,logMessage3)
+    kafkaMiniCluster.produceMessages(TOPIC2, messageList2)
+
+    // run kafka consumer in separate thread
+    val f2 = Future {
+      streamProcessor.read(kafkaConsumerProps, TOPIC2)
+    }
+
+    // sleep until documents are flushed
+    Thread.sleep(6000)
+
+    val app1Query = new SolrQuery("level: ERROR")
+    app1Query.set("collection", app1Alias)
+
+    val query1Result = solrClient.query(app1Query)
+
+    assertResult(2)(query1Result.getResults.getNumFound)
+  }
+
+  ignore("Produce messages, creates collection and sends messages to Solr cloud") {
 
     // Write messages to local Kafka broker
     val messageList = List(logMessage1, logMessage2, logMessage3)
