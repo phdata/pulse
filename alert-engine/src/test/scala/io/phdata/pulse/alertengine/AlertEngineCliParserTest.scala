@@ -68,7 +68,7 @@ class AlertEngineCliParserTest extends FunSuite {
       "--silenced-application-file",
       "silenced-applications.txt",
       "--zk-hosts",
-      "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr"
+      "${HOSTNAME1}/solr,${HOSTNAME2}/solr,${HOSTNAME3}/solr"
     )
 
     val cliParser = new AlertEngineCliParser(args)
@@ -79,7 +79,7 @@ class AlertEngineCliParserTest extends FunSuite {
     assertResult(49152)(cliParser.smtpPort())
     assertResult("silenced-applications.txt")(cliParser.silencedApplicationsFile())
     assertResult(
-      "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr")(
+      "${HOSTNAME1}/solr,${HOSTNAME2}/solr,${HOSTNAME3}/solr")(
       cliParser.zkHost())
     assertResult(None)(cliParser.smtpPassword)
   }

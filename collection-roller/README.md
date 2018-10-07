@@ -72,6 +72,6 @@ $ java -DXmx=2147483648 \
     -cp <path-to-collection-roller-assembly> io.phdata.pulse.collectionroller.CollectionRollerMain \
     --daemonize \
     --conf collection-roller.yml \
-    --zk-hosts master1.valhalla.phdata.io:2181/solr
+    --zk-hosts <hostname>:2181/solr
 
 ```

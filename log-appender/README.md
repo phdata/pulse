@@ -24,7 +24,7 @@ log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
 log4j.appender.stdout.layout.ConversionPattern=%5p [%t] (%F:%L) - %m%n
 
 log4j.appender.http=io.phdata.pulse.log.HttpAppender
-log4j.appender.http.Address=http://edge2.valhalla.phdata.io:9015/v2/events/pulse-test-100
+log4j.appender.http.Address=http://<edge node name>:9015/v2/events/pulse-test-100
 log4j.appender.http.layout=org.apache.log4j.core.layout.JsonLayout
 log4j.appender.http.layout.compact=false
 log4j.appender.http.layout.complete=true

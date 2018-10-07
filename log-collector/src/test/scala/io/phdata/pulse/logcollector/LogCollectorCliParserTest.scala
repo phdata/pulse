@@ -26,13 +26,12 @@ class LogCollectorCliParserTest extends FunSuite {
       "--port",
       "9000",
       "--zk-hosts",
-      "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr");
+      "${HOSTNAME1}/solr,${HOSTNAME2}/solr,${HOSTNAME3}/solr");
 
     val cliParser = new LogCollectorCliParser(args)
     assertResult(9000)(cliParser.port())
     assertResult(
-      "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr")(
+      "${HOSTNAME1}/solr,${HOSTNAME2}/solr,${HOSTNAME3}/solr")(
       cliParser.zkHosts())
   }
-
 }

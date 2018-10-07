@@ -18,9 +18,9 @@ validate: descriptor/service.sdl
 
 place: 
 	echo placing jar in /opt/cloudera/csd
-	scp target/$(packageName).jar manager.valhalla.phdata.io:/opt/cloudera/csd
+	scp target/$(packageName).jar ${ZK_HOST}:/opt/cloudera/csd
 	echo setting permissions
-	ssh manager.valhalla.phdata.io chown cloudera-scm: /opt/cloudera/csd/$(packageName).jar
+	ssh ${ZK_HOST} chown cloudera-scm: /opt/cloudera/csd/$(packageName).jar
 
 clean: 
 	rm -rf target

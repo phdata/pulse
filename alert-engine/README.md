@@ -58,7 +58,7 @@ Example usage of the Alert Engine:
 java -Dlogback.configurationFile=logback.xml \
     -Djava.security.auth.login.config=jaas.conf \
     -cp <path-to-alert-engine-assembly> io.phdata.pulse.alertengine.AlertEngineMain \
-    --daemonize --zk-hosts master1.valhalla.phdata.io:2181/solr \
+    --daemonize --zk-hosts <hostname>:2181/solr \
     --smtp-server smtp.gmail.com --smtp-user user@company.com \
     --smtp-port 25 \
     --conf example-configs/alert-engine/alert-engine.yml \

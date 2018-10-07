@@ -26,14 +26,14 @@ class CollectionRollerCliParserTest extends FunSuite {
       "--conf",
       "conf.yml",
       "--zk-hosts",
-      "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr"
+      "${HOSTNAME1}/solr,${HOSTNAME2}/solr,${HOSTNAME3}/solr"
     )
 
     val collectionRollerCliparser = new CollectionRollerCliArgsParser(args)
 
     assertResult("conf.yml")(collectionRollerCliparser.conf())
     assertResult(
-      "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr")(
+      "${HOSTNAME1}/solr,${HOSTNAME2}/solr,${HOSTNAME3}/solr")(
       collectionRollerCliparser.zkHosts())
 
   }
