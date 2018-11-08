@@ -2,14 +2,16 @@
 
 package io.phdata.pulse.logcollector
 
-import java.util.{ Collections, Properties }
+import java.util.{Collections, Properties}
 
-import akka.actor.{ ActorRef, ActorSystem }
-import org.apache.kafka.clients.consumer.{ ConsumerRecords, KafkaConsumer }
+import akka.actor.{ActorRef, ActorSystem}
+import org.apache.kafka.clients.consumer.{ConsumerRecords, KafkaConsumer}
 import io.phdata.pulse.common.domain.LogEvent
 import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.LazyLogging
-import io.phdata.pulse.common.{ JsonSupport, SolrService }
+import io.phdata.pulse.common.{JsonSupport, SolrService}
+import org.apache.solr.common.SolrException
+import spray.json.JsonParser.ParsingException
 
 import scala.collection.JavaConverters._
 import spray.json._
@@ -45,7 +47,7 @@ class PulseKafkaConsumer(solrService: SolrService) extends JsonSupport with Lazy
           solrInputStream ! (logEvent.application.get, logEvent)
         }
       } catch {
-        // TODO: add more specific cases for parsing, connecting to Kafka, consuming
+        case p: ParsingException => logger.error(p.getMessage)
         case e: Exception => logger.error("Error consuming messages from kafka broker", e)
       }
     }

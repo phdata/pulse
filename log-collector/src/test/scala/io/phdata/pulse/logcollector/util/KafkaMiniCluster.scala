@@ -47,7 +47,7 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
   def produceMessages(topic: String, messages: List[String]): Unit = {
     val kafkaProducerProps = new Properties()
 
-    kafkaProducerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:11111")
+    kafkaProducerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:" + config.kafkaBrokerPort)
     kafkaProducerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
     kafkaProducerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
 
@@ -55,7 +55,6 @@ class KafkaMiniCluster(config: ZooKafkaConfig) {
 
     messages.foreach(msg => {
       val record = new ProducerRecord[String, String](topic, msg)
-
       producer.send(record)
     })
 
