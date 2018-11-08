@@ -53,7 +53,6 @@ class PulseKafkaConsumerTest
   override def afterEach(): Unit = {
     kafkaMiniCluster.stop()
     solrService.close()
-    Thread.sleep(30000)
   }
 
   // Set topic name
@@ -134,7 +133,7 @@ class PulseKafkaConsumerTest
     assertResult(15)(query1Result.getResults.getNumFound)
   }
 
-  test("Send two message batches to Solr Cloud") {
+  ignore("Send two message batches to Solr Cloud") {
 
     // Write first message batch to local Kafka broker
     val messageList1 = generateMessageList(30)
@@ -193,6 +192,4 @@ class PulseKafkaConsumerTest
     assertResult(15)(query1Result.getResults.getNumFound)
     assertResult(15)(query2Result.getResults.getNumFound)
   }
-
-
 }
