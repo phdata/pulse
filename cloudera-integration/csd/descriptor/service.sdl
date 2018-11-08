@@ -163,8 +163,8 @@
         },
         {
           "name": "smtp.user",
-          "label": "SMTP user name",
-          "description": "SMTP server username (email from-address, such as no-reply@company.com)",
+          "label": "FROM address",
+          "description": "Alert FROM email address",
           "required": "false",
           "default": "",
           "configurableInWizard": true,

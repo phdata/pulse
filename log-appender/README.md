@@ -46,6 +46,9 @@ $ java -cp my-jar.jar:log-appender-{version}.jar -Dlog4j.configuration=file:log4
 
 (Assuming the above log4j example is named `log4j.properties`)
 
+When initially configuring the logger, it can be helpful to put log4j in debug mode by adding
+`-D log4j.debug=true` to your java command string.
+
 ## Configuration for Standalone Application
 Add `log-appender-{version}.jar` to your classpath
 

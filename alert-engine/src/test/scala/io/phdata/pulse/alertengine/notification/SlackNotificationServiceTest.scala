@@ -18,37 +18,30 @@ package io.phdata.pulse.alertengine.notification
 
 import java.io.File
 
-import io.phdata.pulse.alertengine.{ AlertRule, SlackAlertProfile, TriggeredAlert }
+import io.phdata.pulse.alertengine.TestObjectGenerator
 import org.apache.solr.common.SolrDocument
 import org.scalatest.FunSuite
 
 import scala.io.Source.fromFile
 
 class SlackNotificationServiceTest extends FunSuite {
-  val doc: SolrDocument = new SolrDocument()
-  doc.addField("id", "123")
-  doc.addField("category", "test")
-  doc.addField("timestamp", "2018-04-06 10:15:00")
-  doc.addField("level", "FATAL")
-  doc.addField("message", "The service is down.")
-  doc.addField("threadName", "thread3")
-  doc.addField("throwable", "NullPointerException")
+  val doc: SolrDocument = TestObjectGenerator.solrDocument(threadName = "OXB Thread")
 
   val path         = "alert-engine/scripts/slack-webhook-url.txt"
   val slackUrlFile = new File(path)
 
-  val alertrule  = AlertRule("query0000000000", 10, Some(0), List("a", "slack"))
-  val alertrule2 = AlertRule("query222222", 20, Some(0), List("a", "slack"))
+  val alertRule = TestObjectGenerator.alertRule()
+  val alertRule2 = TestObjectGenerator.alertRule(retryInterval = 20)
 
-  val triggeredalert  = TriggeredAlert(alertrule, "Spark", Seq(doc), 12)
-  val triggeredalert2 = TriggeredAlert(alertrule2, "PipeWrench", Seq(doc), 14)
+  val triggeredAlert = TestObjectGenerator.triggeredAlert(totalNumFound = 12)
+  val triggeredAlert2 = TestObjectGenerator.triggeredAlert(totalNumFound = 14)
 
   test("sending a triggered alert to a slack profile") {
     if (slackUrlFile.exists) {
       val token        = fromFile(path).getLines.mkString
-      val profile      = SlackAlertProfile("a", token)
+      val profile = TestObjectGenerator.slackAlertProfile(name = "testProfile", url = token)
       val slackService = new SlackNotificationService()
-      slackService.notify(Seq(triggeredalert), profile)
+      slackService.notify(Seq(triggeredAlert), profile)
     } else {
       println("no slack webhook url, skip the test")
     }
@@ -57,9 +50,9 @@ class SlackNotificationServiceTest extends FunSuite {
   test("sending two triggered alerts to a slack profile") {
     if (slackUrlFile.exists) {
       val token        = fromFile(path).getLines.mkString
-      val profile      = SlackAlertProfile("b", token)
+      val profile = TestObjectGenerator.slackAlertProfile(name = "testProfile", url = token)
       val slackService = new SlackNotificationService()
-      slackService.notify(Seq(triggeredalert, triggeredalert2), profile)
+      slackService.notify(Seq(triggeredAlert, triggeredAlert2), profile)
     } else {
       println("no slack webhook url, skip the test")
     }

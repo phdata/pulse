@@ -37,7 +37,7 @@ object SparkLog4jExample {
     val conf = new SparkConf().setAppName("Pulse Spark Logging Example")
     val sc   = SparkContext.getOrCreate(conf)
 
-    val testData = 1 to 10000
+    val testData = 1 to 1000000
     val testRdd  = sc.parallelize(testData)
 
     // put the applicationId in a variable so it can be serialized and sent to the executors where [[sc]] is not available.
@@ -60,14 +60,17 @@ object SparkLog4jExample {
 
     testRdd.foreach { num =>
       LoggingConfiguration.init // initialized once on first record, value is thrown away an nothing done for other records
-      if (num % 100 == 0) {
-        log.warn(s"found num: " + num)
+      if (num % 10000 == 0) {
+        log.error(s"XXXXX error! num: " + num)
+      } else if (num % 5000 == 0) {
+        log.warn(s"XXXXX warning! num: " + num)
       } else {
-        log.info(s"error: " + num)
+        log.info(s"XXXXX found: " + num)
       }
     }
 
     log.info("Shutting down the spark logging example")
+    sc.stop()
   }
 
 }
