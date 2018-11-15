@@ -1,49 +1,54 @@
-# Arcadia Data
+# Pulse Data Visualization using Arcadia
+- Visualizing pulse data using Arcadia
+- Arcadia is the first visual analytics and BI software that runs natively within modern data platforms such as Apache Hadoop and the cloud
+- Read [here](https://www.arcadiadata.com) for more information
 
-## Importing Dashboard
-Steps to Import Arcadia data dashboard.
+## Data visualization using sample arcadia dashboard extract `pulse.json`
+
+### Create new solr connection
+- If Solr connection is not existing in Arcadia Data, create one using this link [Creating New Apache Solr Connection](http://documentation.arcadiadata.com/4.3.0.0/#pages/topics/conn-solr.html)
 
 
-1. If Solr connection is not existing in Arcadia Data, create one using this link [Creating New Apache Solr Connection](http://documentation.arcadiadata.com/4.3.0.0/#pages/topics/conn-solr.html).
-2. Follow this Arcadia data document to [Import dashboard](http://documentation.arcadiadata.com/4.3.0.0/#pages/topics/import-dash.html). But instead of using `Documentation` connection mentioned in this document use the connection we created in previous step.\
-\
-Refer to below screenshots while following the `import dashboard` document.\
+### Create new dataset
+- Sign into Arcadia
+- Click on `DATA`
+![click data](images/click_data.png)
+
+- Go to `solr` connection created in the previous steps and click on `NEW DATASET`
 ![import visual artifact](images/import-visual-artifact.png)
-\
-Click on import visual artifacts.
-\
+
+- Enter your Dataset title, use `solr` as database and finally select the solr collection that you want
+![new dataset detail](images/new_dataset_details.png)
+
+- Click `CREATE`
+- You should be able to see the new dataset created
+![check new dataset](images/check_new_dataset.png)
+
+
+### Replace `dataset_name` from `pulse.json`
+- Use `replace_dataset_name.sh` script to replace dataset_name in pulse.json with new dataset_name created in the last step
+- command `./replace_dataset_name.sh pulse.json new_dataset_name`
+- `pulse.json` is ready to be imported
+
+
+### Importing dashboard
+- Refer to below screenshots while following the [import dashboard](http://documentation.arcadiadata.com/4.3.0.0/#pages/topics/import-dash.html) document
+![import visual artifact](images/import-visual-artifact.png)
+
+- Click on import visual artifacts
 ![import visual artifact](images/import-vis-artifacts.png)
-\
-Choose `pulse.json` file and click on `import`.
-\
+
+- Choose `pulse.json` file and click on `import`
 ![choose pulse](images/choose-pulse.png)
-\
-Click on `Accept and Import`.
-\
+
+- Click on `Accept and Import`, also check `dataset` at the bottom
 ![accept and import](images/accept-import.png)
-\
-Make sure success message appeared on window.
-\
+
+- Make sure success message appeared on window
 ![import-success](images/import-success.png)
-\
-Look for phData Pulse dashboard in visuals private as shown below.
-\
+
+- Look for phData Pulse dashboard in visuals private as shown below.
 ![image](images/check-import-success.png)
 
-3. After importing dashboard, confirm that the Dataset and Visuals imported successfully. Click Data in the top navigation menu and you must be able see `solr_test_dataset` got created. Dataset connections, Solr collection table names, Visuals are all customizable.\
-\
-![dataset check](images/import-visual-artifact.png)
-4. Click on `solr_test_dataset` and explore the options.\
-\
-![explore dataset](images/explore-dataset.png)\
-\
-Use edit button to change Dataset name, Solr collection table name to desired. Change the table name to solr collection `solr.<collection name>` where you are storing the logs captured by **Pulse** log-collector.\
-\
-![data model](images/data_model.png)\
-\
-Change the Solr collection name from `logging-pulse-test` to desired collection name in you solr database.
-\
-![table browser](images/table_browser.png)
-5. Lastly examine the dashboard and functionality of filters. The dashboard will look similar to below screenshot.
-\
+- Lastly examine the dashboard and functionality of filters. The dashboard will look similar to below screenshot.
 ![visual examine](images/examine-visuals.png)
