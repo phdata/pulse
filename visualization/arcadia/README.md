@@ -1,7 +1,5 @@
 # Pulse Data Visualization using Arcadia
-- Visualizing pulse data using Arcadia
-- Arcadia is the first visual analytics and BI software that runs natively within modern data platforms such as Apache Hadoop and the cloud
-- Read [here](https://www.arcadiadata.com) for more information
+Arcadia is visual analytics and BI software that runs natively within modern data platforms such as Apache Hadoop and the cloud. Read [here](https://www.arcadiadata.com) for more information.
 
 ## Data visualization using sample arcadia dashboard extract `pulse.json`
 
