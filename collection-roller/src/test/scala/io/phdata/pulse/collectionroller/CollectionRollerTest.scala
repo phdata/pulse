@@ -184,4 +184,43 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
         .listCollections()
         .contains(s"${app2.name}_${initialTime.toInstant.getEpochSecond}"))
   }
+
+  test("create a new collection when latest collection doesn't exist") {
+    val appName     = TestUtil.randomIdentifier()
+    val initialTime = ZonedDateTime.now(ZoneOffset.UTC)
+    val secondTime  = initialTime.plusDays(1)
+
+    val collectionRoller = new CollectionRoller(solrService, initialTime)
+
+    val app =
+      Application(appName, None, None, None, None, "testconf")
+
+    collectionRoller.run(List(app))
+    collectionRoller.rollApplications(List(app))
+
+    //find all collections
+    val appCollections =
+      solrService
+        .listCollections()
+        .filter(_.startsWith(appName))
+
+    //delete application collections
+    appCollections.foreach { coll =>
+      solrService.deleteCollection(coll)
+
+    }
+
+    val collectionRoller2 =
+      new CollectionRoller(solrService, ZonedDateTime.parse(secondTime.toString))
+    collectionRoller2.rollApplications(List(app))
+
+    assert(
+      solrService
+        .listCollections()
+        .contains(s"${app.name}_${secondTime.toInstant.getEpochSecond}"))
+
+    assertResult(Some(Set(s"${app.name}_${secondTime.toInstant.getEpochSecond}")))(
+      solrService.getAlias(s"${app.name}_latest"))
+  }
+
 }
