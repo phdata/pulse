@@ -38,6 +38,9 @@
         <field name="throwable" type="text_general" indexed="true" stored="true" required="true"
                multiValued="false"/>
 
+        <field name="hostname" type="text_general" indexed="true" stored="true" required="false"
+               multiValued="false"/>
+
         <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
 
         <field name="_version_" type="long" indexed="true" stored="true"/>

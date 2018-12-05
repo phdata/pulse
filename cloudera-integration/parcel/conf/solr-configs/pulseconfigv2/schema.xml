@@ -35,6 +35,9 @@
         <field name="threadName" type="text_general" indexed="true" stored="true" required="false"
                multiValued="false"/>
 
+        <field name="hostname" type="text_general" indexed="true" stored="true" required="false"
+               multiValued="false"/>
+
         <field name="throwable" type="text_general" indexed="true" stored="true" required="false"
                multiValued="false"/>
 
