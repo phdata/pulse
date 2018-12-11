@@ -28,6 +28,8 @@ import scala.util.Try
  * 2) write the application id and hostname to the driver and executors MDC so they will be
  * searchable in the solr index.
  */
+
+
 object SparkLog4jExample {
 
   private val log = LoggerFactory.getLogger(this.getClass)
@@ -40,26 +42,7 @@ object SparkLog4jExample {
     val testData = 1 to 1000000
     val testRdd  = sc.parallelize(testData)
 
-    // put the applicationId in a variable so it can be serialized and sent to the executors where [[sc]] is not available.
-    val applicationId = sc.applicationId
-    // set the application id of the driver
-    org.apache.log4j.MDC.put("application_id", applicationId)
-
-    /**
-     * This lazy initializer will put the  hostname and application_id on the executors
-     * Any values added to the MDC will be sent to the log collector and available for searching
-     *
-     */
-    object LoggingConfiguration {
-      lazy val init = {
-        setMdcAppId
-      }
-      private lazy val setMdcAppId = Try(MDC.put("application_id", applicationId))
-        .getOrElse(log.warn(s"Error setting application id"))
-    }
-
     testRdd.foreach { num =>
-      LoggingConfiguration.init // initialized once on first record, value is thrown away an nothing done for other records
       if (num % 10000 == 0) {
         log.error(s"XXXXX error! num: " + num)
       } else if (num % 5000 == 0) {

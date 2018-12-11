@@ -3,15 +3,18 @@ package io.phdata.pulse.log;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
+import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.*;
 
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 
 public class HttpAppenderTest {
+
+  private static final String SPARK_LOG_DIR = "/data1/yarn/container-logs/application_1542215373081_0707/container_1542215373081_0707_01_000002";
+  private static final String APP_ID = "application_1542215373081_0707";
+  private static final String CONTAINER_ID = "01_000002";
 
   @Mock
   private HttpManager httpManager;
@@ -76,6 +79,38 @@ public class HttpAppenderTest {
 
     assert (sendArgument.getValue().contains("\"hostname\":"));
   }
+
+  @Test
+  public void testApplicationIdAndContainerIdAppended() {
+    try {
+      System.setProperty(Util.YARN_LOG_DIR_SYSTEM_PROPERTY, SPARK_LOG_DIR);
+      System.setProperty(Util.YARN_APP_ID_PROPERTY, APP_ID);
+
+      Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
+
+      LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, 1, Level.ERROR, "Hello, World",
+              "main", null, "ndc", null, null);
+
+      ArgumentCaptor<String> sendArgument = ArgumentCaptor.forClass(String.class);
+
+      HttpAppender appender = new HttpAppender();
+
+      appender.setHttpManager(httpManager);
+      // first event should call 'send' since we are sending an error message
+      appender.append(event);
+
+      Mockito.verify(httpManager).send(sendArgument.capture());
+
+      System.out.println(sendArgument.getValue());
+      Assert.assertTrue(sendArgument.getValue().contains("\"application_id\":\"application_1542215373081_0707\""));
+      Assert.assertTrue(sendArgument.getValue().contains("\"container_id\":\"01_000002\""));
+    } finally {
+      System.clearProperty(Util.YARN_LOG_DIR_SYSTEM_PROPERTY);
+      System.clearProperty(Util.YARN_APP_ID_PROPERTY);
+    }
+  }
+
+
 
 }
 

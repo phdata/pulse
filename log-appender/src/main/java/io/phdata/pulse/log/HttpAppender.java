@@ -16,14 +16,15 @@
 
 package io.phdata.pulse.log;
 
+import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.helpers.LogLog;
+import org.apache.log4j.spi.LoggingEvent;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.helpers.LogLog;
-import org.apache.log4j.spi.LoggingEvent;
 
 /**
  * An HTTP log appender implementation for Log4j 1.2.x
@@ -35,6 +36,16 @@ import org.apache.log4j.spi.LoggingEvent;
 public class HttpAppender extends AppenderSkeleton {
 
   private static final String HOSTNAME = "hostname";
+  private static final String SPARK_CONTAINER_ID = "container_id";
+  private static final String SPARK_APPLICATION_ID = "application_id";
+
+
+  private boolean isSparkApplication = false;
+
+  // Visible for testing
+  protected boolean verifiedSparkApplication = false;
+  private String applicationId = "";
+  private String containerId = "";
 
   private final List<LoggingEvent> buffer = new ArrayList<>();
 
@@ -61,15 +72,22 @@ public class HttpAppender extends AppenderSkeleton {
 
   public HttpAppender() {
     try {
-      hostname = java.net.InetAddress.getLocalHost().getHostName();
+      this.hostname = java.net.InetAddress.getLocalHost().getHostName();
     } catch (UnknownHostException e) {
       LogLog.error("Could not set hostname: " + e, e);
+    }
+
+    this.verifiedSparkApplication = Util.isSparkApplication();
+    if (verifiedSparkApplication) {
+        this.applicationId = Util.getApplicationId();
+        this.containerId = Util.getContainerId();
     }
   }
 
   /**
    * Append an event to the buffer.
    * All events will be flushed ff the event is ERROR level or the buffer has reached its max size.
+   *
    * @param event The log event.
    */
   @Override
@@ -78,13 +96,18 @@ public class HttpAppender extends AppenderSkeleton {
       event.setProperty(HOSTNAME, hostname);
     }
 
+    if (this.verifiedSparkApplication) {
+      event.setProperty(SPARK_APPLICATION_ID, this.applicationId);
+      event.setProperty(SPARK_CONTAINER_ID, this.containerId);
+    }
+
     // log immediately if dispatcher thread is dead
     if ((dispatcher == null) || !dispatcher.isAlive() || (bufferSize <= 0)) {
       String json;
       try {
         json = jsonParser.marshallEvent(event);
       } catch (IOException e) {
-          throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
       httpManager.send(json);
       return;
@@ -119,8 +142,8 @@ public class HttpAppender extends AppenderSkeleton {
         //   if blocking and thread is not already interrupted and not the dispatcher then wait for a buffer notification
         boolean discard = true;
         if (blocking
-            && !Thread.interrupted()
-            && Thread.currentThread() != dispatcher) {
+                && !Thread.interrupted()
+                && Thread.currentThread() != dispatcher) {
           try {
             buffer.wait();
             discard = false;
@@ -158,8 +181,8 @@ public class HttpAppender extends AppenderSkeleton {
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       org.apache.log4j.helpers.LogLog.error(
-          "Got an InterruptedException while waiting for the "
-              + "dispatcher to finish.", e);
+              "Got an InterruptedException while waiting for the "
+                      + "dispatcher to finish.", e);
     }
 
     try {
@@ -184,6 +207,7 @@ public class HttpAppender extends AppenderSkeleton {
 
   /**
    * Force bufferSize to be at least 1.
+   *
    * @param size must be greater than zero
    */
   public void setBufferSize(int size) {
@@ -195,6 +219,7 @@ public class HttpAppender extends AppenderSkeleton {
 
   /**
    * Determine if the appender should block when the buffer is full. Default value is true.
+   *
    * @param blocking boolean
    */
   public void setBlocking(boolean blocking) {
@@ -250,8 +275,8 @@ public class HttpAppender extends AppenderSkeleton {
     /**
      * Create new instance of dispatcher.
      *
-     * @param parent parent AsyncAppender, may not be null.
-     * @param buffer event buffer, may not be null.
+     * @param parent  parent AsyncAppender, may not be null.
+     * @param buffer  event buffer, may not be null.
      * @param manager http connection manager, may not be null.
      */
     Dispatcher(final HttpAppender parent, final List<LoggingEvent> buffer, final HttpManager manager) {
