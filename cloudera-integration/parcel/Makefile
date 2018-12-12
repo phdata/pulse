@@ -1,4 +1,5 @@
-parcelVersion = $(shell sh ./parcelVersion)
+projectVersion = $(shell make --no-print-directory --silent -C ../../ version)
+parcelVersion = $(projectVersion)-cdh5
 packageName = PULSE-$(parcelVersion)
 distro7 = PULSE-$(parcelVersion)-el7
 distro6 = PULSE-$(parcelVersion)-el6
