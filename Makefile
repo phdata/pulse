@@ -28,7 +28,7 @@ libdir:
 	mkdir -p target/lib/appenders
 
 parcel: package
-	$(MAKE) -C cloudera-integration/parcel/ parcel
+	$(MAKE) -C cloudera-integration/parcel/ package
 
 clean:
 	sbt clean
