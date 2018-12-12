@@ -58,11 +58,11 @@ lazy val dependencies =
 
     val sprayJson = "io.spray" %% "spray-json" % sprayJsonVersion
 
-    val spark = "org.apache.spark" %% "spark-core" % sparkVersion % "provided"
+    val spark = "org.apache.spark" %% "spark-core" % sparkVersion % Provided
     // Testing depends
-    val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
-    val scalaDockerTest = "com.whisk" %% "docker-testkit-scalatest" % dockerTestKitVersion % "test"
-    val spotifyDockerTest = "com.whisk" %% "docker-testkit-impl-spotify" % dockerTestKitVersion % "test"
+    val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
+    val scalaDockerTest = "com.whisk" %% "docker-testkit-scalatest" % dockerTestKitVersion % Test
+    val spotifyDockerTest = "com.whisk" %% "docker-testkit-impl-spotify" % dockerTestKitVersion % Test
 
     val solrj = "org.apache.solr" % "solr-solrj" % solrjVersion
 
@@ -90,13 +90,13 @@ lazy val dependencies =
     val javaMail = "javax.mail" % "mail" % javaMailVersion
 
     // log-appender
-    val log4j = "log4j" % "log4j" % log4jVersion % "provided"
+    val log4j = "log4j" % "log4j" % log4jVersion % Provided
     val httpClient = "org.apache.httpcomponents" % "httpclient" % httpClientVersion
     val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion
     val jacksonCore = "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion
 
-    val junit = "junit" % "junit" % junitVersion % "test"
-    val junitInterface = "com.novocode" % "junit-interface" % "0.11" % "test"
+    val junit = "junit" % "junit" % junitVersion % Test
+    val junitInterface = "com.novocode" % "junit-interface" % "0.11" % Test
     val cats = "org.typelevel" %% "cats-core" % "1.1.0"
 
     val common = Seq(scalaLogging, scalaTest, logback, commonsLogging, cats)
@@ -123,36 +123,33 @@ lazy val `log-collector` = project
     name := "log-collector",
     mainClass in Compile := Some("io.phdata.pulse.logcollector.LogCollector"),
     settings,
-    retrieveManaged := true,
     libraryDependencies ++= dependencies.http ++ Seq(dependencies.scallop)
-  ).dependsOn(`test-common` % "test").dependsOn(common)
+  ).dependsOn(`test-common` % Test).dependsOn(common)
 
 lazy val `collection-roller` = project
   .settings(
     name := "collection-roller",
     mainClass in Compile := Some("io.phdata.pulse.logcollector.roller.CollectionRollerMain"),
     settings,
-    retrieveManaged := true,
     libraryDependencies ++= dependencies.common
       ++ Seq(dependencies.scalaYaml, dependencies.scallop)
-  ).dependsOn(`test-common` % "test").dependsOn(common)
+  ).dependsOn(`test-common` % Test).dependsOn(common)
 
 lazy val `alert-engine` = project
   .settings(
     name := "alert-engine",
     mainClass in Compile := Some("io.phdata.pulse.alertengine.AlertEngineMain"),
     settings,
-    retrieveManaged := true,
     libraryDependencies ++= dependencies.common ++ dependencies.solr ++ Seq(dependencies.javaMail) ++ Seq(dependencies.scalaYaml, dependencies.sprayJson,
       dependencies.scallop) ++ dependencies.mocking
-  ).dependsOn(`test-common` % "test").dependsOn(common)
+  ).dependsOn(`test-common` % Test).dependsOn(common)
 
 lazy val `common` = project
   .settings(
     name := "common",
     settings,
     libraryDependencies ++= dependencies.common ++ dependencies.solr ++ dependencies.http
-  ).dependsOn(`test-common` % "test")
+  ).dependsOn(`test-common` % Test)
 
 lazy val `test-common` = project
   .settings(
