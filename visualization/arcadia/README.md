@@ -23,9 +23,10 @@ Arcadia is visual analytics and BI software that runs natively within modern dat
 ![check new dataset](images/check_new_dataset.png)
 
 
-### Replace `dataset_name` from `pulse.json`
-- Use `replace_dataset_name.sh` script to replace dataset_name in pulse.json with new dataset_name created in the last step
-- command `./replace_dataset_name.sh pulse.json new_dataset_name`
+### Replace dataset_name and dataset_detail from `pulse.json`
+- Use `replace_dataset_name.sh` script to replace dataset_name and dataset_detail in pulse.json
+- For the new dataset created in the last step, dataset_name is `new_solr_test_dataset` and dataset_detail is `Solr.logging-pulse-test_all`
+- command `./replace_dataset_name.sh pulse.json new_dataset_name new_dataset_detail`
 - `pulse.json` is ready to be imported
 
 
