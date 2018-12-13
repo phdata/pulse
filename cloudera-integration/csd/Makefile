@@ -1,7 +1,9 @@
-csdVersion = $(shell sh ./csdVersion)
+projectVersion = $(shell make --no-print-directory --silent -C ../../ version)
+csdVersion = $(projectVersion)-cdh5
+
 packageName = PULSE-$(csdVersion)
 
-csd: clean
+package: clean
 	mkdir -p target/$(packageName)
 	echo building jar
 	cp -r aux images scripts target/$(packageName)

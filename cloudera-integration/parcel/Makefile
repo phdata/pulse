@@ -1,9 +1,10 @@
-parcelVersion = $(shell sh ./parcelVersion)
+projectVersion = $(shell make --no-print-directory --silent -C ../../ version)
+parcelVersion = $(projectVersion)-cdh5
 packageName = PULSE-$(parcelVersion)
 distro7 = PULSE-$(parcelVersion)-el7
 distro6 = PULSE-$(parcelVersion)-el6
 
-parcel: clean jars meta conf
+package: clean jars meta conf
 	../validator -d target/$(packageName)/
 	tar  zcvf target/$(distro7).parcel -C target $(packageName)/
 	../validator -f target/$(distro7).parcel

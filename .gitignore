@@ -6,7 +6,6 @@ project/target
 *.keytab
 alert-engine/scripts/mail-password.txt
 alert-engine/scripts/slack-webhook-url.txt
-lib_managed
 *.log
 dist
 jaas.conf
