@@ -28,7 +28,7 @@ dir:
 	mkdir -p target/$(packageName)/lib
 
 jars: dir 
-	cp -r ../../target/lib/ target/$(packageName)/
+	cp -r ../../target/lib target/$(packageName)/
 
 meta: dir
 	mkdir target/$(packageName)/meta
