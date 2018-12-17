@@ -16,10 +16,10 @@
 
 package io.phdata.pulse.collectionroller
 
-import java.io.{File, FileNotFoundException}
+import java.io.{ File, FileNotFoundException }
 import java.nio.file.Paths
 import java.time.temporal.ChronoUnit
-import java.time.{Instant, ZoneOffset, ZonedDateTime}
+import java.time.{ Instant, ZoneOffset, ZonedDateTime }
 
 import cats.data.Validated
 import cats.implicits._

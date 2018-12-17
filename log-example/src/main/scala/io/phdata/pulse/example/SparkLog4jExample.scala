@@ -28,8 +28,6 @@ import scala.util.Try
  * 2) write the application id and hostname to the driver and executors MDC so they will be
  * searchable in the solr index.
  */
-
-
 object SparkLog4jExample {
 
   private val log = LoggerFactory.getLogger(this.getClass)
