@@ -77,6 +77,10 @@ Visualization and search works with:
 - Simple deployment using CSDs and Parcels
 - Manage and monitor Pulse from within Cloudera Manager
 
+Pulse is used for centralized logging. This diagram compares Pulse to other tools given use cases:
+
+![Arch diagram](images/pulse-vs-cm.png)
+
 ## Adding an application to Pulse
 If a new application wants to use Pulse, a block should be created in the Collection Roller config.yml
 file and the Alert Engine config.yml file. See the [Alert Engine readme](./alert-engine/README.md)
