@@ -18,7 +18,7 @@ package io.phdata.pulse.alertengine
 
 import java.time.ZonedDateTime
 
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
+import org.scalatest.{ BeforeAndAfterEach, FunSuite }
 
 class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
   override def beforeEach(): Unit = {
@@ -27,7 +27,7 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("adding a duplicate alert to the db updates the sleep time") {
-    val alertRule = TestObjectGenerator.alertRule()
+    val alertRule  = TestObjectGenerator.alertRule()
     val firstTime  = ZonedDateTime.now()
     val secondTime = firstTime.plusMinutes(6)
 
@@ -38,14 +38,14 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
 
   test("notify on an unseen alert") {
     val alertRule = TestObjectGenerator.alertRule()
-    val now   = ZonedDateTime.now()
+    val now       = ZonedDateTime.now()
 
     assertResult(true)(AlertsDb.shouldCheck("app1", alertRule, now))
   }
 
   test("don't notify inside alert window") {
     val alertRule = TestObjectGenerator.alertRule()
-    val now   = ZonedDateTime.now()
+    val now       = ZonedDateTime.now()
 
     AlertsDb.markTriggered("app1", alertRule, now)
 
@@ -54,7 +54,7 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
 
   test("notify on second application with the same alert rule") {
     val alertRule = TestObjectGenerator.alertRule()
-    val now   = ZonedDateTime.now()
+    val now       = ZonedDateTime.now()
 
     AlertsDb.markTriggered("app1", alertRule, now)
 
@@ -63,7 +63,7 @@ class AlertsDbTest extends FunSuite with BeforeAndAfterEach {
 
   test("don't alert on an alert that was just checked") {
     val alertRule = TestObjectGenerator.alertRule()
-    val now   = ZonedDateTime.now()
+    val now       = ZonedDateTime.now()
 
     AlertsDb.markTriggered("app1", alertRule, now)
 

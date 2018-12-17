@@ -25,14 +25,19 @@ import scala.io.Source._
 class MailNotificationServiceTest extends FunSuite {
   val doc: SolrDocument = TestObjectGenerator.solrDocument()
 
-  val alertRule = TestObjectGenerator.alertRule()
+  val alertRule  = TestObjectGenerator.alertRule()
   val alertRule2 = TestObjectGenerator.alertRule(retryInterval = 20)
 
-  val profile = TestObjectGenerator.mailAlertProfile(name = "testProfile1", addresses = List("testing@phdata.io"))
-  val profile2 = TestObjectGenerator.mailAlertProfile(name = "testProfile2", addresses = List("testing1@phdata.io", "testing@phdata.io"))
+  val profile = TestObjectGenerator.mailAlertProfile(name = "testProfile1",
+                                                     addresses = List("testing@phdata.io"))
+  val profile2 = TestObjectGenerator.mailAlertProfile(
+    name = "testProfile2",
+    addresses = List("testing1@phdata.io", "testing@phdata.io"))
 
-  val triggeredAlert = TestObjectGenerator.triggeredAlert(applicationName = "Spark", totalNumFound = 23)
-  val triggeredAlert2 = TestObjectGenerator.triggeredAlert(applicationName = "Pipewrench", totalNumFound = 15)
+  val triggeredAlert =
+    TestObjectGenerator.triggeredAlert(applicationName = "Spark", totalNumFound = 23)
+  val triggeredAlert2 =
+    TestObjectGenerator.triggeredAlert(applicationName = "Pipewrench", totalNumFound = 15)
 
   test("sending one email to an address") {
     if (new java.io.File("alert-engine/scripts/mail-password.txt").exists) {
