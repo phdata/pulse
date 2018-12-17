@@ -1,0 +1,37 @@
+- hosts: all
+  become: true
+  vars:
+    dist_path: ../dist
+    csd_name: "PULSE-{{ version }}-cdh5.jar"
+    parcel_name: "PULSE-{{ version }}-cdh5-el7.parcel"
+  tasks:
+  - name: Remove csd
+    file:
+      state: absent
+      path: "/opt/cloudera/csd/{{ csd_name }}"
+  - name: Install csd
+    copy:
+      src: "{{ dist_path }}/{{ csd_name }}"
+      dest: "/opt/cloudera/csd/{{ csd_name }}"
+      owner: cloudera-scm
+      group: cloudera-scm
+      mode: 0644
+  - name: Remove parcel
+    file:
+      state: absent
+      path: "/opt/cloudera/parcel-repo/{{ parcel_name }}"
+    ignore_errors: true
+  - name: Install parcel
+    copy:
+      src: "{{ dist_path }}/{{ parcel_name }}"
+      dest: "/opt/cloudera/parcel-repo/{{ parcel_name }}"
+      owner: cloudera-scm
+      group: cloudera-scm
+      mode: 0644
+  - name: Install parcel sha
+    copy:
+      src: "{{ dist_path }}/{{ parcel_name }}.sha"
+      dest: "/opt/cloudera/parcel-repo/{{ parcel_name }}.sha"
+      owner: cloudera-scm
+      group: cloudera-scm
+      mode: 0644
