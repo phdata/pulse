@@ -11,6 +11,10 @@ package: clean jars meta conf
 	tar  zcvf target/$(distro6).parcel -C target $(packageName)/
 	../validator -f target/$(distro6).parcel
 	$(MAKE) sha
+	$(MAKE) manifest
+
+version:
+	printf $(parcelVersion)
 
 install:
 	cp target/$(distro7).parcel* /opt/cloudera/parcel-repo
@@ -44,6 +48,9 @@ validate-parcel-json: parcel
 
 validate-alternatives-json: parcel
 	../validator -a target/$(packageName)/meta/alternatives.json
+
+manifest:                                                                          
+	./make_manifest.py target 
 
 clean:
 	rm -rf target

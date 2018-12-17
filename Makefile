@@ -19,6 +19,7 @@ version:
 dist: parcel csd
 	mkdir -p dist
 	cp cloudera-integration/parcel/target/*.parcel* dist
+	cp cloudera-integration/parcel/target/*.json dist
 	cp cloudera-integration/csd/target/*.jar* dist
 
 sbt-package:
