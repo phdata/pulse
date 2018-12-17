@@ -18,13 +18,17 @@ package io.phdata.pulse.alertengine
 
 import java.io.File
 
-import io.phdata.pulse.alertengine.notification.{MailNotificationService, NotificationServices, SlackNotificationService}
-import io.phdata.pulse.common.{DocumentConversion, SolrService}
-import io.phdata.pulse.testcommon.{BaseSolrCloudTest, TestUtil}
+import io.phdata.pulse.alertengine.notification.{
+  MailNotificationService,
+  NotificationServices,
+  SlackNotificationService
+}
+import io.phdata.pulse.common.{ DocumentConversion, SolrService }
+import io.phdata.pulse.testcommon.{ BaseSolrCloudTest, TestUtil }
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 import org.mockito.Mockito
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, FunSuite}
+import org.scalatest.{ BeforeAndAfterEach, FunSuite }
 
 class AlertEngineImplTest
     extends FunSuite
@@ -61,7 +65,12 @@ class AlertEngineImplTest
     val result = solrService.createCollection(alias, 1, 1, CONF_NAME, null)
 
     val document = DocumentConversion.toSolrDocument(TestObjectGenerator.logEvent())
-    val documentError = DocumentConversion.toSolrDocument(TestObjectGenerator.logEvent(id = None, category = "ERROR", level = "ERROR2", message = "message2", throwable = Some("Exception in thread main")))
+    val documentError = DocumentConversion.toSolrDocument(
+      TestObjectGenerator.logEvent(id = None,
+                                   category = "ERROR",
+                                   level = "ERROR2",
+                                   message = "message2",
+                                   throwable = Some("Exception in thread main")))
 
     solrClient.add(document)
 
@@ -75,7 +84,10 @@ class AlertEngineImplTest
   }
 
   test("get active alert") {
-    val alertRule = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1, resultThreshold = Some(1), alertProfiles = List("test@phdata.io"))
+    val alertRule = TestObjectGenerator.alertRule(query = "category: ERROR",
+                                                  retryInterval = 1,
+                                                  resultThreshold = Some(1),
+                                                  alertProfiles = List("test@phdata.io"))
 
     val engine =
       new AlertEngineImpl(
@@ -117,8 +129,8 @@ class AlertEngineImplTest
     val engine =
       new AlertEngineImpl(null, new NotificationServices(mailNotificationService, null))
 
-    val triggeredAlert = TestObjectGenerator.triggeredAlert(documents = null)
-    val app = Application("testApp", List(alertRule), Some(List(mailAlertProfile)), None)
+    val triggeredAlert  = TestObjectGenerator.triggeredAlert(documents = null)
+    val app             = Application("testApp", List(alertRule), Some(List(mailAlertProfile)), None)
     val triggeredAlerts = List(triggeredAlert)
 
     engine.sendAlert(app, "mailprofile1", triggeredAlerts)
@@ -127,15 +139,16 @@ class AlertEngineImplTest
   }
 
   test("Slack profile is matched from AlertRule to Application") {
-    val profileName       = "slackProfile1"
-    val slackAlertProfile = TestObjectGenerator.slackAlertProfile(name = profileName, url = "https://slack.com")
+    val profileName = "slackProfile1"
+    val slackAlertProfile =
+      TestObjectGenerator.slackAlertProfile(name = profileName, url = "https://slack.com")
 
     val alertRule = TestObjectGenerator.alertRule()
     val engine =
       new AlertEngineImpl(null, new NotificationServices(null, slackNotificationService))
 
-    val triggeredAlert = TriggeredAlert(alertRule, "Spark", null, 1)
-    val app = Application("testApp", List(alertRule), None, Some(List(slackAlertProfile)))
+    val triggeredAlert  = TriggeredAlert(alertRule, "Spark", null, 1)
+    val app             = Application("testApp", List(alertRule), None, Some(List(slackAlertProfile)))
     val triggeredAlerts = List(triggeredAlert)
 
     engine.sendAlert(app, profileName, triggeredAlerts)
@@ -149,11 +162,11 @@ class AlertEngineImplTest
         null,
         new NotificationServices(mailNotificationService, slackNotificationService))
 
-    val alertRule = TestObjectGenerator.alertRule(query = "spark1query")
+    val alertRule  = TestObjectGenerator.alertRule(query = "spark1query")
     val alertRule1 = TestObjectGenerator.alertRule(query = "spark2query1")
     val alertRule2 = TestObjectGenerator.alertRule(query = "spark2query2")
-    val App1 = Application("spark1", List(alertRule), None, None)
-    val App2 = Application("spark2", List(alertRule1, alertRule2), None, None)
+    val App1       = Application("spark1", List(alertRule), None, None)
+    val App2       = Application("spark2", List(alertRule1, alertRule2), None, None)
 
     val triggeredAlerts =
       List(
@@ -176,8 +189,8 @@ class AlertEngineImplTest
 
     val alertRule = TestObjectGenerator.alertRule()
 
-    val activeApp = Application("activeApp", List(alertRule), None, None)
-    val silencedApp = Application("silencedApp", List(alertRule), None, None)
+    val activeApp        = Application("activeApp", List(alertRule), None, None)
+    val silencedApp      = Application("silencedApp", List(alertRule), None, None)
     val silencedAppNames = List("silencedApp")
 
     val engine =
@@ -190,7 +203,9 @@ class AlertEngineImplTest
   }
 
   test("mark alert triggered on results found > 0") {
-    val alertRule = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1, alertProfiles = List("testing@tester.com"))
+    val alertRule = TestObjectGenerator.alertRule(query = "category: ERROR",
+                                                  retryInterval = 1,
+                                                  alertProfiles = List("testing@tester.com"))
     val engine =
       new AlertEngineImpl(
         solrClient,

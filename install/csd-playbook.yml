@@ -1,0 +1,12 @@
+- hosts: all
+  become: true
+  vars:
+    csd_file: "PULSE-{{ version }}-cdh5.jar"
+  tasks:
+  - name: Install csd
+    get_url:
+      url: https://repository.phdata.io/artifactory/list/parcels-release/phdata/pulse/{{ version }}/{{ csd_file }}
+      dest: "/opt/cloudera/csd/{{ csd_file }}"
+      owner: cloudera-scm
+      group: cloudera-scm
+      mode: 0644

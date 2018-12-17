@@ -1,7 +1,10 @@
 .idea
+penv
+.envrc
 target
 project/target
 .DS_store
+*.retry
 *.iml
 *.keytab
 alert-engine/scripts/mail-password.txt
