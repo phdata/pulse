@@ -32,6 +32,12 @@
         <field name="message" type="text_general" indexed="true" stored="true" required="true"
                multiValued="false"/>
 
+        <field name="container_id" type="text_general" indexed="true" stored="true" required="false"
+               multiValued="false"/>
+
+        <field name="application_id" type="text_general" indexed="true" stored="true" required="false"
+               multiValued="false"/>
+
         <field name="threadName" type="text_general" indexed="true" stored="true" required="false"
                multiValued="false"/>
 
