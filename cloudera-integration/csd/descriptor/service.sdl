@@ -20,7 +20,7 @@
   ],
   "parcel" : {
     "requiredTags" : [ "pulse" ],
-    "repoUrl" : "http://downloads.phdata.io/cdh5/parcels"
+    "repoUrl" : "https://repository.phdata.io/artifactory/list/parcels-release/phdata/pulse/{{ version }}"
   },
   "roles": [
     {
