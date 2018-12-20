@@ -4,6 +4,7 @@ set -euo pipefail
 echo starting deploy
 
 projectVersion=$(make --no-print-directory --silent version)
+repoName=${projectVersion}-cdh5
 parcelVersion=$(make --no-print-directory --silent -C cloudera-integration/parcel version)
 
 curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/manifest.json "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${projectVersion}/manifest.json"

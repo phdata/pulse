@@ -1,7 +1,7 @@
 projectVersion = $(shell make --no-print-directory --silent -C ../../ version)
-csdVersion = $(projectVersion)-cdh5
 
-packageName = PULSE-$(csdVersion)
+packageName = PULSE-$(projectVersion)-cdh5
+csdVersion = $(projectVersion)-cdh5
 
 package: clean
 	mkdir -p target/$(packageName)
@@ -9,6 +9,7 @@ package: clean
 	cp -r aux images scripts target/$(packageName)
 	mkdir target/$(packageName)/descriptor
 	sed 's/{{ version }}/$(csdVersion)/' < descriptor/service.sdl > target/$(packageName)/descriptor/service.sdl
+
 	jar -cvf target/$(packageName).jar -C target/$(packageName) .
 	sha1sum target/$(packageName).jar | awk '{ print $$1 }' > target/$(packageName).jar.sha
 	$(MAKE) validate
