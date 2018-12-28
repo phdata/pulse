@@ -1,6 +1,7 @@
 # Collection Roller
 The log collector manages log indexes for applications.
 An application for the log collector consists of:
+
 - timestamped collections in the format <application_name>_<unixtime_created>. The 'timestamped' 
 collections hold the actual log data.
 - an alias pointing to the newest timestamped collection called <application_name>_latest. 
@@ -8,7 +9,7 @@ The 'latest' alias is used for any applications writing logs (like the Log Colle
 - an alias pointing to all collections called <application>_all. The 'all' alias is used for 
 searching all collections
 
-![collection-rolling](../images/collection-roller.png)
+![collection-rolling](images/collection-roller.png)
 
 If an application does not exist in Pulse the log collector will create the required aliases and
 indexes.
@@ -43,6 +44,7 @@ applications:
 ```
 
 At minimum, the configuration needs:
+
 - `solrConfigSetDir`: These Solr configurations can contain customized schema.xml and solrconfig.xml.
 The `solrConfigSetDir` can contain multiple configurations. The configurations will be looped over
 and uploaded to solr each time the Collection Roller runs.
@@ -51,6 +53,7 @@ and uploaded to solr each time the Collection Roller runs.
 `solrConfigSetName` must correspond to the name of a solr config directory in `solrConfigSetDir`
 
 Optional configuration for applications:
+
 - `numCollections`: The number of collections to keep when rolling collections. The default is 7
 - `rollPeriod`: Rollperiod in days. Default is 1.
 - `shards`: Number of shards for each collection. Default is 1.

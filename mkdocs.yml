@@ -1,0 +1,12 @@
+site_name: Pulse
+theme: readthedocs
+pages:
+  - index.md
+  - installation.md
+  - collection-roller.md
+  - log-appender.md
+  - log-collector.md
+  - alerting-engine.md
+  - building.md
+  - contributing.md
+
