@@ -1,14 +1,16 @@
 # Log Collector
 
 The Log Collector is an HTTP Server that listens for log events, batches them, and writes them 
-into a Solr Cloud cluster
+into a Solr Cloud cluster. The log collector removes the need for each application to authenticate
+with Kerberose (if enabled), and adds batching and queuing for log messages to increase the efficiency
+of writes to Solr Cloud.
 
-![log-collector](../images/log-collector.png)
+![log-collector](images/log-collector.png)
 
 Example usage:
 
 ```bash 
-    java -cp <log-collector-jar> xio.phdata.pulse.logcollector.LogCollector \
+    java -cp <log-collector-jar> io.phdata.pulse.logcollector.LogCollector \
     --port $WEBSERVER_PORT \
     --zk-hosts $SOLR_ZK_QUORUM
 ```

@@ -52,6 +52,11 @@ install-parcel: parcel
 install-csd: csd
 	$(MAKE) -C cloudera-integration/csd install
 
+.PHONY: version
+
 install: install-parcel install-csd
 
-.PHONY: version
+.PHONY: docs
+
+docs:
+	mkdocs serve
