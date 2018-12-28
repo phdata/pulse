@@ -3,7 +3,7 @@
 The Log Collector is an HTTP Server that listens for log events, batches them, and writes them 
 into a Solr Cloud cluster
 
-![log-collector](../images/log-collector.png)
+![log-collector](images/log-collector.png)
 
 Example usage:
 

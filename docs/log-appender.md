@@ -1,5 +1,5 @@
 
-# Java log appenders
+# Log Appenders
 
 ## Log4j 1.x appenders
 The log4j 1.x http appender will send a post message to the `log-collector` process with the
@@ -32,7 +32,6 @@ log4j.appender.http.layout.complete=true
 # when the connection to the log-collector is not available
 log4j.logger.io.phdata.pulse.shade.org.apache.http=off
 log4j.logger.io.phdata.pulse.shade.org.apache.wire=off
-
 ```
 
 It's recommended (for now) that the logs be written to file in addition to Pulse through the http 

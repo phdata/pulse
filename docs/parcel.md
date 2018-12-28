@@ -2,12 +2,14 @@
 
 ## Building the parcel
 At the root of the project, run 
+
 ```bash
 $ make package
 ```
 This will collect all dependent jars into the `lib_managed` folder
 
 Then from this directory run:
+
 ```bash
 $ make 
 ```

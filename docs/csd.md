@@ -1,4 +1,7 @@
-# Cloudera CSD (Custom Service Descriptor)
+# Cloudera CSD 
+The CSD (Custom Service Descriptor) allows Cloudera Manager to easily
+manage and monitor the Pulse log aggregation framework, creating 'roles'
+for each of the Alerting Engine, Collection Roller, and Log Collector.
 
 ## Building the CSD
 ```bash
