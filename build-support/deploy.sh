@@ -11,8 +11,8 @@ curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/manifest.json "https://repos
 curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/PULSE-${parcelVersion}-el7.parcel "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/PULSE-${parcelVersion}-el7.parcel"
 curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/PULSE-${parcelVersion}-el7.parcel.sha "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/PULSE-${parcelVersion}-el7.parcel.sha"
 
-curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/PULSE-${parcelVersion}-el7.parcel "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/PULSE-${parcelVersion}-el6.parcel"
-curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/PULSE-${parcelVersion}-el7.parcel.sha "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/PULSE-${parcelVersion}-el6.parcel.sha"
+curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/PULSE-${parcelVersion}-el6.parcel "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/PULSE-${parcelVersion}-el6.parcel"
+curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/PULSE-${parcelVersion}-el6.parcel.sha "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/PULSE-${parcelVersion}-el6.parcel.sha"
 
 curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/PULSE-${parcelVersion}.jar "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/PULSE-${parcelVersion}.jar"
 curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/PULSE-${parcelVersion}.jar.sha "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/PULSE-${parcelVersion}.jar.sha"
