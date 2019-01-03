@@ -24,7 +24,7 @@ import io.phdata.pulse.collectionroller.util.ValidationImplicits._
 import io.phdata.pulse.common.SolrService
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 
-import scala.util.Try
+import scala.util.{ Failure, Success, Try }
 
 object CollectionRollerMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES       = 5L // five minutes
@@ -150,25 +150,19 @@ object CollectionRollerMain extends LazyLogging {
       try {
         logger.info("starting Collection Roller run")
 
-        val configUploadResults =
-          config.solrConfigSetDir
-            .map(dir => Try(collectionRoller.uploadConfigsFromDirectory(dir)))
-            .toSeq
-            .toValidated()
-            .mapInvalid { e =>
-              logger.error("fatal error", e)
-              cleanupAndExit()
-            }
+        val configUploadResults: Try[Unit] =
+          collectionRoller.uploadConfigsFromDirectory(config.solrConfigSetDir)
+
+        configUploadResults match {
+          case Success(_) => logger.info("Successfully uploaded config sets.")
+          case Failure(e) => logger.error("Error uploading config sets", e)
+        }
 
         val collectionRollingResults =
           collectionRoller.run(config.applications)
 
-        val allResults = collectionRollingResults ++ configUploadResults
+        collectionRollingResults.mapInvalid(e => logger.error("fatal error", e))
 
-        if (allResults.exists(_.isInvalid)) {
-          allResults.mapInvalid(e => logger.error("fatal error", e))
-
-        }
         logger.info("ending Collection Roller run")
       } finally {
         collectionRoller.close()

@@ -67,6 +67,7 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
    * @param solrConfigSetDir Location of the ConfigSetDir
    */
   def uploadConfigsFromDirectory(solrConfigSetDir: String): Try[Unit] = Try {
+    logger.info(s"Uploading Solr config sets from directory $solrConfigSetDir")
     val directory = new File(solrConfigSetDir)
 
     if (!directory.exists()) {
@@ -75,6 +76,10 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
 
     val solrInstanceDirectories =
       directory.listFiles.filter(_.isDirectory).toList
+
+    if (solrInstanceDirectories.isEmpty) {
+      logger.warn(s"No solr instance directories found at: $solrConfigSetDir")
+    }
 
     logger.info(s"Attempting to upload directories ${solrInstanceDirectories.mkString(" ")}")
 

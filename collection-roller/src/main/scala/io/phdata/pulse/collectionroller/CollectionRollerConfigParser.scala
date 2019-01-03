@@ -45,7 +45,7 @@ object ConfigParser {
  * @param solrConfigSetDir Local directory containg one or many Solr Config Sets to be uploaded
  * @param applications List of [[Application]]s
  */
-case class CollectionRollerConfig(solrConfigSetDir: Option[String], applications: List[Application])
+case class CollectionRollerConfig(solrConfigSetDir: String, applications: List[Application])
 
 /**
  *

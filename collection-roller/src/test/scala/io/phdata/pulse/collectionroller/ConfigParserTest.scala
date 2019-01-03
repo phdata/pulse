@@ -34,7 +34,7 @@ class ConfigParserTest extends FunSuite {
 
     val expected =
       CollectionRollerConfig(
-        Some("conf"),
+        "conf",
         List(Application("application1", Some(2), Some(1), Some(1), Some(1), "config1")))
 
     assertResult(expected)(ConfigParser.convert(yaml))
