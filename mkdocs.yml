@@ -7,6 +7,7 @@ pages:
   - log-appender.md
   - log-collector.md
   - alerting-engine.md
+  - visualizations.md
   - building.md
   - contributing.md
 
