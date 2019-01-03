@@ -1,0 +1,4 @@
+solrConfigSetDir: /etc/pulse-logging/solr-configs/
+applications:
+- name: pulse-test-default
+  solrConfigSetName: pulseconfigv2
