@@ -39,6 +39,19 @@ export DEFAULT_LOGBACK_CONFIG="${CONF_DIR}/logback.xml" # This is auto-generated
 export LOGBACK_CONFIG=${LOGBACK_CONFIG:-$DEFAULT_LOGBACK_CONFIG}
 export KEYTAB_FILE=${KEYTAB_FILE:-"${CONF_DIR}/pulse.keytab"}
 export AKKA_CONF=${AKKA_CONF:-"application.conf"}
+DEFAULT_COLLECTION_ROLLER_CONFIG=aux/collection-roller-default.yml
+DEFAULT_ALERT_ENGINE_CONFIG=aux/alert-engine-default.yml
+
+# If configs are empty (aren't set in the safety valve) use defaults.
+if [ ! -s "$COLLECTION_ROLLER_CONFIG" ]; then
+    echo "No collection roller config found, using the default."
+    COLLECTION_ROLLER_CONFIG="$DEFAULT_ALERT_ENGINE_CONFIG"
+fi
+
+if [[ ! -s "$ALERT_ENGINE_CONFIG" ]]; then
+    echo "No alert engine config found, using the default."
+    ALERT_ENGINE_CONFIG="$DEFAULT_ALERT_ENGINE_CONFIG"
+fi
 
 export JAAS_CONFIG="Client {
    com.sun.security.auth.module.Krb5LoginModule required

@@ -1,0 +1,9 @@
+- name: pulse-test-default
+  alertRules:
+  - query: "timestamp:[NOW-10MINUTES TO NOW] AND level: ERROR"
+    retryInterval: 10
+    resultThreshold: 0
+    alertProfiles: mailProfile1
+  emailProfiles:
+  - name: mailProfile1
+    addresses: []
