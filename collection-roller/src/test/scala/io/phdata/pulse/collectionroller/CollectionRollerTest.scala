@@ -16,7 +16,6 @@
 
 package io.phdata.pulse.collectionroller
 
-import java.io.FileNotFoundException
 import java.time.{ ZoneOffset, ZonedDateTime }
 
 import io.phdata.pulse.common.SolrService
