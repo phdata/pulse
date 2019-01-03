@@ -23,10 +23,22 @@ Versions:
 Pulse can be installed through the "Add New Service" button for your cluster.
 
 The wizard will ask you for:
+
 - `smtp user`: This will be the 'from' address for alerts
 - `smtp password`: This is only necessary if your smtp server uses authentication
 - `smtp address`: The hostname of your smtp server
 - `smtp port`: The port of your smtp server
+
+### Installation for use with Spark
+To install the log4j appender for use with Apache Spark, the `log-appender-{version}.jar`  needs
+to be added to the classpath in `spark-env.sh`
+
+To modify the classpath in Cloudera, add this line to the `spark-env.sh` safety valve and redeploy
+client configuration:
+
+```bash
+export SPARK_DIST_CLASSPATH="$SPARK_DIST_CLASSPATH:/opt/cloudera/parcels/PULSE/lib/appenders/*"
+```
 
 ## Ansible Installation
 
