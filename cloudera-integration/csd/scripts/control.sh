@@ -45,7 +45,7 @@ DEFAULT_ALERT_ENGINE_CONFIG=aux/alert-engine-default.yml
 # If configs are empty (aren't set in the safety valve) use defaults.
 if [ ! -s "$COLLECTION_ROLLER_CONFIG" ]; then
     echo "No collection roller config found, using the default."
-    COLLECTION_ROLLER_CONFIG="$DEFAULT_ALERT_ENGINE_CONFIG"
+    COLLECTION_ROLLER_CONFIG="$DEFAULT_COLLECTION_ROLLER_CONFIG"
 fi
 
 if [[ ! -s "$ALERT_ENGINE_CONFIG" ]]; then
