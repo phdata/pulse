@@ -17,6 +17,7 @@ Versions:
 (Note, CSDs are included in the parcel repo)
 
 - 2.1.0: https://repository.phdata.io/artifactory/list/parcels-release/phdata/pulse/2.1.0-ada1-cdh5/
+- 2.2.0: https://repository.phdata.io/artifactory/list/parcels-release/phdata/pulse/2.2.0-de10-cdh5/
 
 ## Installing the Pulse service
 
