@@ -17,9 +17,9 @@
 package io.phdata.pulse.logcollector
 
 import akka.Done
-import akka.actor.{ ActorRef, ActorSystem }
-import akka.stream.OverflowStrategy
+import akka.actor.ActorRef
 import akka.stream.scaladsl.{ RunnableGraph, Sink, Source }
+import akka.stream.{ ActorAttributes, OverflowStrategy }
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.domain.LogEvent
 import io.phdata.pulse.common.{ DocumentConversion, SolrService }
@@ -28,6 +28,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 class SolrCloudStreams(solrService: SolrService) extends LazyLogging {
+
   val GROUP_SIZE     = 1000 // Number of elements to put into a group
   val GROUP_MAX_TIME = 1 seconds // If a grouping exceeds this time it will stop short of GROUP_SIZE
   val MAX_SUBSTREAMS = 1000 // If the number of apps being processed exceeds this some will be dropped
@@ -35,18 +36,22 @@ class SolrCloudStreams(solrService: SolrService) extends LazyLogging {
   /**
    * Solr Cloud [[Sink]] for [[LogEvent]]s
    */
-  private val sink: Sink[(String, Seq[LogEvent]), Future[Done]] =
-    Sink.foreach[(String, Seq[LogEvent])] {
-      case (appName, events) =>
-        val latestCollectionAlias = s"${appName}_latest"
-        logger.trace(s"Saving $latestCollectionAlias LogEvent: ${events.toString}")
-        try {
-          solrService.insertDocuments(latestCollectionAlias,
-                                      events.map(DocumentConversion.toSolrDocument))
-        } catch {
-          case e: Exception => logger.error("Error posting documents to solr", e)
-        }
-    }
+  private def solrSink: Sink[(String, Seq[LogEvent]), Future[Done]] =
+    Sink
+      .foreach[(String, Seq[LogEvent])] {
+        case (appName, events) =>
+          val latestCollectionAlias = s"${appName}_latest"
+          logger.trace(s"Saving $latestCollectionAlias LogEvent: ${events.toString}")
+          try {
+            solrService.insertDocuments(latestCollectionAlias,
+                                        events.map(DocumentConversion.toSolrDocument))
+          } catch {
+            case e: Exception => logger.error("Error posting documents to solr", e)
+          }
+      }
+      // Give the solrSink its own dispatcher so blocking in the dispatcher won't affect
+      // the stream or the http server.
+      .withAttributes(ActorAttributes.dispatcher("akka.actor.solr-dispatcher"))
 
   /**
    * This Graph will
@@ -60,6 +65,7 @@ class SolrCloudStreams(solrService: SolrService) extends LazyLogging {
       .groupedWithin(GROUP_SIZE, GROUP_MAX_TIME) // group 1000 records or within one second, whichever comes first
       .map(x => (x(0)._1, x.map(_._2))) // get application name from the first tuple (they're all the same), and a sequence of LogEvents
       .mergeSubstreams
-      .to(sink)
+      .to(solrSink)
   }
+
 }
