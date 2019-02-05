@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Log Appenders - Pulse</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Log Appenders";
+    var mkdocs_page_input_path = "log-appender.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Pulse</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../installation/">Installation</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../collection-roller/">Collection Roller</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Log Appenders</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#log-appenders">Log Appenders</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#log4j-1x-appenders">Log4j 1.x appenders</a></li>
+        
+            <li><a class="toctree-l3" href="#special-handling">Special Handling</a></li>
+        
+            <li><a class="toctree-l3" href="#example-log4j-configuration">Example log4j configuration</a></li>
+        
+            <li><a class="toctree-l3" href="#configuration-for-standalone-application">Configuration for Standalone Application</a></li>
+        
+            <li><a class="toctree-l3" href="#installation-for-use-with-spark">Installation for use with Spark</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../log-collector/">Log Collector</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../alerting-engine/">Alert Engine</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../visualizations/">Visualization</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../building/">Building Pulse</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../contributing/">Contributing to Pulse</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Pulse</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Log Appenders</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="log-appenders">Log Appenders</h1>
+<h2 id="log4j-1x-appenders">Log4j 1.x appenders</h2>
+<p>The log4j 1.x http appender will send a post message to the <code>log-collector</code> process with the
+contents of your log message. The appender will batch messages into groups of 1000 records and will 
+flush when a group is available, 1 second has passed. The appender will always flush all messages
+as soon as an ERROR level message is logged.</p>
+<h2 id="special-handling">Special Handling</h2>
+<ul>
+<li>MDC: Fields stored in the MDC (or Mapped Diagnostic Context) will be added as a top level searchable
+ field.  </li>
+<li>Message Properties: Fields found in the message properties will be added as a top level searchable
+field. </li>
+<li>NDC: The NDC (or Nested Diagnostic Context) is currently ignored</li>
+</ul>
+<h2 id="example-log4j-configuration">Example log4j configuration</h2>
+<p>Here is an example log4j configuration file:</p>
+<pre><code class="bash">log4j.rootLogger=info, stdout, http
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%5p [%t] (%F:%L) - %m%n
+
+log4j.appender.http=io.phdata.pulse.log.HttpAppender
+log4j.appender.http.Address=http://edge2.valhalla.phdata.io:9015/v2/events/pulse-test-100
+log4j.appender.http.layout=org.apache.log4j.core.layout.JsonLayout
+log4j.appender.http.layout.compact=false
+log4j.appender.http.layout.complete=true
+# Info messages will cause the http client to recursively call the logger 
+# when the connection to the log-collector is not available
+log4j.logger.io.phdata.pulse.shade.org.apache.http=off
+log4j.logger.io.phdata.pulse.shade.org.apache.wire=off
+</code></pre>
+
+<p>It's recommended (for now) that the logs be written to file in addition to Pulse through the http 
+appender. This appender currently doesn't currently make any availability guarantees.</p>
+<p>Example usage:</p>
+<pre><code class="bash">$ java -cp my-jar.jar:log-appender-{version}.jar -Dlog4j.configuration=file:log4j.properties com.my.main.class
+</code></pre>
+
+<p>(Assuming the above log4j example is named <code>log4j.properties</code>)</p>
+<p>When initially configuring the logger, it can be helpful to put log4j in debug mode by adding
+<code>-D log4j.debug=true</code> to your java command string.</p>
+<h2 id="configuration-for-standalone-application">Configuration for Standalone Application</h2>
+<p>Add <code>log-appender-{version}.jar</code> to your classpath</p>
+<h2 id="installation-for-use-with-spark">Installation for use with Spark</h2>
+<p>To install the log4j appender for use with Apache Spark, the <code>log-appender-{version}.jar</code>  needs
+to be added to the classpath in <code>spark-env.sh</code></p>
+<p>To modify the classpath in Cloudera, add this line to the <code>spark-env.sh</code> safety valve and redeploy
+client configuration:</p>
+<pre><code class="bash">export SPARK_DIST_CLASSPATH=&quot;$SPARK_DIST_CLASSPATH:/opt/cloudera/parcels/PULSE/lib/appenders/*&quot;
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../log-collector/" class="btn btn-neutral float-right" title="Log Collector">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../collection-roller/" class="btn btn-neutral" title="Collection Roller"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../collection-roller/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../log-collector/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

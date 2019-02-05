@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Log Collector - Pulse</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Log Collector";
+    var mkdocs_page_input_path = "log-collector.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Pulse</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../installation/">Installation</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../collection-roller/">Collection Roller</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../log-appender/">Log Appenders</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Log Collector</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#log-collector">Log Collector</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#endpoints">Endpoints</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../alerting-engine/">Alert Engine</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../visualizations/">Visualization</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../building/">Building Pulse</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../contributing/">Contributing to Pulse</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Pulse</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Log Collector</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="log-collector">Log Collector</h1>
+<p>The Log Collector is an HTTP Server that listens for log events, batches them, and writes them 
+into a Solr Cloud cluster. The log collector removes the need for each application to authenticate
+with Kerberose (if enabled), and adds batching and queuing for log messages to increase the efficiency
+of writes to Solr Cloud.</p>
+<p><img alt="log-collector" src="../images/log-collector.png" /></p>
+<p>Example usage:</p>
+<pre><code class="bash">    java -cp &lt;log-collector-jar&gt; io.phdata.pulse.logcollector.LogCollector \
+    --port $WEBSERVER_PORT \
+    --zk-hosts $SOLR_ZK_QUORUM
+</code></pre>
+
+<h2 id="endpoints">Endpoints</h2>
+<p><code>/log?application=&lt;application</code> (POST) DEPRECATED
+Accepts a single JSON event at a time and will insert into the log indexes of <code>&lt;application&gt;</code></p>
+<p><code>/v2/event/&lt;application&gt;</code> (POST)
+Accepts a single JSON event at a time and will insert into the log indexes of <code>&lt;application&gt;</code></p>
+<p><code>/v2/events/&lt;application&gt;</code> (POST)
+Accepts a JSON array of events at a time and will insert into the log indexes of <code>&lt;application&gt;</code></p>
+<p>Sample JSON event:</p>
+<pre><code class="json">  {
+  &quot;category&quot;:&quot;io.phdata.pulse.log.HttpAppenderTest&quot;,
+  &quot;timestamp&quot;: &quot;YYYY-MM-DDTHH:mm:ss.sssZ&quot;,
+  &quot;level&quot;:&quot;INFO&quot;,
+  &quot;message&quot;:&quot;Hello, World&quot;,
+  &quot;threadName&quot;:&quot;main&quot;,
+  &quot;ndc&quot;:&quot;ndc&quot;,
+  &quot;properties&quot;:{&quot;key&quot;:&quot;value&quot;},
+  &quot;thrown&quot;:[&quot;java.lang.Throwable: Test&quot;,&quot;\tat io.phdata.pulse.log.HttpAppenderTest.testRenderJson(HttpAppenderTest.java:24)&quot;,&quot;\tat sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)&quot;,&quot;\tat sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)&quot;,&quot;\tat sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)&quot;,&quot;\tat java.lang.reflect.Method.invoke(Method.java:498)&quot;,&quot;\tat org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:50)&quot;,&quot;\tat org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)&quot;,&quot;\tat org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:47)&quot;,&quot;\tat org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)&quot;,&quot;\tat org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:325)&quot;,&quot;\tat org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:78)&quot;,&quot;\tat org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:57)&quot;,&quot;\tat org.junit.runners.ParentRunner$3.run(ParentRunner.java:290)&quot;,&quot;\tat org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:71)&quot;,&quot;\tat org.junit.runners.ParentRunner.runChildren(ParentRunner.java:288)&quot;,&quot;\tat org.junit.runners.ParentRunner.access$000(ParentRunner.java:58)&quot;,&quot;\tat org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:268)&quot;,&quot;\tat org.junit.runners.ParentRunner.run(ParentRunner.java:363)&quot;,&quot;\tat org.junit.runner.JUnitCore.run(JUnitCore.java:137)&quot;,&quot;\tat com.intellij.junit4.JUnit4IdeaTestRunner.startRunnerWithArgs(JUnit4IdeaTestRunner.java:68)&quot;,&quot;\tat com.intellij.rt.execution.junit.IdeaTestRunner$Repeater.startRunnerWithArgs(IdeaTestRunner.java:47)&quot;,&quot;\tat com.intellij.rt.execution.junit.JUnitStarter.prepareStreamsAndStart(JUnitStarter.java:242)&quot;,&quot;\tat com.intellij.rt.execution.junit.JUnitStarter.main(JUnitStarter.java:70)&quot;]
+  }
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../alerting-engine/" class="btn btn-neutral float-right" title="Alert Engine">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../log-appender/" class="btn btn-neutral" title="Log Appenders"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../log-appender/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../alerting-engine/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

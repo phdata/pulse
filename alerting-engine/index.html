@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Alert Engine - Pulse</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Alert Engine";
+    var mkdocs_page_input_path = "alerting-engine.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Pulse</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../installation/">Installation</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../collection-roller/">Collection Roller</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../log-appender/">Log Appenders</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../log-collector/">Log Collector</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Alert Engine</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#alert-engine">Alert Engine</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#config-file">Config file</a></li>
+        
+            <li><a class="toctree-l3" href="#silenced-applications">Silenced applications</a></li>
+        
+            <li><a class="toctree-l3" href="#running-the-alert-engine">Running the Alert Engine</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../visualizations/">Visualization</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../building/">Building Pulse</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../contributing/">Contributing to Pulse</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Pulse</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Alert Engine</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="alert-engine">Alert Engine</h1>
+<p>An alert engine will run pre-defined queries against application logs, alerting via email if they
+return a number of results above or below some threshold. For example, a query could be if an
+application has had any error messages in the past hour.</p>
+<p>The alert engine will have
+- User defined queries
+- Send emails to a list of email addresses per query</p>
+<p><img alt="alert-engine" src="../images/alert-engine.png" /></p>
+<h2 id="config-file">Config file</h2>
+<p>Here's an example of an Alert Engine configuration file:</p>
+<pre><code class="yaml">
+---
+applications:
+- name: pulse-test-100
+  alertRules:
+  - query: &quot;timestamp:[NOW-10MINUTES TO NOW] AND level: ERROR&quot;
+    retryInterval: 10
+    resultThreshold: 0 # If the threshold is set to `-1` it will throw an alert if no results are returned
+    alertProfiles:
+    - mailProfile1
+  emailProfiles:
+  - name: mailProfile1
+    addresses:
+    - address@company.com
+  slackProfiles:
+  - name: slackProfile1
+    url: testurl.com
+
+</code></pre>
+
+<p>The alert engine takes CLI arguments including a configuration file and zookeeper hosts - because we are using CloudSolrServer to connect to Solr. The solr nodes are stored in Zookkeeper, and this gives things like load balancing for free from the client.</p>
+<p>The top-level object of the configuration file is a list of applications.</p>
+<p>An application consists of two things, alerts and profiles. Alerts tell the AlertEngine what to alert on. Profiles are used to set up connections to services like email or chat clients. As many profiles can be defined as needed, so you can send alerts through both email and Slack, or any number of services.
+An alert rule consists of</p>
+<ul>
+<li>query: Solr Query that acts as a predicate, for example this query Solr: 
+<code>timestamp:[NOW-10MINUTES TO NOW] AND level: ERROR</code> will trigger an alert if any message with level
+ 'ERROR' is found within the last 10 minutes</li>
+<li>retryInterval: the query will be run on the retry interval. The retry interval is set in minutes</li>
+<li>threshold: if the query returns more than threshold results, an alert will be triggered. The default is 0. If the threshold is set to <code>-1</code>, the non-existence of documents with this query will trigger an alert. This is useful for tracking application uptime.</li>
+<li>alertProfiles: One or many alertProfiles can be defined. For each alertProfile defined in an alert, an alertProfile needs to be defined for the application</li>
+</ul>
+<h2 id="silenced-applications">Silenced applications</h2>
+<p>A silenced application file can be provided <code>--silenced-application-file silenced-applications.txt</code>
+That contains one line per application that should not alert.</p>
+<h2 id="running-the-alert-engine">Running the Alert Engine</h2>
+<p>A helper script for running the alert engine is located at <code>bin/alert-engine</code>.</p>
+<p>Example usage of the Alert Engine:</p>
+<pre><code class="bash">java -Dlogback.configurationFile=logback.xml \
+    -Djava.security.auth.login.config=jaas.conf \
+    -cp &lt;path-to-alert-engine-assembly&gt; io.phdata.pulse.alertengine.AlertEngineMain \
+    --daemonize --zk-hosts master1.valhalla.phdata.io:2181/solr \
+    --smtp-server smtp.gmail.com --smtp-user user@company.com \
+    --smtp-port 25 \
+    --conf example-configs/alert-engine/alert-engine.yml \
+    --silenced-application-file silenced-applications.txt
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../visualizations/" class="btn btn-neutral float-right" title="Visualization">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../log-collector/" class="btn btn-neutral" title="Log Collector"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../log-collector/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../visualizations/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Visualization - Pulse</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Visualization";
+    var mkdocs_page_input_path = "visualizations.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Pulse</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../installation/">Installation</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../collection-roller/">Collection Roller</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../log-appender/">Log Appenders</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../log-collector/">Log Collector</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../alerting-engine/">Alert Engine</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Visualization</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#visualization">Visualization</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#pulse-data-visualization-using-arcadia">Pulse Data Visualization using Arcadia</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../building/">Building Pulse</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../contributing/">Contributing to Pulse</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Pulse</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Visualization</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="visualization">Visualization</h1>
+<p>Pulse uses Solr, which can use several Visualization tools, including Hue and Arcadia Data.</p>
+<h2 id="pulse-data-visualization-using-arcadia">Pulse Data Visualization using Arcadia</h2>
+<p>Arcadia is visual analytics and BI software that runs natively within modern data platforms such as
+Apache Hadoop and the cloud. Read <a href="https://www.arcadiadata.com">here</a> for more information.</p>
+<h3 id="data-visualization-using-sample-arcadia-dashboard-extract-pulsejson">Data visualization using sample arcadia dashboard extract <code>pulse.json</code></h3>
+<h4 id="create-new-solr-connection">Create new solr connection</h4>
+<ul>
+<li>If Solr connection is not existing in Arcadia Data, create one using this link
+<a href="http://documentation.arcadiadata.com/4.3.0.0/#pages/topics/conn-solr.html">Creating New Apache Solr Connection</a></li>
+</ul>
+<h3 id="create-new-dataset">Create new dataset</h3>
+<ul>
+<li>Sign into Arcadia</li>
+<li>
+<p>Click on <code>DATA</code>
+<img alt="click data" src="../images/arcadia/click_data.png" /></p>
+</li>
+<li>
+<p>Go to <code>solr</code> connection created in the previous steps and click on <code>NEW DATASET</code>
+<img alt="import visual artifact" src="../images/arcadia/import-visual-artifact.png" /></p>
+</li>
+<li>
+<p>Enter your Dataset title, use <code>solr</code> as database and finally select the solr collection that you want
+<img alt="new dataset detail" src="../images/arcadia/new_dataset_details.png" /></p>
+</li>
+<li>
+<p>Click <code>CREATE</code></p>
+</li>
+<li>You should be able to see the new dataset created
+<img alt="check new dataset" src="../images/arcadia/check_new_dataset.png" /></li>
+</ul>
+<h3 id="replace-dataset_name-and-dataset_detail-from-pulsejson">Replace dataset_name and dataset_detail from <code>pulse.json</code></h3>
+<p>The <code>replace-dataset-name.sh</code> script can be found in the <code>visualizations/arcadia</code> folder.</p>
+<ul>
+<li>Use <code>replace-dataset-name.sh</code> script to replace dataset_name and dataset_detail with the dataset name and Solr index name of your own dataset</li>
+<li>command <code>./replace-dataset-name.sh my_dataset_name Solr.my_application_all</code></li>
+<li><code>dashboard.json</code> is ready to be imported</li>
+</ul>
+<h3 id="importing-dashboard">Importing dashboard</h3>
+<ul>
+<li>
+<p>Refer to below screenshots while following the <a href="http://documentation.arcadiadata.com/4.3.0.0/#pages/topics/import-dash.html">import dashboard</a> document
+<img alt="import visual artifact" src="../images/arcadia/import-visual-artifact.png" /></p>
+</li>
+<li>
+<p>Click on import visual artifacts
+<img alt="import visual artifact" src="../images/arcadia/import-vis-artifacts.png" /></p>
+</li>
+<li>
+<p>Choose <code>pulse.json</code> file and click on <code>import</code>
+<img alt="choose pulse" src="../images/arcadia/choose-pulse.png" /></p>
+</li>
+<li>
+<p>Click on <code>Accept and Import</code>, also check <code>dataset</code> at the bottom
+<img alt="accept and import" src="../images/arcadia/accept-import.png" /></p>
+</li>
+<li>
+<p>Make sure success message appeared on window
+<img alt="import-success" src="../images/arcadia/import-success.png" /></p>
+</li>
+<li>
+<p>Look for phData Pulse dashboard in visuals private as shown below.
+<img alt="image" src="../images/arcadia/check-import-success.png" /></p>
+</li>
+<li>
+<p>Lastly examine the dashboard and functionality of filters. The dashboard will look similar to below screenshot.
+<img alt="visual examine" src="../images/arcadia/examine-visuals.png" /></p>
+</li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../building/" class="btn btn-neutral float-right" title="Building Pulse">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../alerting-engine/" class="btn btn-neutral" title="Alert Engine"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../alerting-engine/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../building/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Collection Roller - Pulse</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Collection Roller";
+    var mkdocs_page_input_path = "collection-roller.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Pulse</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../installation/">Installation</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Collection Roller</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#collection-roller">Collection Roller</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#rolling">Rolling</a></li>
+        
+            <li><a class="toctree-l3" href="#configuration">Configuration</a></li>
+        
+            <li><a class="toctree-l3" href="#running-the-collection-roller">Running the Collection Roller</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../log-appender/">Log Appenders</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../log-collector/">Log Collector</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../alerting-engine/">Alert Engine</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../visualizations/">Visualization</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../building/">Building Pulse</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../contributing/">Contributing to Pulse</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Pulse</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Collection Roller</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="collection-roller">Collection Roller</h1>
+<p>The log collector manages log indexes for applications.
+An application for the log collector consists of:</p>
+<ul>
+<li>timestamped collections in the format <application_name>_<unixtime_created>. The 'timestamped' 
+collections hold the actual log data.</li>
+<li>an alias pointing to the newest timestamped collection called <application_name>_latest. 
+The 'latest' alias is used for any applications writing logs (like the Log Collector)</li>
+<li>an alias pointing to all collections called <application>_all. The 'all' alias is used for 
+searching all collections</li>
+</ul>
+<p><img alt="collection-rolling" src="../images/collection-roller.png" /></p>
+<p>If an application does not exist in Pulse the log collector will create the required aliases and
+indexes.
+Logs are kept for a limited amount of time (weeks or months). Logs for individual applications will
+actually be multiple collections, each covering a time period.</p>
+<h2 id="rolling">Rolling</h2>
+<p>After an application has been created, the collection roller will create new collections for each
+day and delete collections older than the configured <code>numCollections</code> hold limit.</p>
+<h2 id="configuration">Configuration</h2>
+<p>A Collection Roller configuration file is written in yaml and will look like:</p>
+<pre><code class="yaml">
+solrConfigSetDir: /etc/pulse-logging/solr-configs/ # directory containing one or many solr instancedir configs to be uploaded. The name of the config when uploaded to solr will be the name of the directory
+applications:
+# Config using all defaults
+- name: pulse-test-default
+  solrConfigSetName: pulseconfigv2
+# Config using options
+- name: pulse-test-options
+  numCollections: 7 # (optional) number of collections to keep at any given time. Defaults to 7
+  shards: 1 # (optional) solr collection shards, defaults to 1
+  replicas: 1 # (optional) number of solr config replicas. Defaults to 1
+  rollPeriod: 1 # (optional) number of days before the collection is rolled
+  solrConfigSetName: pulseconfigv2 # name of solr config to use for the collections
+
+</code></pre>
+
+<p>At minimum, the configuration needs:</p>
+<ul>
+<li><code>solrConfigSetDir</code>: These Solr configurations can contain customized schema.xml and solrconfig.xml.
+The <code>solrConfigSetDir</code> can contain multiple configurations. The configurations will be looped over
+and uploaded to solr each time the Collection Roller runs.</li>
+<li><code>applications</code>: A list of applications</li>
+<li>The applications must contain at minimum: <code>name</code> and <code>solrConfigSetName</code>. <code>name</code> must be unique. 
+<code>solrConfigSetName</code> must correspond to the name of a solr config directory in <code>solrConfigSetDir</code></li>
+</ul>
+<p>Optional configuration for applications:</p>
+<ul>
+<li><code>numCollections</code>: The number of collections to keep when rolling collections. The default is 7</li>
+<li><code>rollPeriod</code>: Rollperiod in days. Default is 1.</li>
+<li><code>shards</code>: Number of shards for each collection. Default is 1.</li>
+<li><code>replicas</code>: Number of replicas in each collection. Default is 1.</li>
+</ul>
+<p>This configuration file is passes as a CLI argument along with a list of zookeeper hosts.</p>
+<h2 id="running-the-collection-roller">Running the Collection Roller</h2>
+<p>A helper script to run the collection roller (mostly used for development) is here
+<code>bin/collection-roller</code></p>
+<p>To run the collection roller from the command line looks like</p>
+<pre><code class="bash">$ java -DXmx=2147483648 \
+    -Dlogback.configurationFile=logback.xml \
+    -Djava.security.auth.login.config=./jaas.conf \
+    -Dsun.security.krb5.debug=false \
+    -cp &lt;path-to-collection-roller-assembly&gt; io.phdata.pulse.collectionroller.CollectionRollerMain \
+    --daemonize \
+    --conf collection-roller.yml \
+    --zk-hosts master1.valhalla.phdata.io:2181/solr
+
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../log-appender/" class="btn btn-neutral float-right" title="Log Appenders">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../installation/" class="btn btn-neutral" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../installation/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../log-appender/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

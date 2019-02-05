@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Installation - Pulse</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Installation";
+    var mkdocs_page_input_path = "installation.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Pulse</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Home</a>
+	    </li>
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href="./">Installation</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#installation">Installation</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#installing-the-csd">Installing the CSD</a></li>
+        
+            <li><a class="toctree-l3" href="#installing-the-parcel">Installing the Parcel</a></li>
+        
+            <li><a class="toctree-l3" href="#installing-the-pulse-service">Installing the Pulse service</a></li>
+        
+            <li><a class="toctree-l3" href="#ansible-installation">Ansible Installation</a></li>
+        
+            <li><a class="toctree-l3" href="#csd-playbookyml">csd-playbook.yml</a></li>
+        
+            <li><a class="toctree-l3" href="#dev-playbookyml">dev-playbook.yml</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../collection-roller/">Collection Roller</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../log-appender/">Log Appenders</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../log-collector/">Log Collector</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../alerting-engine/">Alert Engine</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../visualizations/">Visualization</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../building/">Building Pulse</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../contributing/">Contributing to Pulse</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Pulse</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Installation</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="installation">Installation</h1>
+<p>Pulse can be installed as a Cloudera CSD (Custom Service Descriptor).</p>
+<h2 id="installing-the-csd">Installing the CSD</h2>
+<ol>
+<li>Download the latest CSD jar, see versions list below</li>
+<li>Place the jar in your Cloudera Manager CSD directory, usually <code>/opt/cloudera/csd</code></li>
+<li>Modify the ownership of the jar <code>chown cloudera-scm:cloudera-scm /opt/cloudera/csd/pulse-&lt;version&gt;.jar</code></li>
+<li>Restart Cloudera Manager to install the jar</li>
+</ol>
+<h2 id="installing-the-parcel">Installing the Parcel</h2>
+<ol>
+<li>The parcel repo should be automatically added with the CSD. The url to add it manually:</li>
+<li>Download, distribute, activate the parcel</li>
+</ol>
+<p>Versions: 
+(Note, CSDs are included in the parcel repo)</p>
+<ul>
+<li>2.2.0: https://repository.phdata.io/artifactory/list/parcels-release/phdata/pulse/2.2.0-cbcd-cdh5/</li>
+<li>2.1.0: https://repository.phdata.io/artifactory/list/parcels-release/phdata/pulse/2.1.0-ada1-cdh5/</li>
+</ul>
+<h2 id="installing-the-pulse-service">Installing the Pulse service</h2>
+<p>Pulse can be installed through the "Add New Service" button for your cluster.</p>
+<p>The wizard will ask you for:</p>
+<ul>
+<li><code>smtp user</code>: This will be the 'from' address for alerts</li>
+<li><code>smtp password</code>: This is only necessary if your smtp server uses authentication</li>
+<li><code>smtp address</code>: The hostname of your smtp server</li>
+<li><code>smtp port</code>: The port of your smtp server</li>
+</ul>
+<h3 id="installation-for-use-with-spark">Installation for use with Spark</h3>
+<p>To install the log4j appender for use with Apache Spark, the <code>log-appender-{version}.jar</code>  needs
+to be added to the classpath in <code>spark-env.sh</code></p>
+<p>To modify the classpath in Cloudera, add this line to the <code>spark-env.sh</code> safety valve and redeploy
+client configuration:</p>
+<pre><code class="bash">export SPARK_DIST_CLASSPATH=&quot;$SPARK_DIST_CLASSPATH:/opt/cloudera/parcels/PULSE/lib/appenders/*&quot;
+</code></pre>
+
+<h2 id="ansible-installation">Ansible Installation</h2>
+<p>Ansible playbooks for installing Pulse from the <code>install</code> folder of this repository.</p>
+<h2 id="csd-playbookyml">csd-playbook.yml</h2>
+<p>Installs the CSD from the phData parcel repository.
+This installation method requires <a href="https://github.com/ansible/ansible">ansible</a></p>
+<p>The <code>csd-playbook</code></p>
+<pre><code class="bash">$ cd install
+$ ansible-playbook csd-playbook.yml -u &lt;user&gt; -i &lt;host&gt;, --extra-vars &quot;version=&lt;version&gt;&quot;  
+</code></pre>
+
+<h2 id="dev-playbookyml">dev-playbook.yml</h2>
+<p>The dev playbook will install a Cloudera CSD and parcel from local artifacts</p>
+<pre><code class="bash">$ cd install
+$ ansible-playbook dev-playbook.yml -u &lt;user&gt; -i &lt;host&gt;, --extra-vars &quot;version=$(sh ../version)&quot;  
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../collection-roller/" class="btn btn-neutral float-right" title="Collection Roller">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href=".." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href=".." style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../collection-roller/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+
+</body>
+</html>

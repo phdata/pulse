@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="None">
+  
+  <link rel="shortcut icon" href="img/favicon.ico">
+  <title>Home - Pulse</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Home";
+    var mkdocs_page_input_path = "index.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="js/jquery-2.1.1.min.js" defer></script>
+  <script src="js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="." class="icon icon-home"> Pulse</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1 current">
+		
+    <a class="current" href=".">Home</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l2"><a href="#overview">Overview</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l3" href="#license">License</a></li>
+        
+            <li><a class="toctree-l3" href="#system-requirements">System Requirements</a></li>
+        
+            <li><a class="toctree-l3" href="#features">Features</a></li>
+        
+            <li><a class="toctree-l3" href="#components">Components</a></li>
+        
+            <li><a class="toctree-l3" href="#running-the-application-manually-on-a-cluster">Running the application manually on a cluster</a></li>
+        
+            <li><a class="toctree-l3" href="#running-tests">Running tests</a></li>
+        
+        </ul>
+    
+
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="installation/">Installation</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="collection-roller/">Collection Roller</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="log-appender/">Log Appenders</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="log-collector/">Log Collector</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="alerting-engine/">Alert Engine</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="visualizations/">Visualization</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="building/">Building Pulse</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="contributing/">Contributing to Pulse</a>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href=".">Pulse</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p><img alt="Travis Build Tag" src="https://travis-ci.org/phdata/pulse.svg?branch=master" /></p>
+<h1 id="overview">Overview</h1>
+<p>Pulse is an Apache 2.0 licensed log aggregation framework built on top of Solr Cloud (Cloudera Search). It 
+can be used with applications written in any language, but was build especially for improving logging
+ in Apache Spark Streaming applications running on Apache Hadoop.</p>
+<p>Pulse gives application users full text centralized search of their logs, flexible alerts on their logs,
+and works with several visualization tools.</p>
+<p>Pulse handles log lifecycle, so application developers don't have to worry about rotating or maintaining
+ log indexes themselves.</p>
+<h2 id="license">License</h2>
+<p>Pulse is <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a> Licensed </p>
+<h2 id="system-requirements">System Requirements</h2>
+<ul>
+<li>A Solr Cloud installation</li>
+<li>Java 1.8</li>
+<li>A Cloudera Manager managed cluster is recommended but not required</li>
+</ul>
+<h2 id="features">Features</h2>
+<p><strong><em>Log Aggregation and Search</em></strong>
+- Add log aggregation, search, and alerts to your Java, Scala, Bash, or Python programs and scripts</p>
+<p><strong><em>Alerting</em></strong></p>
+<ul>
+<li>Flexible alerting using the Pulse Alert Engine</li>
+<li>Write alerts using the full solr query syntax. Example alerts:<ul>
+<li>There was an appliction Error in the last 5 minutes</li>
+<li>My application has stopped logging messages</li>
+</ul>
+</li>
+<li>Email and web hook integrations</li>
+</ul>
+<p><strong><em>Log Lifecycle Management</em></strong></p>
+<ul>
+<li>Built in rotation of logs.</li>
+<li>Keep logs for as long as you need them</li>
+<li>Automatically rotate new log indexes after a configured time period</li>
+<li>Easily search all logs</li>
+</ul>
+<p><strong><em>Dashboarding</em></strong></p>
+<ul>
+<li>Integration with existing dashboards for rich UIs.</li>
+</ul>
+<p>Visualization and search works with:</p>
+<ul>
+<li>Hue Search</li>
+<li>Arcadia Data</li>
+<li>Banana</li>
+</ul>
+<p><strong><em>Hadoop Native</em></strong></p>
+<ul>
+<li>Pulse uses Solr for document indexing and search and can be deployed on your Hadoop cluster</li>
+<li>Use existing Sentry roles to control access to log data</li>
+</ul>
+<p><strong><em>Cloudera Manager Integration</em></strong></p>
+<ul>
+<li>Simple deployment using CSDs and Parcels</li>
+<li>Manage and monitor Pulse from within Cloudera Manager</li>
+</ul>
+<p>Pulse is used for centralized logging. This diagram compares Pulse to other tools given use cases:</p>
+<p><img alt="Arch diagram" src="images/pulse-vs-cm.png" /></p>
+<h2 id="components">Components</h2>
+<p><strong><em>Collection Roller</em></strong>
+The collection roller is responsible for creating solr indexes for new applications in Pulse and
+deleting old or expired log collections.</p>
+<p><strong><em>Alert Engine</em></strong>
+The Alert Engine is a daemon process with a set of <code>alertRules</code>. Alert rules can be configured
+to notify developers and application users when an event happens.</p>
+<p>See the <a href="alerting-engine">Alerting Engine</a> for more details and configuration
+options.</p>
+<p><strong><em>Log Collector</em></strong>
+The Log Collector is an HTTP server that receives log messages as JSON and puts them into SOLR
+ collections.</p>
+<p>See the <a href="log-collector">Log Collector</a> for more details and configuration
+ options.
+<strong><em>Log Appender</em></strong>
+An HTTP log appender for log4j 1.x that will post json messages to the log collector.</p>
+<p>See the <a href="log-appender">Log Appender</a> for more details.</p>
+<p>There are also log appenders for Bash and Python in the 'appenders' folder</p>
+<h3 id="architecture-diagram">Architecture Diagram</h3>
+<p><img alt="Arch diagram" src="images/pulse-arch.png" /></p>
+<h4 id="deploying-config">Deploying config</h4>
+<p>Pulse has two configuration files, <code>collection-roller.yml</code> and <code>alert-engine.yml</code></p>
+<p>Both of these configs are deployed via safety valves. <a href="alerting-engine">Alert Engine Example</a> and <a href="collection-roller">Collection Roller Example</a></p>
+<p>Place <code>collection-roller.yml</code> in <code>Collection Roller Advanced Configuration Snippet (Safety Valve) for collection-roller.yml</code></p>
+<p>Place the <code>alert-engine.yml</code> in <code>Alert Engine Advanced Configuration Snippet (Safety Valve) for alert-engine.yml</code></p>
+<h4 id="configuring-sentry-for-solr">Configuring Sentry for Solr</h4>
+<p>If Sentry is enabled for Solr, roles and grants will need to be configured for Pulse and for each Pulse application.  </p>
+<p>Add the pulse group to the Solr admin role.  This assumes Sentry for Solr has been configured with an admin role.  This step only needs to be done once after install.  The example below assumes your admin role is named <code>solradmin</code>.
+- <code>solrctl sentry --add-role-group solradmin pulse</code></p>
+<p>Create the role and grant for each application.  In this example, <code>sample_role</code> is the name of the Solr role granting query privileges to the collection <code>sample-app_all</code> for the Pulse application <code>sample-app</code>.  The <code>sample-group</code> group is added to that role.<br />
+- <code>solrctl sentry --create-role sample_role</code>
+- <code>solrctl sentry --grant-privilege sample_role 'collection=sample-app_all-&gt;action=Query'</code>
+- <code>solrctl sentry --add-role-group sample_role sample_group</code></p>
+<h2 id="running-the-application-manually-on-a-cluster">Running the application manually on a cluster</h2>
+<p>Run <code>make package</code> which will collect all the jars into <code>target/lib</code>.</p>
+<p>Remove the <code>.template</code> suffix from these two files under the <code>bin</code> directory.
+- <code>cp env.sh.template env.sh</code></p>
+<p>Change the kerberos keyTab and principal in <code>jaas.conf</code> to your own (you need to create one if you don't have it already)</p>
+<p>Run individual components:</p>
+<pre><code class="bash">$ bin/collection-roller
+$ bin/log-collector
+$ bin/alert-engine
+</code></pre>
+
+<h2 id="running-tests">Running tests</h2>
+<p>Run all tests from the project root:</p>
+<pre><code class="bash">$ make test
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="installation/" class="btn btn-neutral float-right" title="Installation">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+      
+        <span style="margin-left: 15px"><a href="installation/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme.js" defer></script>
+      <script src="search/main.js" defer></script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.0.4
+Build Date UTC : 2019-02-05 14:56:13
+-->
