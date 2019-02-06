@@ -82,6 +82,21 @@ public class HttpAppender extends AppenderSkeleton {
         this.applicationId = Util.getApplicationId();
         this.containerId = Util.getContainerId();
     }
+
+    try {
+      // Shutdown hook will flush log buffers
+      Runtime.getRuntime().addShutdownHook(new Thread()
+      {
+        public void run()
+        {
+          LogLog.debug("HttpAppender shutdown hook called");
+          HttpAppender.this.close();
+          LogLog.debug("HttpAppender shutdown hook finished");
+        }
+      });
+    } catch(Exception e) {
+      LogLog.debug("Failed to add HttpAppender shutdown hook", e);
+    }
   }
 
   /**
