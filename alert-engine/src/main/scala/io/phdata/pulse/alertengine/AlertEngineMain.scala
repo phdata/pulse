@@ -54,7 +54,7 @@ object AlertEngineMain extends LazyLogging {
         Runtime.getRuntime.addShutdownHook(shutDownHook(scheduledFuture))
         executorService.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
       } catch {
-        case e: Exception => logger.error(s"Error running CollectionRoller", e)
+        case e: Exception => logger.error(s"Error running AlertEngineMain", e)
       } finally {
         executorService.shutdown()
       }
@@ -144,7 +144,7 @@ object AlertEngineMain extends LazyLogging {
         logger.info("ending Alert Engine run")
       } catch {
         case e: Throwable =>
-          logger.error("caught exception in Collection Roller task", e)
+          logger.error("caught exception in AlertEngine task", e)
           System.exit(1)
       } finally {
         try {
