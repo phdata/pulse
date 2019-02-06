@@ -166,8 +166,8 @@ lazy val `log-example` = project
   .settings(
     name := "log-example",
     settings,
-    libraryDependencies ++= Seq("log4j" % "log4j" % "1.2.16", dependencies.spark)
-  )
+    libraryDependencies ++= Seq("log4j" % "log4j" % "1.2.16", dependencies.spark, dependencies.scalaTest)
+  ).dependsOn(`log-appender`)
 
 // Library versions
 val logbackVersion = "1.2.3"

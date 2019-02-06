@@ -16,11 +16,8 @@
 
 package io.phdata.pams.example
 
-import java.net.InetAddress
-import org.apache.log4j.MDC
 import org.apache.spark.{ SparkConf, SparkContext }
 import org.slf4j.LoggerFactory
-import scala.util.Try
 
 /**
  * This example shows how to
@@ -37,7 +34,15 @@ object SparkLog4jExample {
     val conf = new SparkConf().setAppName("Pulse Spark Logging Example")
     val sc   = SparkContext.getOrCreate(conf)
 
-    val testData = 1 to 1000000
+    try {
+      run(sc, numEvents = 10000)
+    } finally {
+      sc.stop()
+    }
+  }
+
+  def run(sc: SparkContext, numEvents: Int): Unit = {
+    val testData = 1 to numEvents
     val testRdd  = sc.parallelize(testData)
 
     testRdd.foreach { num =>
@@ -51,7 +56,6 @@ object SparkLog4jExample {
     }
 
     log.info("Shutting down the spark logging example")
-    sc.stop()
   }
 
 }
