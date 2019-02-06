@@ -1,4 +1,3 @@
-
 # Log Appenders
 
 ## Log4j 1.x appenders
