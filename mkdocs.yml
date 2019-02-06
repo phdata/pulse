@@ -8,6 +8,7 @@ pages:
   - log-collector.md
   - alerting-engine.md
   - visualizations.md
+  - metrics.md
   - building.md
   - contributing.md
 

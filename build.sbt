@@ -115,7 +115,7 @@ lazy val `log-appender` = project
   .settings(
     name := "log-appender",
     settings,
-    libraryDependencies ++= Seq(dependencies.log4j, dependencies.httpClient, dependencies.jacksonDatabind, dependencies.jacksonCore, dependencies.junit, dependencies.junitInterface) ++ dependencies.mocking
+    libraryDependencies ++= Seq(dependencies.log4j, dependencies.httpClient, dependencies.jacksonDatabind, dependencies.jacksonCore, dependencies.junit, dependencies.junitInterface, dependencies.scalaTest) ++ dependencies.mocking
   ).enablePlugins(JavaServerAppPackaging)
 
 lazy val `log-collector` = project
