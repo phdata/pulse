@@ -60,12 +60,12 @@ public class HttpAppender extends AppenderSkeleton {
   /**
    * Maximum buffer size.
    */
-  private int bufferSize = 1024;
+  private int bufferSize = 8192;
 
   /**
    * Does appender block when buffer is full.
    */
-  private boolean blocking = true;
+  private boolean blocking = false;
 
   private String hostname = null;
   private Thread dispatcher;

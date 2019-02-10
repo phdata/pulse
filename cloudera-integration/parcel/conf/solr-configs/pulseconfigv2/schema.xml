@@ -21,7 +21,7 @@
     <fields>
         <field name="id" type="string" indexed="true" stored="true" required="true"
                multiValued="false"/>
-        <field name="category" type="text_general" indexed="true" stored="true" required="true"
+        <field name="category" type="string" indexed="true" stored="true" required="true"
                multiValued="false"/>
         <field name="timestamp" type="date" indexed="true" stored="true" required="true"
                multiValued="false"/>
@@ -32,13 +32,13 @@
         <field name="message" type="text_general" indexed="true" stored="true" required="true"
                multiValued="false"/>
 
-        <field name="container_id" type="text_general" indexed="true" stored="true" required="false"
+        <field name="container_id" type="string" indexed="true" stored="true" required="false"
                multiValued="false"/>
 
-        <field name="application_id" type="text_general" indexed="true" stored="true" required="false"
+        <field name="application_id" type="string" indexed="true" stored="true" required="false"
                multiValued="false"/>
 
-        <field name="threadName" type="text_general" indexed="true" stored="true" required="false"
+        <field name="threadName" type="string" indexed="true" stored="true" required="false"
                multiValued="false"/>
 
         <field name="throwable" type="text_general" indexed="true" stored="true" required="false"

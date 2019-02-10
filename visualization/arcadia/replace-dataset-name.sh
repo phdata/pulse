@@ -8,7 +8,7 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-NEW_DATASET_NAME=$2
-DATASET_SOURCE=$3
+NEW_DATASET_NAME=$1
+DATASET_SOURCE=$2
 
 sed "s/pulse-test-temp/$NEW_DATASET_NAME/g; s/Solr.pulse-test-default_all/$DATASET_SOURCE/g" pulse-dashboard-template.json > dashboard.json
