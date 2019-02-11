@@ -26,7 +26,9 @@ class CollectionRollerMainTest extends FunSuite with BaseSolrCloudTest {
   var solrService =
     new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress,
                     miniSolrCloudCluster.getSolrClient)
-  val collectionRoller = new CollectionRoller(solrService, ZonedDateTime.now(ZoneOffset.UTC))
+  val collectionRoller = new CollectionRoller(solrService)
+
+  val now = ZonedDateTime.now(ZoneOffset.UTC)
 
   test("List applications from Main method") {
     val app1Name = TestUtil.randomIdentifier()
@@ -43,7 +45,7 @@ class CollectionRollerMainTest extends FunSuite with BaseSolrCloudTest {
       Application(app1Name, None, None, None, None, "testconf"),
       Application(app2Name, None, None, None, None, "testconf")
     )
-    collectionRoller.run(appList)
+    collectionRoller.run(appList, now)
     assert(collectionRoller.collectionList().contains(app1Name))
     assert(collectionRoller.collectionList().contains(app2Name))
   }
@@ -64,7 +66,7 @@ class CollectionRollerMainTest extends FunSuite with BaseSolrCloudTest {
       Application(app1Name, None, None, None, None, "testconf"),
       Application(app2Name, None, None, None, None, "testconf")
     )
-    collectionRoller.run(appList)
+    collectionRoller.run(appList, now)
     assert(collectionRoller.collectionList().contains(app1Name))
     assert(collectionRoller.collectionList().contains(app2Name))
 
@@ -92,7 +94,7 @@ class CollectionRollerMainTest extends FunSuite with BaseSolrCloudTest {
       Application(app2Name, None, None, None, None, "testconf")
     )
 
-    collectionRoller.run(appList)
+    collectionRoller.run(appList, now)
     CollectionRollerMain.main(args)
 
     // check if alias exists for app1 & app2
