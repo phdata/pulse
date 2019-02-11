@@ -52,14 +52,11 @@ import scala.util.Try
  * requirements). After we reach the max amount, we start deleting the oldest collection as we add
  * new ones.
  */
-class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
-    extends AutoCloseable
-    with LazyLogging {
+class CollectionRoller(solrService: SolrService) extends AutoCloseable with LazyLogging {
   val DEFAULT_ROLLPERIOD      = 1
   val DEFAULT_SHARDS          = 1
   val DEFAULT_REPLICAS        = 1
   val DEFAULT_NUM_COLLECTIONS = 7
-  private val nowSeconds      = now.toInstant.getEpochSecond
 
   /**
    * Upload Solr ConfigSetDir to Zookeeper for use in configuring Solr Collections.
@@ -89,12 +86,15 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
     }
   }
 
-  def run(applications: Seq[Application]): Iterable[Validated[Throwable, Unit]] = {
+  // TODO this function needs a better name, maybe just 'initialize'? Does it need to actually roll applications
+  // or should that just be a separate call?
+  def run(applications: Seq[Application],
+          now: ZonedDateTime): Iterable[Validated[Throwable, Unit]] = {
     val initializeResults = applications
-      .map(app => initializeApplication(app))
+      .map(app => initializeApplication(app, now))
       .toValidated()
 
-    initializeResults.mapValid(app => rollApplication(app))
+    initializeResults.mapValid(app => rollApplication(app, now))
   }
 
   /**
@@ -106,10 +106,10 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
    * @param application the [[io.phdata.pulse.collectionroller.Application]] to be initialized
    * @return
    */
-  private def initializeApplication(application: Application) = Try {
+  private def initializeApplication(application: Application, now: ZonedDateTime) = Try {
     if (!applicationExists(application)) {
       logger.info(s"creating application ${application.name}")
-      val nextCollection = getNextCollectionName(application.name)
+      val nextCollection = getNextCollectionName(application.name, now)
       solrService.createCollection(nextCollection,
                                    application.shards.getOrElse(DEFAULT_SHARDS),
                                    application.replicas.getOrElse(DEFAULT_REPLICAS),
@@ -144,8 +144,10 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
     result
   }
 
-  private def getNextCollectionName(applicationName: String) =
+  private def getNextCollectionName(applicationName: String, now: ZonedDateTime) = {
+    val nowSeconds = now.toInstant.getEpochSecond
     s"${applicationName}_$nowSeconds"
+  }
 
   /**
    * - Create a new collection with a newer timestamp
@@ -156,11 +158,11 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
    * @param application The [[io.phdata.pulse.collectionroller.Application]] to be rolled
    * @return
    */
-  private def rollApplication(application: Application): Unit =
-    if (shouldRollApplication(application)) {
+  private def rollApplication(application: Application, now: ZonedDateTime): Unit =
+    if (shouldRollApplication(application, now)) {
       logger.info(s"rolling collections for: ${application.name}")
 
-      val nextCollection = getNextCollectionName(application.name)
+      val nextCollection = getNextCollectionName(application.name, now)
       solrService.createCollection(nextCollection,
                                    application.shards.getOrElse(DEFAULT_SHARDS),
                                    application.replicas.getOrElse(DEFAULT_SHARDS),
@@ -183,7 +185,7 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
    * @param application application to maybe roll
    * @return
    */
-  private def shouldRollApplication(application: Application): Boolean = {
+  private def shouldRollApplication(application: Application, now: ZonedDateTime): Boolean = {
     val alias = latestAliasName(application.name)
     val collections = solrService
       .getAlias(alias)
@@ -256,10 +258,10 @@ class CollectionRoller(solrService: SolrService, val now: ZonedDateTime)
    *
    * @param applications The list of [[io.phdata.pulse.collectionroller.Application]]s to be rolled
    */
-  def rollApplications(applications: List[Application]): Seq[Try[Unit]] =
+  def rollApplications(applications: List[Application], now: ZonedDateTime): Seq[Try[Unit]] =
     applications
-      .filter(shouldRollApplication)
-      .map(application => Try(rollApplication(application)))
+      .filter(application => shouldRollApplication(application, now))
+      .map(application => Try(rollApplication(application, now)))
 
   /**
    * Fully delete a list of applications including
