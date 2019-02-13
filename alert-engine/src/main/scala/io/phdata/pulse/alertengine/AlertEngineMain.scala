@@ -34,6 +34,7 @@ import org.apache.solr.client.solrj.impl.{
 import scala.io.Source
 import scala.util.Try
 
+
 object AlertEngineMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES = 1
   HttpClientUtil.setConfigurer(new Krb5HttpClientConfigurer())
@@ -44,13 +45,39 @@ object AlertEngineMain extends LazyLogging {
 
     val executorService = Executors.newSingleThreadScheduledExecutor()
 
+    val solrServer = new CloudSolrServer(parsedArgs.zkHost())
+
+    val mailNotificationService =
+      new MailNotificationService(parsedArgs.smtpServer(),
+                                  parsedArgs.smtpPort(),
+                                  parsedArgs.smtpUser(),
+                                  parsedArgs.smtpPassword,
+                                  parsedArgs.smtp_tls())
+
+    val slackNotificationService = new SlackNotificationService
+
+    val notificationFactory =
+      new NotificationServices(mailNotificationService, slackNotificationService)
+
+    val config = try {
+      AlertEngineConfigParser.getConfig(parsedArgs.conf())
+    } catch {
+      case e: Exception =>
+        logger.error("Error parsing configuration, exiting", e)
+        System.exit(1)
+        throw new RuntimeException(e) // this code won't be reached but is needed for the typechecker
+    }
+    logger.info(s"using config: $config")
+    validateConfig(config)
+
     if (parsedArgs.daemonize()) {
       try {
 
-        val scheduledFuture = executorService.scheduleAtFixedRate(new AlertEngineTask(parsedArgs),
-                                                                  0L,
-                                                                  DAEMON_INTERVAL_MINUTES,
-                                                                  TimeUnit.MINUTES)
+        val scheduledFuture = executorService.scheduleAtFixedRate(
+          new AlertEngineTask(solrServer, notificationFactory, config, parsedArgs),
+          0L,
+          DAEMON_INTERVAL_MINUTES,
+          TimeUnit.MINUTES)
         Runtime.getRuntime.addShutdownHook(shutDownHook(scheduledFuture))
         executorService.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
       } catch {
@@ -59,7 +86,7 @@ object AlertEngineMain extends LazyLogging {
         executorService.shutdown()
       }
     } else {
-      val alertTask = new AlertEngineTask(parsedArgs)
+      val alertTask = new AlertEngineTask(solrServer, notificationFactory, config, parsedArgs)
       alertTask.run()
     }
 
@@ -104,40 +131,19 @@ object AlertEngineMain extends LazyLogging {
    * Task for running an alert. Can be schduled to be run repeatedly.
    * @param parsedArgs Application arguments
    */
-  class AlertEngineTask(parsedArgs: AlertEngineCliParser) extends Runnable {
+  class AlertEngineTask(solrServer: CloudSolrServer,
+                        notificationFactory: NotificationServices,
+                        config: AlertEngineConfig,
+                        parsedArgs: AlertEngineCliParser)
+      extends Runnable {
 
     override def run(): Unit = {
       logger.info("starting Alerting Engine run")
-      val config = try {
-        AlertEngineConfigParser.getConfig(parsedArgs.conf())
-      } catch {
-        case e: Exception =>
-          logger.info("Error parsing configuration, exiting", e)
-          System.exit(1)
-          throw new RuntimeException(e) // this code won't be reached but is needed for the typechecker
-      }
-
-      logger.info(s"using config: $config")
-      validateConfig(config)
-
-      val solrServer = new CloudSolrServer(parsedArgs.zkHost())
-
-      logger.info("starting Alert Engine run")
-      val mailNotificationService =
-        new MailNotificationService(parsedArgs.smtpServer(),
-                                    parsedArgs.smtpPort(),
-                                    parsedArgs.smtpUser(),
-                                    parsedArgs.smtpPassword,
-                                    parsedArgs.smtp_tls())
-
-      val slackNotificationService = new SlackNotificationService
 
       val silencedApplications = parsedArgs.silencedApplicationsFile
         .map(file => readSilencedApplications(file))
         .getOrElse(List())
 
-      val notificationFactory =
-        new NotificationServices(mailNotificationService, slackNotificationService)
       try {
         val engine: AlertEngine = new AlertEngineImpl(solrServer, notificationFactory)
         engine.run(config.applications, silencedApplications)
@@ -146,13 +152,8 @@ object AlertEngineMain extends LazyLogging {
         case e: Throwable =>
           logger.error("caught exception in AlertEngine task", e)
           System.exit(1)
-      } finally {
-        try {
-          solrServer.shutdown()
-        } catch {
-          case e: Exception => logger.warn("exception closing solr server", e)
-        }
       }
+
     }
   }
 }
