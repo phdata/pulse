@@ -16,7 +16,7 @@
  limitations under the License.
 -->
 
-<schema name="example" version="1.5">
+<schema name="pulse" version="1.0">
 
     <fields>
         <field name="id" type="string" indexed="true" stored="true" required="true"
@@ -27,6 +27,9 @@
                multiValued="false"/>
 
         <field name="level" type="string" indexed="true" stored="true" required="true"
+               multiValued="false"/>
+
+        <field name="hostname" type="string" indexed="true" stored="true" required="false"
                multiValued="false"/>
 
         <field name="message" type="text_general" indexed="true" stored="true" required="true"
@@ -46,7 +49,7 @@
 
         <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
 
-        <field name="_version_" type="long" indexed="true" stored="true"/>
+        <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
 
         <dynamicField name="*" type="string" indexed="true"  stored="true"/>
 
@@ -70,6 +73,8 @@
     <copyField source="message" dest="text"/>
     <copyField source="threadName" dest="text"/>
     <copyField source="throwable" dest="text"/>
+    <copyField source="hostname" dest="text"/>
+
 
     <types>
         <!-- field type definitions. The "name" attribute is
