@@ -80,7 +80,7 @@ class SolrCloudStreamsTest extends FunSuite with BaseSolrCloudTest {
     testValues.foreach(x => solrStream ! x)
 
     // sleep past the time documents would be flushed
-    Thread.sleep(streamProcessor.GROUP_MAX_TIME.toMillis + 5000)
+    Thread.sleep(streamProcessor.DEFAULT_BATCH_FLUSH_DURATION + 1)
 
     val app1Query = new SolrQuery("level: ERROR")
     app1Query.set("collection", app1Alias)
@@ -105,7 +105,7 @@ class SolrCloudStreamsTest extends FunSuite with BaseSolrCloudTest {
     solrService.createCollection(collection, 1, 1, TEST_CONF_NAME, null)
     solrService.createAlias(alias, collection)
 
-    val testValues = List.fill(streamProcessor.GROUP_SIZE + 100)((app1Name, document1))
+    val testValues = List.fill(streamProcessor.DEFALUT_GROUP_SIZE + 100)((app1Name, document1))
 
     val solrStream = streamProcessor.groupedInsert.run()
 
