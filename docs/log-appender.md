@@ -67,4 +67,4 @@ export SPARK_DIST_CLASSPATH="$SPARK_DIST_CLASSPATH:/opt/cloudera/parcels/PULSE/l
 
 - `log4j.appender.http.address`: Address of the log collector host.
 - `log4j.appender.http.blocking` (default `false`): Whether the log appender should block if the buffer is full. If the buffer is full and blocking is set to `false` new messages will be dropped.
-- `log4j.appender.http.buffersize` (default `1024`): Default max buffer size.
+- `log4j.appender.http.bufferSize` (default `1024`): Default max buffer size.
