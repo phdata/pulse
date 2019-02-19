@@ -1,6 +1,6 @@
 #!/bin/bash
 project_version=$(make --no-print-directory --silent -C ../ version)
-spark2-submit \
+spark-submit \
 --master local[*] \
 --files src/main/resources/log4j.properties \
 --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:src/main/resources/log4j.properties" \
