@@ -17,7 +17,7 @@
 package io.phdata.pulse.example
 
 import javax.naming.NamingException
-import org.apache.log4j.{Logger, MDC, NDC}
+import org.apache.log4j.{ Logger, MDC, NDC }
 
 object StandaloneAppExample {
   private val log = Logger.getLogger(this.getClass)

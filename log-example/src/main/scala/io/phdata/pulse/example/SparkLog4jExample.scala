@@ -16,8 +16,9 @@
 
 package io.phdata.pams.example
 
+import io.phdata.pulse.metrics.Metrics
+import org.apache.log4j.Logger
 import org.apache.spark.{ SparkConf, SparkContext }
-import org.slf4j.LoggerFactory
 
 /**
  * This example shows how to
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory
  */
 object SparkLog4jExample {
 
-  private val log = LoggerFactory.getLogger(this.getClass)
+  private implicit val log = Logger.getLogger(this.getClass)
 
   def main(args: Array[String]): Unit = {
     log.info("Starting up the spark logging example")
@@ -42,20 +43,27 @@ object SparkLog4jExample {
   }
 
   def run(sc: SparkContext, numEvents: Int): Unit = {
-    val testData = 1 to numEvents
-    val testRdd  = sc.parallelize(testData)
+    val samples = 1 to 1000000 by 50
+    Metrics.time("metric_l5") {
+      samples.foreach { sampleNum =>
+        println(sampleNum)
+        val rdd = sc.parallelize(1 to sampleNum)
 
-    testRdd.foreach { num =>
-      if (num % 10000 == 0) {
-        log.error(s"XXXXX error! num: " + num)
-      } else if (num % 5000 == 0) {
-        log.warn(s"XXXXX warning! num: " + num)
-      } else {
-        log.info(s"XXXXX found: " + num)
+        rdd.filter { _ =>
+          val x = math.random
+          val y = math.random
+          Thread.sleep(10)
+          x * x + y * y < 1
+        }
+        val count = rdd.count()
+        rdd.unpersist(true)
+
+        log.info(s"Pi calculated to: ${4.0 * count / sampleNum} with $sampleNum samples")
       }
     }
 
     log.info("Shutting down the spark logging example")
+    sc.stop()
   }
 
 }

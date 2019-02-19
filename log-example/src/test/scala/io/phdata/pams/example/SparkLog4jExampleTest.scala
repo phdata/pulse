@@ -22,7 +22,7 @@ import org.scalatest.FunSuite
 class SparkLog4jExampleTest extends FunSuite {
   // TODO fix error: "com.fasterxml.jackson.databind.JsonMappingException: Incompatible Jackson version: 2.9.4"
   // Can be fixed temporarily by setting the jackson version to '2.2.3', but this needs to be fully tested with the rest of the app
-  ignore("Run test job") {
+  test("Run test job") {
     val conf = new SparkConf().setMaster("local[*]").setAppName("Pulse Spark Logging Example")
     val sc   = SparkContext.getOrCreate(conf)
 
