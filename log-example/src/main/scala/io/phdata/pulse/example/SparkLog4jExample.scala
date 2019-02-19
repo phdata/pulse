@@ -43,7 +43,7 @@ object SparkLog4jExample {
   }
 
   def run(sc: SparkContext, numEvents: Int): Unit = {
-    val samples = 1 to 1000000 by 50
+    val samples = 1 to numEvents by 50
     Metrics.time("metric_l5") {
       samples.foreach { sampleNum =>
         println(sampleNum)
