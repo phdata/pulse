@@ -36,7 +36,7 @@ object SparkLog4jExample {
     val sc   = SparkContext.getOrCreate(conf)
 
     try {
-      run(sc, numEvents = 10000)
+      run(sc, args(0).toInt)
     } finally {
       sc.stop()
     }
