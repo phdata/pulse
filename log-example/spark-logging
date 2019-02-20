@@ -1,9 +1,9 @@
 #!/bin/bash
 project_version=$(make --no-print-directory --silent -C ../ version)
-spark-submit \
---master local[*] \
+spark2-submit \
+--master yarn-client \
 --files src/main/resources/log4j.properties \
 --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:src/main/resources/log4j.properties" \
 --conf "spark.executor.extraJavaOptions=-Dlog4j.configuration=file:log4j.properties" \
---class io.phdata.pams.example.SparkLog4jExample target/scala-2.11/log-example-assembly-${project_version}.jar
+--class io.phdata.pams.example.SparkLog4jExample target/scala-2.11/log-example-assembly-${project_version}.jar $@
 

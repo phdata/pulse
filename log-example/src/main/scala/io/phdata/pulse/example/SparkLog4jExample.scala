@@ -45,22 +45,23 @@ object SparkLog4jExample {
   // scalastyle:off
   def run(sc: SparkContext, numEvents: Int, step: Int): Unit = {
     val samples = 0 to numEvents by step
-    Metrics.time("metric_l5") {
-      samples.foreach { sampleNum =>
-        println("start: " + sampleNum)
+    samples.foreach { sampleNum =>
+      println("start: " + sampleNum)
+      Metrics.time("metric_l5") {
         val rdd = sc.parallelize(1 to sampleNum)
 
-        rdd.filter { _ =>
+        val filtered = rdd.filter { _ =>
           val x = math.random
           val y = math.random
           x * x + y * y < 1
         }
-        val count = rdd.count()
+        val count = filtered.count()
         rdd.unpersist(true)
-        println("done")
+        filtered.unpersist(true)
 
         log.info(s"Pi calculated to: ${4.0 * count / sampleNum} with $sampleNum samples")
       }
+      println("done")
     }
 
     log.info("Shutting down the spark logging example")
