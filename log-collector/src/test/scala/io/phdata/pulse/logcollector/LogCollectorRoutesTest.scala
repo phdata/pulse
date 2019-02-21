@@ -47,6 +47,16 @@ class LogCollectorRoutesTest
                               Some("Exception in thread main"),
                               None)
 
+
+  val jsonDocument: String =
+    """{ "timestamp": "1970-01-01T00:00:00Z",
+      | "category": "ERROR",
+      | "message": "message",
+      | "threadName": "thread oxb",
+      | "throwable": "Exception in thread main",
+      | "level": "ERROR"
+      | }""".stripMargin
+
   val solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress, solrClient)
 
   solrService.uploadConfDir(
@@ -61,6 +71,15 @@ class LogCollectorRoutesTest
     val docEntity = Marshal(document).to[MessageEntity].futureValue
 
     Post(uri = "/log?application=test")
+      .withEntity(docEntity) ~> routes ~> check {
+      assert(status === (StatusCodes.OK))
+    }
+  }
+
+  test("post json to endpoint, parse into json") {
+    val docEntity = Marshal(jsonDocument).to[MessageEntity].futureValue
+
+    Post(uri = "/v1/json/test")
       .withEntity(docEntity) ~> routes ~> check {
       assert(status === (StatusCodes.OK))
     }
