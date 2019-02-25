@@ -233,6 +233,18 @@ public class HttpAppender extends AppenderSkeleton {
   }
 
   /**
+   * Force bufferSize to be at least 1.
+   *
+   * @param size must be greater than zero
+   */
+  public void setbuffersize(int size) {
+    synchronized (buffer) {
+      this.bufferSize = (size < 1) ? 1 : size;
+      buffer.notifyAll();
+    }
+  }
+
+  /**
    * Determine if the appender should block when the buffer is full. Default value is true.
    *
    * @param blocking boolean
