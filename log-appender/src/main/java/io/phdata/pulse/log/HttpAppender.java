@@ -60,12 +60,12 @@ public class HttpAppender extends AppenderSkeleton {
   /**
    * Maximum buffer size.
    */
-  private int bufferSize = 1024;
+  private int bufferSize = 8192;
 
   /**
    * Does appender block when buffer is full.
    */
-  private boolean blocking = true;
+  private boolean blocking = false;
 
   private String hostname = null;
   private Thread dispatcher;
@@ -81,6 +81,21 @@ public class HttpAppender extends AppenderSkeleton {
     if (verifiedSparkApplication) {
         this.applicationId = Util.getApplicationId();
         this.containerId = Util.getContainerId();
+    }
+
+    try {
+      // Shutdown hook will flush log buffers
+      Runtime.getRuntime().addShutdownHook(new Thread()
+      {
+        public void run()
+        {
+          LogLog.debug("HttpAppender shutdown hook called");
+          HttpAppender.this.close();
+          LogLog.debug("HttpAppender shutdown hook finished");
+        }
+      });
+    } catch(Exception e) {
+      LogLog.debug("Failed to add HttpAppender shutdown hook", e);
     }
   }
 

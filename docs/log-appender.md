@@ -24,6 +24,7 @@ log4j.appender.stdout.layout.ConversionPattern=%5p [%t] (%F:%L) - %m%n
 
 log4j.appender.http=io.phdata.pulse.log.HttpAppender
 log4j.appender.http.Address=http://edge2.valhalla.phdata.io:9015/v2/events/pulse-test-100
+log4j.appender.http.blocking=false
 log4j.appender.http.layout=org.apache.log4j.core.layout.JsonLayout
 log4j.appender.http.layout.compact=false
 log4j.appender.http.layout.complete=true
@@ -60,3 +61,9 @@ client configuration:
 ```bash
 export SPARK_DIST_CLASSPATH="$SPARK_DIST_CLASSPATH:/opt/cloudera/parcels/PULSE/lib/appenders/*"
 ```
+
+## Log Appender Options
+
+- `log4j.appender.http.address`: Address of the log collector host.
+- `log4j.appender.http.blocking` (default `false`): Whether the log appender should block if the buffer is full. If the buffer is full and blocking is set to `false` new messages will be dropped.
+- `log4j.appender.http.bufferSize` (default `1024`): Default max buffer size.

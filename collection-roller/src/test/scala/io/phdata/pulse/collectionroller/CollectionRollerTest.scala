@@ -25,15 +25,16 @@ import org.scalatest._
 class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
 
   val solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress, solrClient)
+  val now         = ZonedDateTime.now(ZoneOffset.UTC)
 
   test("create an application if it doesn't exist") {
     val appName = TestUtil.randomIdentifier()
 
     val now              = ZonedDateTime.now(ZoneOffset.UTC)
     val nowSeconds       = now.toInstant.getEpochSecond
-    val collectionRoller = new CollectionRoller(solrService, now)
+    val collectionRoller = new CollectionRoller(solrService)
     val app              = Application(appName, None, None, None, None, "testconf")
-    collectionRoller.run(List(app))
+    collectionRoller.run(List(app), now)
 
     assertResult(true)(solrService.collectionExists(s"${app.name}_$nowSeconds"))
     assertResult(true)(solrService.aliasExists(s"${app.name}_latest"))
@@ -41,20 +42,20 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
   }
 
   test("upload solr configs") {
-    val collectionRoller = new CollectionRoller(solrService, ZonedDateTime.now(ZoneOffset.UTC))
+    val collectionRoller = new CollectionRoller(solrService)
 
     collectionRoller.uploadConfigsFromDirectory("./test-config")
   }
 
   test("fail if config dir is null") {
-    val collectionRoller = new CollectionRoller(solrService, ZonedDateTime.now(ZoneOffset.UTC))
+    val collectionRoller = new CollectionRoller(solrService)
 
     assert(collectionRoller.uploadConfigsFromDirectory(null).isFailure)
 
   }
 
   test("fail if config dir does not exist") {
-    val collectionRoller = new CollectionRoller(solrService, ZonedDateTime.now(ZoneOffset.UTC))
+    val collectionRoller = new CollectionRoller(solrService)
 
     assert(collectionRoller.uploadConfigsFromDirectory("faksjhdfaksjdfh").isFailure)
   }
@@ -67,19 +68,16 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     val fourthTime  = initialTime.plusDays(3)
     val fifthTime   = initialTime.plusDays(4)
 
-    val collectionRoller = new CollectionRoller(solrService, initialTime)
+    val collectionRoller = new CollectionRoller(solrService)
 
     val app =
       Application(appName, Some(2), Some(1), Some(1), Some(1), "testconf")
-    collectionRoller.run(List(app))
-    collectionRoller.rollApplications(List(app))
+    collectionRoller.run(List(app), initialTime)
 
-    val times = List(secondTime, thirdTime, fourthTime, fifthTime)
+    val times = List(initialTime, secondTime, thirdTime, fourthTime, fifthTime)
 
     times foreach { timestamp =>
-      val collectionRoller =
-        new CollectionRoller(solrService, ZonedDateTime.parse(timestamp.toString))
-      collectionRoller.rollApplications(List(app))
+      collectionRoller.rollApplications(List(app), ZonedDateTime.parse(timestamp.toString))
     }
 
     assert(
@@ -108,17 +106,15 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     val initialTime = ZonedDateTime.now(ZoneOffset.UTC)
     val secondTime  = initialTime.plusMinutes(60)
 
-    val collectionRoller = new CollectionRoller(solrService, initialTime)
+    val collectionRoller = new CollectionRoller(solrService)
 
     val app =
       Application(appName, None, None, None, None, "testconf")
-    collectionRoller.run(List(app))
+    collectionRoller.run(List(app), initialTime)
 
-    collectionRoller.rollApplications(List(app))
+    collectionRoller.rollApplications(List(app), initialTime)
 
-    val collectionRoller2 =
-      new CollectionRoller(solrService, ZonedDateTime.parse(secondTime.toString))
-    collectionRoller2.rollApplications(List(app))
+    collectionRoller.rollApplications(List(app), ZonedDateTime.parse(secondTime.toString))
 
     assert(
       solrService
@@ -134,17 +130,15 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     val initialTime = ZonedDateTime.now(ZoneOffset.UTC)
     val secondTime  = initialTime.plusDays(2)
 
-    val collectionRoller = new CollectionRoller(solrService, initialTime)
+    val collectionRoller = new CollectionRoller(solrService)
 
     val app =
       Application(appName, None, None, None, None, "testconf")
-    collectionRoller.run(List(app))
+    collectionRoller.run(List(app), initialTime)
 
-    collectionRoller.rollApplications(List(app))
+    collectionRoller.rollApplications(List(app), initialTime)
 
-    val collectionRoller2 =
-      new CollectionRoller(solrService, ZonedDateTime.parse(secondTime.toString))
-    collectionRoller2.rollApplications(List(app))
+    collectionRoller.rollApplications(List(app), ZonedDateTime.parse(secondTime.toString))
 
     assertResult(Some(Set(s"${app.name}_${secondTime.toInstant.getEpochSecond}")))(
       solrService.getAlias(s"${app.name}_latest"))
@@ -160,9 +154,9 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     val app2 =
       Application(app2Name, None, None, None, None, "testconf")
 
-    val collectionRoller = new CollectionRoller(solrService, initialTime)
+    val collectionRoller = new CollectionRoller(solrService)
 
-    collectionRoller.run(List(app1, app2))
+    collectionRoller.run(List(app1, app2), initialTime)
     collectionRoller.deleteApplications(List(app1Name, app2Name))
 
     // check if alias exists for app1 & app2
@@ -189,13 +183,13 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     val initialTime = ZonedDateTime.now(ZoneOffset.UTC)
     val secondTime  = initialTime.plusDays(1)
 
-    val collectionRoller = new CollectionRoller(solrService, initialTime)
+    val collectionRoller = new CollectionRoller(solrService)
 
     val app =
       Application(appName, None, None, None, None, "testconf")
 
-    collectionRoller.run(List(app))
-    collectionRoller.rollApplications(List(app))
+    collectionRoller.run(List(app), initialTime)
+    collectionRoller.rollApplications(List(app), initialTime)
 
     //find all collections
     val appCollections =
@@ -206,12 +200,9 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     //delete application collections
     appCollections.foreach { coll =>
       solrService.deleteCollection(coll)
-
     }
 
-    val collectionRoller2 =
-      new CollectionRoller(solrService, ZonedDateTime.parse(secondTime.toString))
-    collectionRoller2.rollApplications(List(app))
+    collectionRoller.rollApplications(List(app), ZonedDateTime.parse(secondTime.toString))
 
     assert(
       solrService

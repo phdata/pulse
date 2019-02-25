@@ -26,7 +26,7 @@ import org.apache.solr.cloud.MiniSolrCloudCluster
 
 object TestUtil {
 
-  val miniSolrCloudCluster: MiniSolrCloudCluster = {
+  def miniSolrCloudCluster(): MiniSolrCloudCluster = {
 
     val DEFAULT_SOLR_CLOUD_XML =
       """<solr>
@@ -62,7 +62,7 @@ object TestUtil {
     // Set up a MiniSolrCloudCluster
     val clusterHome = s"${System.getProperty("user.dir")}/target/solr/solrHome/${UUID.randomUUID()}"
     val jettyConfig =
-      JettyConfig.builder().setContext("/solr").setPort(8983).stopAtShutdown(false).build()
+      JettyConfig.builder().setContext("/solr").setPort(8983).stopAtShutdown(true).build()
 
     new MiniSolrCloudCluster(1, Paths.get(clusterHome), DEFAULT_SOLR_CLOUD_XML, jettyConfig)
   }

@@ -73,7 +73,8 @@ lazy val dependencies =
     val powerMockJunit = "org.powermock" % "powermock-module-junit4" % powerMockVersion % Test
     val powerMockApi = "org.powermock" % "powermock-api-mockito" % powerMockVersion % Test
 
-
+    // Kafka depends
+    val apacheKafka = "org.apache.kafka" % "kafka_2.11" % "0.10.2-kafka-2.2.0" % Provided
 
     // Http depends
     val akkaHttp = "com.typesafe.akka" %% "akka-http" % akkaHttpVersion
@@ -123,7 +124,7 @@ lazy val `log-collector` = project
     name := "log-collector",
     mainClass in Compile := Some("io.phdata.pulse.logcollector.LogCollector"),
     settings,
-    libraryDependencies ++= dependencies.http ++ Seq(dependencies.scallop)
+    libraryDependencies ++= dependencies.http ++ Seq(dependencies.scallop, dependencies.apacheKafka)
   ).dependsOn(`test-common` % Test).dependsOn(common)
 
 lazy val `collection-roller` = project
@@ -165,8 +166,8 @@ lazy val `log-example` = project
   .settings(
     name := "log-example",
     settings,
-    libraryDependencies ++= Seq("log4j" % "log4j" % "1.2.16", dependencies.spark)
-  )
+    libraryDependencies ++= Seq("log4j" % "log4j" % "1.2.16", dependencies.spark, dependencies.scalaTest)
+  ).dependsOn(`log-appender`)
 
 // Library versions
 val logbackVersion = "1.2.3"

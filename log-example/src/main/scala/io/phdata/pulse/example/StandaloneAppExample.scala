@@ -16,7 +16,8 @@
 
 package io.phdata.pulse.example
 
-import org.apache.log4j.{ Logger, MDC, NDC }
+import javax.naming.NamingException
+import org.apache.log4j.{Logger, MDC, NDC}
 
 object StandaloneAppExample {
   private val log = Logger.getLogger(this.getClass)
@@ -34,7 +35,9 @@ object StandaloneAppExample {
         log.error(s"error happened $uuid", new Exception())
       }
     }
-    throw new Exception("exiting")
+    // Throw an exception so when we turn on `log4j.debug=true` we can see where events stop posting to the log collector
+    // it's a <code>NamingException</code> so we can catch it in the test for this class
+    throw new NamingException("exiting")
 
   }
 

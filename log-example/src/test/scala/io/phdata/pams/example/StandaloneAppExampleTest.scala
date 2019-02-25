@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.phdata.pulse.common
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import io.phdata.pulse.common.domain.LogEvent
-import spray.json.{ DefaultJsonProtocol, RootJsonFormat }
+package io.phdata.pams.example
 
-/**
- * Provides Json serialization/deserialization for the LogEvent case class
- */
-trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit def logEventJsonFormat: RootJsonFormat[LogEvent] = jsonFormat9(LogEvent)
+import io.phdata.pulse.example.StandaloneAppExample
+import javax.naming.NamingException
+import org.scalatest.FunSuite
+
+class StandaloneAppExampleTest extends FunSuite {
+  test("Run standalone example") {
+    try {
+      StandaloneAppExample.main(Array("1", "1"))
+    } catch {
+      case e: NamingException =>
+    }
+  }
 }

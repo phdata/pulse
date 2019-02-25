@@ -20,6 +20,10 @@ import java.time.{ ZoneOffset, ZonedDateTime }
 import java.util.concurrent.{ Executors, ScheduledFuture, TimeUnit }
 
 import com.typesafe.scalalogging.LazyLogging
+import io.phdata.pulse.collectionroller.CollectionRollerMain.{
+  createCollectionRoller,
+  CollectionRollerTask
+}
 import io.phdata.pulse.collectionroller.util.ValidationImplicits._
 import io.phdata.pulse.common.SolrService
 import org.apache.solr.client.solrj.impl.CloudSolrServer
@@ -29,37 +33,62 @@ import scala.util.{ Failure, Success, Try }
 object CollectionRollerMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES       = 5L // five minutes
   val CLEANUP_SLEEP_INTERVAL_MILLIS = 100
+  val executorService               = Executors.newSingleThreadScheduledExecutor()
 
   def main(args: Array[String]) {
     val parsedArgs = new CollectionRollerCliArgsParser(args)
     logger.debug(s"Parsed args: $parsedArgs")
 
-    val executorService = Executors.newSingleThreadScheduledExecutor()
-
-    if (parsedArgs.daemonize()) {
-      try {
-        val scheduledFuture = executorService.scheduleAtFixedRate(
-          new CollectionRollerTask(parsedArgs),
-          0L,
-          DAEMON_INTERVAL_MINUTES,
-          TimeUnit.MINUTES)
-        Runtime.getRuntime.addShutdownHook(shutDownHook(scheduledFuture))
-
-        executorService.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
-      } catch {
-        case e: Exception => logger.error(s"Error running CollectionRoller", e)
-      } finally {
-        executorService.shutdown()
-      }
-    } else if (parsedArgs.deleteApplications.supplied) {
+    if (parsedArgs.deleteApplications.supplied) {
       deleteApplications(parsedArgs)
     } else if (parsedArgs.listApplications.supplied && parsedArgs.verbose.supplied) {
       listApplicationsVerbose(parsedArgs)
     } else if (parsedArgs.listApplications.supplied) {
       listApplications(parsedArgs)
     } else {
-      val collectionRollerTask = new CollectionRollerTask(parsedArgs)
-      collectionRollerTask.run()
+      val config = try {
+        val c = ConfigParser.getConfig(parsedArgs.conf())
+        logger.info(s"using config: $c")
+        c
+      } catch {
+        case e: Exception =>
+          logger.error("Error parsing config, exiting", e)
+          System.exit(1) // bail if we have a bad config
+          // this code won't be reached but is needed for the typechecker
+          throw new RuntimeException("Error parsing configuration, exiting", e)
+      }
+
+      val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
+
+      try {
+        val configUploadResults =
+          collectionRoller.uploadConfigsFromDirectory(config.solrConfigSetDir)
+
+        configUploadResults match {
+          case Success(_) => logger.info("Successfully uploaded config sets.")
+          case Failure(e) => logger.error("Error uploading config sets", e)
+        }
+
+        if (parsedArgs.daemonize()) {
+          try {
+            val scheduledFuture = executorService.scheduleAtFixedRate(
+              new CollectionRollerTask(collectionRoller, config, parsedArgs),
+              0L,
+              DAEMON_INTERVAL_MINUTES,
+              TimeUnit.MINUTES)
+            Runtime.getRuntime.addShutdownHook(shutDownHook(scheduledFuture))
+
+            executorService.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
+          } catch {
+            case e: Exception => logger.error(s"Error running CollectionRoller", e)
+          } finally {
+            executorService.shutdown()
+          }
+        } else {
+          val collectionRollerTask = new CollectionRollerTask(collectionRoller, config, parsedArgs)
+          collectionRollerTask.run()
+        }
+      }
     }
 
     def shutDownHook(future: ScheduledFuture[_]) = new Thread() {
@@ -122,60 +151,36 @@ object CollectionRollerMain extends LazyLogging {
   }
 
   private def createCollectionRoller(zookeeper: String) = {
-    val now              = ZonedDateTime.now(ZoneOffset.UTC)
     val solr             = new CloudSolrServer(zookeeper)
     val solrService      = new SolrService(zookeeper, solr)
-    val collectionRoller = new CollectionRoller(solrService, now)
+    val collectionRoller = new CollectionRoller(solrService)
     collectionRoller
   }
 
-  class CollectionRollerTask(parsedArgs: CollectionRollerCliArgsParser)
+  class CollectionRollerTask(collectionRoller: CollectionRoller,
+                             config: CollectionRollerConfig,
+                             parsedArgs: CollectionRollerCliArgsParser)
       extends Runnable
       with LazyLogging {
 
-    override def run(): Unit = {
-      val config = try {
-        ConfigParser.getConfig(parsedArgs.conf())
-      } catch {
-        case e: Exception =>
-          logger.error("Error parsing config, exiting", e)
-          System.exit(1) // bail if we have a bad config
-          throw new RuntimeException("Error parsing configuration, exiting", e) // this code won't be reached but is needed for the typechecker
-      }
-
-      logger.info(s"using config: $config")
-
-      val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
-
+    override def run(): Unit =
       try {
         logger.info("starting Collection Roller run")
 
-        val configUploadResults: Try[Unit] =
-          collectionRoller.uploadConfigsFromDirectory(config.solrConfigSetDir)
-
-        configUploadResults match {
-          case Success(_) => logger.info("Successfully uploaded config sets.")
-          case Failure(e) => logger.error("Error uploading config sets", e)
-        }
+        val now = ZonedDateTime.now(ZoneOffset.UTC)
 
         val collectionRollingResults =
-          collectionRoller.run(config.applications)
+          collectionRoller.run(config.applications, now)
 
         collectionRollingResults.mapInvalid(e => logger.error("fatal error", e))
 
         logger.info("ending Collection Roller run")
-      } finally {
-        collectionRoller.close()
-      }
-
-      def cleanupAndExit() =
-        try {
+      } catch {
+        case e: Exception =>
+          logger.error(e.getMessage, e)
           collectionRoller.close()
-        } finally {
-          // a failure exists, kill the application so the supervisor will alert
           System.exit(1)
-        }
-    }
+      }
   }
 
 }
