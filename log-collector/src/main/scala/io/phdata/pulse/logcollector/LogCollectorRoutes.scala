@@ -92,11 +92,13 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
       */
     post {
       // create a streaming Source from the incoming json string
+      // TODO: Try unmarshalling(?) to Map[String, String] directly
       entity(as[String]) { logEvent =>
         logger.trace("received message")
+        // TODO: Flatten to handle nested JSON
         val parsed = logEvent.parseJson.convertTo[Map[String, String]]
 
-        streamRef ! (applicationName, parsed)
+        streamRef ! (applicationName, logEvent)
 
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
