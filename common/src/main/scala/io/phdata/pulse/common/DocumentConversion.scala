@@ -45,10 +45,14 @@ object DocumentConversion {
     doc
   }
 
-
+  /**
+   * Convert a [[Map[String, String]]] to a [[SolrInputDocument]]
+   * @param event [[Map[String, String]]] to convert
+   * @return The document as a [[SolrDocument]]
+   */
   def mapToSolrDocument(event: Map[String, String]): SolrInputDocument = {
     val doc = new SolrInputDocument()
-    event.foreach(field => doc.addField(s"${field._1}", field._2))
+    event.foreach(field => doc.addField(field._1, field._2))
     doc
   }
 

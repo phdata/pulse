@@ -53,7 +53,7 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
         // create a streaming Source from the incoming json
         entity(as[LogEvent]) { logEvent =>
           logger.trace("received message")
-          streamRef ! (applicationName, logEvent)
+          streamRef ! (applicationName, logEventToFlattenedMap(logEvent))
 
           complete(HttpEntity(ContentTypes.`application/json`, "ok"))
         }
@@ -68,7 +68,7 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
       // create a streaming Source from the incoming json
       entity(as[LogEvent]) { logEvent =>
         logger.trace("received message")
-        streamRef ! (applicationName, logEvent)
+        streamRef ! (applicationName, logEventToFlattenedMap(logEvent))
 
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
@@ -81,27 +81,52 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
       // create a streaming Source from the incoming json
       entity(as[Array[LogEvent]]) { logEvents =>
         logger.trace("received message")
-        logEvents.foreach(logEvent => streamRef ! (applicationName, logEvent))
+        logEvents.foreach(logEvent =>
+          streamRef ! (applicationName, logEventToFlattenedMap(logEvent)))
 
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
     }
   } ~ path("v1" / "json" / Segment) { applicationName =>
     /**
-      * Consumes an single json event
-      */
+     * Consumes an single json event
+     */
     post {
       // create a streaming Source from the incoming json string
-      // TODO: Try unmarshalling(?) to Map[String, String] directly
       entity(as[String]) { logEvent =>
         logger.trace("received message")
-        // TODO: Flatten to handle nested JSON
-        val parsed = logEvent.parseJson.convertTo[Map[String, String]]
+        val parsedJsonMap = logEvent.parseJson.convertTo[Map[String, String]]
 
-        streamRef ! (applicationName, logEvent)
+        streamRef ! (applicationName, parsedJsonMap)
 
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
     }
   }
+
+  /**
+   * Convert a [[LogEvent]] to a flattened [[Map[String,String]]
+   * @param logEvent LogEvent to convert
+   * @return The event, with properties flattened, as a [[Map[String,String]]
+   */
+  def logEventToFlattenedMap(logEvent: LogEvent): Map[String, String] = {
+    val values = logEvent.productIterator
+    val logEventmap = logEvent.getClass.getDeclaredFields.map {
+      _.getName -> (values.next() match {
+        case x => x
+      })
+    }.toMap
+    logEventmap
+      .flatten {
+        case ((key, map: Option[Map[String, String]]))
+            if map.getOrElse(None).isInstanceOf[Map[String, String]] =>
+          map.get
+        case ((key, value: Option[String])) if value.getOrElse(None).isInstanceOf[String] =>
+          Map(key -> value.getOrElse(None))
+        case ((key, value)) => Map(key -> value)
+      }
+      .toMap
+      .asInstanceOf[Map[String, String]]
+  }
+
 }

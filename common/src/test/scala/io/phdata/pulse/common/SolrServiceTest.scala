@@ -132,25 +132,47 @@ class SolrServiceTest extends FunSuite with BaseSolrCloudTest {
     val collectionName = TestUtil.randomIdentifier()
     solrService.createCollection(collectionName, 1, 1, "testconf", null)
 
-    val document1 = DocumentConversion.toSolrDocument(
-      new LogEvent(None,
-                   "ERROR",
-                   "1970-01-01T00:00:00Z",
-                   "ERROR",
-                   "message",
-                   "thread oxb",
-                   Some("Exception in thread main"),
-                   None))
+//    val document1 = DocumentConversion.toSolrDocument(
+//      new LogEvent(None,
+//                   "ERROR",
+//                   "1970-01-01T00:00:00Z",
+//                   "ERROR",
+//                   "message",
+//                   "thread oxb",
+//                   Some("Exception in thread main"),
+//                   None))
+//
+//    val document2 = DocumentConversion.toSolrDocument(
+//      new LogEvent(None,
+//                   "ERROR",
+//                   "1970-01-01T00:00:00Z",
+//                   "ERROR",
+//                   "message",
+//                   "thread oxb",
+//                   Some("Exception in thread main"),
+//                   None))
 
-    val document2 = DocumentConversion.toSolrDocument(
-      new LogEvent(None,
-                   "ERROR",
-                   "1970-01-01T00:00:00Z",
-                   "ERROR",
-                   "message",
-                   "thread oxb",
-                   Some("Exception in thread main"),
-                   None))
+    val document1 = DocumentConversion.mapToSolrDocument(
+      Map("id" -> None,
+        "category" -> "ERROR",
+        "timestamp" -> "1970-01-01T00:00:00Z",
+        "level" -> "ERROR",
+        "message" -> "message",
+        "threadName" -> "thread oxb",
+        "throwable" -> "Exception in thread main",
+        "application" -> None)
+        .asInstanceOf[Map[String,String]])
+
+    val document2 = DocumentConversion.mapToSolrDocument(
+      Map("id" -> None,
+        "category" -> "ERROR",
+        "timestamp" -> "1970-01-01T00:00:00Z",
+        "level" -> "ERROR",
+        "message" -> "message",
+        "threadName" -> "thread oxb",
+        "throwable" -> "Exception in thread main",
+        "application" -> None)
+        .asInstanceOf[Map[String,String]])
 
     solrService.insertDocuments(collectionName, Seq(document1, document2))
 
@@ -167,17 +189,16 @@ class SolrServiceTest extends FunSuite with BaseSolrCloudTest {
     val collectionName = TestUtil.randomIdentifier()
     solrService.createCollection(collectionName, 1, 1, "testconf", null)
 
-    val properties = Map("hostname" -> "host1.com")
-
-    val document1 = DocumentConversion.toSolrDocument(
-      new LogEvent(None,
-                   "ERROR",
-                   "1970-01-01T00:00:00Z",
-                   "ERROR",
-                   "message",
-                   "thread oxb",
-                   Some("Exception in thread main"),
-                   Some(properties)))
+    val document1 = DocumentConversion.mapToSolrDocument(
+      Map("id" -> None,
+        "category" -> "ERROR",
+        "timestamp" -> "1970-01-01T00:00:00Z",
+        "level" -> "ERROR",
+        "message" -> "message",
+        "threadName" -> "thread oxb",
+        "throwable" -> "Exception in thread main",
+        "hostname" -> "host1.com")
+        .asInstanceOf[Map[String,String]])
 
     solrService.insertDocuments(collectionName, Seq(document1))
 
