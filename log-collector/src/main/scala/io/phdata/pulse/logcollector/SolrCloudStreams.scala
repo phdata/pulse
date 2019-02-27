@@ -16,6 +16,8 @@
 
 package io.phdata.pulse.logcollector
 
+import java.util.concurrent.TimeUnit
+
 import akka.Done
 import akka.actor.ActorRef
 import akka.stream.scaladsl.{ RunnableGraph, Sink, Source }
@@ -28,10 +30,46 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 class SolrCloudStreams(solrService: SolrService) extends LazyLogging {
+  val DEFAULT_MAX_BUFFER_SIZE      = 512000
+  val DEFALUT_GROUP_SIZE           = 1000
+  val DEFAULT_BATCH_FLUSH_DURATION = 1
+  val DEFAULT_OVERFLOW_STRATAGY    = OverflowStrategy.fail
 
-  val GROUP_SIZE     = 1000 // Number of elements to put into a group
-  val GROUP_MAX_TIME = 1 seconds // If a grouping exceeds this time it will stop short of GROUP_SIZE
   val MAX_SUBSTREAMS = 1000 // If the number of apps being processed exceeds this some will be dropped
+
+  val maxBuffersize: Int =
+    sys.props
+      .get("pulse.collector.stream.buffer.max")
+      .map(_.toInt)
+      .getOrElse(DEFAULT_MAX_BUFFER_SIZE)
+  val batchFlushDuration = {
+    val property =
+      sys.props
+        .get("pulse.collector.stream.flush.seconds")
+        .map(_.toInt)
+        .getOrElse(DEFAULT_BATCH_FLUSH_DURATION)
+
+    Duration(property, TimeUnit.SECONDS)
+
+  }
+  val solrBatchSize =
+    sys.props.get("pulse.collector.stream.batch.size").map(_.toInt).getOrElse(DEFALUT_GROUP_SIZE)
+
+  val overflowStrategy = {
+    sys.props
+      .get("pulse.collector.stream.overflow.strategy")
+      .map { strategy =>
+        strategy.trim.toLowerCase match {
+          case "fail"         => OverflowStrategy.fail
+          case "drophead"     => OverflowStrategy.dropHead
+          case "droptail"     => OverflowStrategy.dropTail
+          case "dropnew"      => OverflowStrategy.dropNew
+          case "dropbuffer"   => OverflowStrategy.dropBuffer
+          case "backpressure" => OverflowStrategy.backpressure
+        }
+      }
+      .getOrElse(DEFAULT_OVERFLOW_STRATAGY)
+  }
 
   /**
    * Solr Cloud [[Sink]] for [[LogEvent]]s
@@ -60,9 +98,9 @@ class SolrCloudStreams(solrService: SolrService) extends LazyLogging {
    */
   val groupedInsert: RunnableGraph[ActorRef] = {
     Source
-      .actorRef[(String, Map[String, String])](Int.MaxValue, OverflowStrategy.dropNew)
+      .actorRef[(String, Map[String, String])](maxBuffersize, overflowStrategy)
       .groupBy(MAX_SUBSTREAMS, x => x._1) // group by the application name
-      .groupedWithin(GROUP_SIZE, GROUP_MAX_TIME) // group 1000 records or within one second, whichever comes first
+      .groupedWithin(solrBatchSize, batchFlushDuration)
       .map(x => (x(0)._1, x.map(_._2))) // get application name from the first tuple (they're all the same), and a sequence of LogEvents
       .mergeSubstreams
       .to(solrSink)
