@@ -9,7 +9,7 @@ the Log Collector, or more likely Solr, get backed up, messages will be dropped 
 than affecting the performance of the application. This can be changed by setting 
 `log4j.appender.http.blocking=true`
 - Alert Engine and Collection Roller use a single connection to Zookeeper, reducing
-log verbosity.
+log verbosity
 - Collection Roller will no longer update Solr config set dirs every 5 minutes.
 A restart of the Collection Roller is now required to update configurations.
 - Add `hostname` to the default schema
@@ -17,11 +17,12 @@ A restart of the Collection Roller is now required to update configurations.
 - Added an experimental `Metrics` class for application metrics and profiling
 - HttpAppender buffer size can now be set using all lowercase letters `log4j.appender.http.buffersize`
 - Add a secure Solr config set dir called `pulseconfig-securev1`
-- Add new configuration options to the Log Collector:The log collector will batch up messages over a period of time before sending them to Solr.
+- Add new configuration options to the Log Collector:
+  - The log collector will batch up messages over a period of time before sending them to Solr.
   - The batch size, duration, and max buffer size are configurable via java options:
     - `pulse.collector.stream.buffer.max`: Max number of messages to be kept in the log collector buffer
-before new messages are dropped.  This buffer can grow and become full if Solr is overloaded. Default is 512000 messages.
-    - `pulse.collector.stream.batch.size`: Size of the batches to send to solr. Default is 1000 messages.
+before new messages are dropped.  This buffer can grow and become full if Solr is overloaded. Default is 512000 messages
+    - `pulse.collector.stream.batch.size`: Size of the batches to send to solr. Default is 1000 messages
     - `pulse.collector.stream.flush.seconds`: Number of seconds to wait before flushing documents to solr. Default is 1 second
     - `pulse.collector.stream.overflow.strategy`: [OverflowStrategy](https://doc.akka.io/japi/akka/current/akka/stream/OverflowStrategy.html) 
     to employ if the buffer has reached its max size. Options are 'dropnew', 'drophead', 'droptail', 'backpressure', and 'dropbuffer'. Defaults to `fail`
@@ -30,7 +31,7 @@ before new messages are dropped.  This buffer can grow and become full if Solr i
 
 - Don't require 'kudu masters' in Cloudera Manager service
 - Add default alert and collection roller yaml configs for Cloudera Manager Service first run
-- Require 'solrConfigSetDir' in collection-roller.yml to be set and populated.
+- Require 'solrConfigSetDir' in collection-roller.yml to be set and populated
 - Fix parcel shasums in parcel repo
 - Add missing backslash in spark-submit example script
 
