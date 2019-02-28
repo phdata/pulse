@@ -173,6 +173,8 @@ class SolrService(zkAddress: String, solr: CloudSolrServer) extends Closeable wi
       update_request.add(doc)
     }
 
+    println(update_request.getXML)
+
     update_request.setAction(ACTION.COMMIT, true, true, true).process(solr)
 
     logger.info(s"saved ${documents.length} documents to collection $collection")

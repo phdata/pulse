@@ -126,10 +126,10 @@ class SolrCloudStreamsTest extends FunSuite with BaseSolrCloudTest {
 
     val mapDocument: Map[String, String] = Map("id" -> "12345",
       "timestamp" -> "1970-01-01T00:00:00Z",
-      "message" -> "test",
+      "message" -> "message",
       "level" -> "ERROR",
-      "throwable" -> "e",
-      "category" -> "test")
+      "throwable" -> "Exception in thread main",
+      "category" -> "ERROR")
 
     val collection = s"${app1Name}_1"
     val alias      = s"${app1Name}_latest"

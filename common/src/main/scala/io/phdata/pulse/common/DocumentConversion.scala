@@ -24,26 +24,26 @@ import org.apache.solr.common.{ SolrDocument, SolrInputDocument }
  */
 object DocumentConversion {
 
-  def toSolrDocument(event: LogEvent): SolrInputDocument = {
-    val doc = new SolrInputDocument()
-    event.id.foreach(id => doc.addField("id", id))
-    doc.addField("category", event.category)
-    doc.addField("timestamp", event.timestamp)
-    doc.addField("level", event.level)
-    doc.addField("message", event.message)
-    doc.addField("threadName", event.threadName)
-    doc.addField("throwable", event.throwable.getOrElse(""))
-
-    // If the event properties exist, add each property to the document. The fields will be added as
-    // dynamic [[String]] fields
-    event.properties.fold() { properties =>
-      properties.foreach {
-        case (k: String, v: String) =>
-          doc.addField(s"$k", v)
-      }
-    }
-    doc
-  }
+//  def toSolrDocument(event: LogEvent): SolrInputDocument = {
+//    val doc = new SolrInputDocument()
+//    event.id.foreach(id => doc.addField("id", id))
+//    doc.addField("category", event.category)
+//    doc.addField("timestamp", event.timestamp)
+//    doc.addField("level", event.level)
+//    doc.addField("message", event.message)
+//    doc.addField("threadName", event.threadName)
+//    doc.addField("throwable", event.throwable.getOrElse(""))
+//
+//    // If the event properties exist, add each property to the document. The fields will be added as
+//    // dynamic [[String]] fields
+//    event.properties.fold() { properties =>
+//      properties.foreach {
+//        case (k: String, v: String) =>
+//          doc.addField(s"$k", v)
+//      }
+//    }
+//    doc
+//  }
 
   /**
    * Convert a [[Map[String, String]]] to a [[SolrInputDocument]]

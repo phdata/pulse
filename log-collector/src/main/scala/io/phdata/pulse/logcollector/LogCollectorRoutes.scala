@@ -126,6 +126,7 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
         case ((key, value)) => Map(key -> value)
       }
       .toMap
+      .filter(kv => !kv._2.equals(None))
       .asInstanceOf[Map[String, String]]
   }
 

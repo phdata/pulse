@@ -18,17 +18,14 @@ package io.phdata.pulse.alertengine
 
 import java.io.File
 
-import io.phdata.pulse.alertengine.notification.{
-  MailNotificationService,
-  NotificationServices,
-  SlackNotificationService
-}
-import io.phdata.pulse.common.{ DocumentConversion, SolrService }
-import io.phdata.pulse.testcommon.{ BaseSolrCloudTest, TestUtil }
+import io.phdata.pulse.alertengine.notification.{MailNotificationService, NotificationServices, SlackNotificationService}
+import io.phdata.pulse.common.{DocumentConversion, SolrService}
+import io.phdata.pulse.testcommon.{BaseSolrCloudTest, TestUtil}
 import org.apache.solr.client.solrj.impl.CloudSolrServer
+import org.apache.solr.common.SolrInputDocument
 import org.mockito.Mockito
 import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{ BeforeAndAfterEach, FunSuite }
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
 class AlertEngineImplTest
     extends FunSuite
@@ -64,16 +61,23 @@ class AlertEngineImplTest
     solrClient.setDefaultCollection(alias)
     val result = solrService.createCollection(alias, 1, 1, CONF_NAME, null)
 
-    val document = DocumentConversion.toSolrDocument(TestObjectGenerator.logEvent())
-    val documentError = DocumentConversion.toSolrDocument(
-      TestObjectGenerator.logEvent(id = None,
-                                   category = "ERROR",
-                                   level = "ERROR2",
-                                   message = "message2",
-                                   throwable = Some("Exception in thread main")))
+    val document = DocumentConversion.mapToSolrDocument(Map(
+      "id" -> "123",
+      "category" -> "test",
+      "timestamp" -> "2018-04-06 10:15:00",
+      "level" -> "FATAL",
+      "message" -> "The service is down.",
+      "threadName" -> "thread3",
+      "throwable" -> "NullPointerException"))
 
-    solrClient.add(document)
+    val documentError = DocumentConversion.mapToSolrDocument(Map(
+      "category" -> "ERROR",
+      "timestamp" -> "1970-01-01T00:00:00Z",
+      "level" -> "ERROR2",
+      "message" -> "message2",
+      "throwable" -> "Exception in thread main"))
 
+    println(documentError.toString)
     for (i <- 1 to 12) {
       solrClient.add(documentError)
     }
