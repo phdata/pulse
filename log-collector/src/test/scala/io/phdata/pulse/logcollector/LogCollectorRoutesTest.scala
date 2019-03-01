@@ -47,6 +47,24 @@ class LogCollectorRoutesTest
                               Some("Exception in thread main"),
                               None)
 
+  val jsonArrayDocument: String =
+    """[
+      |{ "timestamp": "1970-01-01T00:00:00Z",
+      | "category": "ERROR",
+      | "message": "message",
+      | "threadName": "thread oxb",
+      | "throwable": "Exception in thread main",
+      | "level": "ERROR"
+      | },
+      | { "timestamp": "1970-01-01T00:00:00Z",
+      | "category": "ERROR",
+      | "message": "message",
+      | "threadName": "thread oxb",
+      | "throwable": "Exception in thread main",
+      | "level": "ERROR"
+      | }
+      | ]""".stripMargin
+
   val solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress, solrClient)
 
   solrService.uploadConfDir(
@@ -80,6 +98,15 @@ class LogCollectorRoutesTest
 
     Post(uri = "/v2/events/test")
       .withEntity(entity) ~> Route.seal(routes) ~> check {
+      assert(status === (StatusCodes.OK))
+    }
+  }
+
+  test("post json array to 'json' endpoint") {
+    val docEntity = Marshal(jsonArrayDocument).to[MessageEntity].futureValue
+
+    Post(uri = "/v1/json/test")
+      .withEntity(docEntity) ~> routes ~> check {
       assert(status === (StatusCodes.OK))
     }
   }

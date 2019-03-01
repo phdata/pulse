@@ -24,6 +24,8 @@ import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.domain.LogEvent
 import io.phdata.pulse.common.{ JsonSupport, SolrService }
+import spray.json._
+import DefaultJsonProtocol._
 
 /**
  * Http Rest Endpoint
@@ -51,7 +53,7 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
         // create a streaming Source from the incoming json
         entity(as[LogEvent]) { logEvent =>
           logger.trace("received message")
-          streamRef ! (applicationName, logEvent)
+          streamRef ! (applicationName, Util.logEventToFlattenedMap(logEvent))
 
           complete(HttpEntity(ContentTypes.`application/json`, "ok"))
         }
@@ -66,7 +68,7 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
       // create a streaming Source from the incoming json
       entity(as[LogEvent]) { logEvent =>
         logger.trace("received message")
-        streamRef ! (applicationName, logEvent)
+        streamRef ! (applicationName, Util.logEventToFlattenedMap(logEvent))
 
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
@@ -79,10 +81,30 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
       // create a streaming Source from the incoming json
       entity(as[Array[LogEvent]]) { logEvents =>
         logger.trace("received message")
-        logEvents.foreach(logEvent => streamRef ! (applicationName, logEvent))
+        logEvents.foreach(logEvent =>
+          streamRef ! (applicationName, Util.logEventToFlattenedMap(logEvent)))
+
+        complete(HttpEntity(ContentTypes.`application/json`, "ok"))
+      }
+    }
+  } ~ path("v1" / "json" / Segment) { applicationName =>
+    /**
+     * Consumes an array of json events
+     */
+    post {
+      // create a streaming Source from the incoming json string
+      entity(as[String]) { logEvent =>
+        logger.trace("received message")
+
+        val parsedJsonArray = logEvent.parseJson.convertTo[Array[Map[String, String]]]
+
+        parsedJsonArray.foreach(jsonMap => {
+          streamRef ! (applicationName, jsonMap)
+        })
 
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
     }
   }
+
 }

@@ -21,18 +21,18 @@
     <fields>
         <field name="id" type="string" indexed="true" stored="true" required="true"
                multiValued="false"/>
-        <field name="category" type="string" indexed="true" stored="true" required="true"
+        <field name="category" type="string" indexed="true" stored="true" required="false"
                multiValued="false"/>
-        <field name="timestamp" type="date" indexed="true" stored="true" required="true"
+        <field name="timestamp" type="date" indexed="true" stored="true" required="false"
                multiValued="false"/>
 
-        <field name="level" type="string" indexed="true" stored="true" required="true"
+        <field name="level" type="string" indexed="true" stored="true" required="false"
                multiValued="false"/>
 
         <field name="hostname" type="string" indexed="true" stored="true" required="false"
                multiValued="false"/>
 
-        <field name="message" type="text_general" indexed="true" stored="true" required="true"
+        <field name="message" type="text_general" indexed="true" stored="true" required="false"
                multiValued="false"/>
 
         <field name="container_id" type="string" indexed="true" stored="true" required="false"
