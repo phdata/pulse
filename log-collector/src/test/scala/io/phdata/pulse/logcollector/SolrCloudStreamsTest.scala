@@ -105,7 +105,8 @@ class SolrCloudStreamsTest extends FunSuite with BaseSolrCloudTest {
     solrService.createCollection(collection, 1, 1, TEST_CONF_NAME, null)
     solrService.createAlias(alias, collection)
 
-    val testValues = List.fill(streamProcessor.DEFALUT_GROUP_SIZE + 100)((app1Name, document1))
+    val testValues = List.fill(streamProcessor.DEFALUT_GROUP_SIZE + 100)(
+      (app1Name, Util.logEventToFlattenedMap(document1)))
 
     val solrStream = streamProcessor.groupedInsert.run()
 

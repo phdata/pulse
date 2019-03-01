@@ -74,15 +74,15 @@ class SolrCloudStreams(solrService: SolrService) extends LazyLogging {
   /**
    * Solr Cloud [[Sink]] for [[LogEvent]]s
    */
-  private def solrSink: Sink[(String, Seq[LogEvent]), Future[Done]] =
+  private def solrSink: Sink[(String, Seq[Map[String, String]]), Future[Done]] =
     Sink
-      .foreach[(String, Seq[LogEvent])] {
+      .foreach[(String, Seq[Map[String, String]])] {
         case (appName, events) =>
           val latestCollectionAlias = s"${appName}_latest"
           logger.trace(s"Saving $latestCollectionAlias LogEvent: ${events.toString}")
           try {
             solrService.insertDocuments(latestCollectionAlias,
-                                        events.map(DocumentConversion.toSolrDocument))
+                                        events.map(DocumentConversion.mapToSolrDocument))
           } catch {
             case e: Exception => logger.error("Error posting documents to solr", e)
           }
@@ -98,7 +98,7 @@ class SolrCloudStreams(solrService: SolrService) extends LazyLogging {
    */
   val groupedInsert: RunnableGraph[ActorRef] = {
     Source
-      .actorRef[(String, LogEvent)](maxBuffersize, overflowStrategy)
+      .actorRef[(String, Map[String, String])](maxBuffersize, overflowStrategy)
       .groupBy(MAX_SUBSTREAMS, x => x._1) // group by the application name
       .groupedWithin(solrBatchSize, batchFlushDuration)
       .map(x => (x(0)._1, x.map(_._2))) // get application name from the first tuple (they're all the same), and a sequence of LogEvents
