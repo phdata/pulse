@@ -125,18 +125,17 @@ class SolrCloudStreamsTest extends FunSuite with BaseSolrCloudTest {
     val app1Name = TestUtil.randomIdentifier()
 
     val mapDocument: Map[String, String] = Map("id" -> "12345",
-      "timestamp" -> "1970-01-01T00:00:00Z",
-      "message" -> "message",
-      "level" -> "ERROR",
-      "throwable" -> "Exception in thread main",
-      "category" -> "ERROR")
+                                               "timestamp" -> "1970-01-01T00:00:00Z",
+                                               "message"   -> "message",
+                                               "level"     -> "ERROR",
+                                               "throwable" -> "Exception in thread main",
+                                               "category"  -> "ERROR")
 
     val collection = s"${app1Name}_1"
     val alias      = s"${app1Name}_latest"
 
     solrService.createCollection(collection, 1, 1, TEST_CONF_NAME, null)
     solrService.createAlias(alias, collection)
-
 
     val testValues = List.fill(streamProcessor.DEFALUT_GROUP_SIZE + 100)((app1Name, mapDocument))
 

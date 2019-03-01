@@ -76,7 +76,7 @@ class LogCollectorRoutesTest
   }
 
   test("post single log event to 'event' endpoint") {
-     val docEntity = Marshal(document).to[MessageEntity].futureValue
+    val docEntity = Marshal(document).to[MessageEntity].futureValue
 
     Post(uri = "/v2/event/test")
       .withEntity(docEntity) ~> routes ~> check {

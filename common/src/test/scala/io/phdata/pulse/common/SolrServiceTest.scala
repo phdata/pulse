@@ -132,22 +132,24 @@ class SolrServiceTest extends FunSuite with BaseSolrCloudTest {
     solrService.createCollection(collectionName, 1, 1, "testconf", null)
 
     val document1 = DocumentConversion.mapToSolrDocument(
-      Map("category" -> "ERROR",
-        "timestamp" -> "1970-01-01T00:00:00Z",
-        "level" -> "ERROR",
-        "message" -> "message",
+      Map(
+        "category"   -> "ERROR",
+        "timestamp"  -> "1970-01-01T00:00:00Z",
+        "level"      -> "ERROR",
+        "message"    -> "message",
         "threadName" -> "thread oxb",
-        "throwable" -> "Exception in thread main")
-        .asInstanceOf[Map[String,String]])
+        "throwable"  -> "Exception in thread main"
+      ).asInstanceOf[Map[String, String]])
 
     val document2 = DocumentConversion.mapToSolrDocument(
-      Map("category" -> "ERROR",
-        "timestamp" -> "1970-01-01T00:00:00Z",
-        "level" -> "ERROR",
-        "message" -> "message",
+      Map(
+        "category"   -> "ERROR",
+        "timestamp"  -> "1970-01-01T00:00:00Z",
+        "level"      -> "ERROR",
+        "message"    -> "message",
         "threadName" -> "thread oxb",
-        "throwable" -> "Exception in thread main")
-        .asInstanceOf[Map[String,String]])
+        "throwable"  -> "Exception in thread main"
+      ).asInstanceOf[Map[String, String]])
 
     solrService.insertDocuments(collectionName, Seq(document1, document2))
 
@@ -165,15 +167,16 @@ class SolrServiceTest extends FunSuite with BaseSolrCloudTest {
     solrService.createCollection(collectionName, 1, 1, "testconf", null)
 
     val document1 = DocumentConversion.mapToSolrDocument(
-      Map("id" -> None,
-        "category" -> "ERROR",
-        "timestamp" -> "1970-01-01T00:00:00Z",
-        "level" -> "ERROR",
-        "message" -> "message",
+      Map(
+        "id"         -> None,
+        "category"   -> "ERROR",
+        "timestamp"  -> "1970-01-01T00:00:00Z",
+        "level"      -> "ERROR",
+        "message"    -> "message",
         "threadName" -> "thread oxb",
-        "throwable" -> "Exception in thread main",
-        "hostname" -> "host1.com")
-        .asInstanceOf[Map[String,String]])
+        "throwable"  -> "Exception in thread main",
+        "hostname"   -> "host1.com"
+      ).asInstanceOf[Map[String, String]])
 
     solrService.insertDocuments(collectionName, Seq(document1))
 

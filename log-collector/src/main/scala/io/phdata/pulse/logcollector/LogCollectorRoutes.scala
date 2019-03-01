@@ -53,7 +53,7 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
         // create a streaming Source from the incoming json
         entity(as[LogEvent]) { logEvent =>
           logger.trace("received message")
-          streamRef ! (applicationName, logEventToFlattenedMap(logEvent))
+          streamRef ! (applicationName, Util.logEventToFlattenedMap(logEvent))
 
           complete(HttpEntity(ContentTypes.`application/json`, "ok"))
         }
@@ -68,7 +68,7 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
       // create a streaming Source from the incoming json
       entity(as[LogEvent]) { logEvent =>
         logger.trace("received message")
-        streamRef ! (applicationName, logEventToFlattenedMap(logEvent))
+        streamRef ! (applicationName, Util.logEventToFlattenedMap(logEvent))
 
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
@@ -82,7 +82,7 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
       entity(as[Array[LogEvent]]) { logEvents =>
         logger.trace("received message")
         logEvents.foreach(logEvent =>
-          streamRef ! (applicationName, logEventToFlattenedMap(logEvent)))
+          streamRef ! (applicationName, Util.logEventToFlattenedMap(logEvent)))
 
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
@@ -102,32 +102,6 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
     }
-  }
-
-  /**
-   * Convert a [[LogEvent]] to a flattened [[Map[String,String]]
-   * @param logEvent LogEvent to convert
-   * @return The event, with properties flattened, as a [[Map[String,String]]
-   */
-  def logEventToFlattenedMap(logEvent: LogEvent): Map[String, String] = {
-    val values = logEvent.productIterator
-    val logEventmap = logEvent.getClass.getDeclaredFields.map {
-      _.getName -> (values.next() match {
-        case x => x
-      })
-    }.toMap
-    logEventmap
-      .flatten {
-        case ((key, map: Option[Map[String, String]]))
-            if map.getOrElse(None).isInstanceOf[Map[String, String]] =>
-          map.get
-        case ((key, value: Option[String])) if value.getOrElse(None).isInstanceOf[String] =>
-          Map(key -> value.getOrElse(None))
-        case ((key, value)) => Map(key -> value)
-      }
-      .toMap
-      .filter(kv => !kv._2.equals(None))
-      .asInstanceOf[Map[String, String]]
   }
 
 }

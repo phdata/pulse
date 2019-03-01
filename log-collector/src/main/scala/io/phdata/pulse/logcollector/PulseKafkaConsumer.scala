@@ -53,11 +53,12 @@ class PulseKafkaConsumer(solrService: SolrService) extends JsonSupport with Lazy
         val records = consumer.poll(MAX_TIMEOUT)
         for (record <- records.asScala) {
           logger.trace("KAFKA: Consuming " + record.value() + " from topic: " + topic)
-          val logEvent = record
-            .value()
-            .parseJson
-            .convertTo[LogEvent]
-          solrInputStream ! (logEvent.application.get, logEvent)
+          val logEventMap = Util.logEventToFlattenedMap(
+            record
+              .value()
+              .parseJson
+              .convertTo[LogEvent])
+          solrInputStream ! (logEventMap.getOrElse("application", None), logEventMap)
         }
       } catch {
         case p: ParsingException => logger.error("Error parsing message from kafka broker", p)
