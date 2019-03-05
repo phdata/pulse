@@ -16,7 +16,10 @@
 
 package io.phdata.pulse.logcollector
 
+import java.io.FileInputStream
+import java.util.Properties
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
@@ -24,6 +27,7 @@ import akka.stream.{ ActorMaterializer, Materializer }
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.SolrService
 import org.apache.kudu.client.KuduClient.KuduClientBuilder
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 
 import scala.concurrent.duration.Duration
@@ -60,11 +64,6 @@ object LogCollector extends LazyLogging {
     val solrService = new SolrService(cliParser.zkHosts(), solrServer)
     val solrStream  = new SolrCloudStream(solrService)
 
-    // Akka System for the http server
-    implicit val actorSystem: ActorSystem   = ActorSystem()
-    implicit val materializer: Materializer = ActorMaterializer.create(actorSystem)
-    implicit val ec                         = actorSystem.dispatchers.lookup("akka.actor.http-dispatcher")
-
     val kuduClient =
       cliParser.kuduMasters.toOption.map(masters => new KuduClientBuilder(masters).build())
 
@@ -72,23 +71,50 @@ object LogCollector extends LazyLogging {
 
     val routes = new LogCollectorRoutes(solrStream, kuduStream)
 
-    // Starts Http Service
-    def start(port: Int): Future[Unit] =
-      Http().bindAndHandle(routes.routes, "0.0.0.0", port = port)(materializer) map { binding =>
-        logger.info(s"Log Collector interface bound to: ${binding.localAddress}")
+    cliParser.mode() match {
+      case "kafka" => {
+        kafka(solrService, cliParser.kafkaProps(), cliParser.topic())
       }
+      case _ => {
+        http(cliParser.port(), routes)
+      }
+    }
+  }
 
-    val s = start(cliParser.port())
+  def http(port: Int, routes: LogCollectorRoutes): Future[Unit] = {
+    // Akka System
+    implicit val actorSystem: ActorSystem   = ActorSystem()
+    implicit val ec                         = actorSystem.dispatchers.lookup("akka.actor.http-dispatcher")
+    implicit val materializer: Materializer = ActorMaterializer.create(actorSystem)
 
-    s.onComplete {
+    // Starts Http Service
+    val httpServerFuture = Http().bindAndHandle(routes.routes, "0.0.0.0", port)(materializer) map {
+      binding =>
+        logger.info(s"Log Collector interface bound to: ${binding.localAddress}")
+    }
+
+    httpServerFuture.onComplete {
       case Success(v) => ()
       case Failure(e) => throw new RuntimeException(e)
     }
 
     // Start LogCollector HttpService
     Await.ready(
-      s,
+      httpServerFuture,
       Duration.Inf
     )
+  }
+
+  // Starts Kafka Consumer
+  def kafka(solrService: SolrService, kafkaProps: String, topic: String): Unit = {
+
+    val solrCloudStream = new SolrCloudStream(solrService)
+
+    val kafkaConsumer      = new PulseKafkaConsumer(solrCloudStream)
+    val kafkaConsumerProps = new Properties()
+
+    kafkaConsumerProps.load(new FileInputStream(kafkaProps))
+
+    kafkaConsumer.read(kafkaConsumerProps, topic)
   }
 }

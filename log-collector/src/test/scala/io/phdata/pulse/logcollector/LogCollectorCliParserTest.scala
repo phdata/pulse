@@ -35,4 +35,27 @@ class LogCollectorCliParserTest extends FunSuite {
       cliParser.zkHosts())
   }
 
+  test("Test LogCollectorCliParser with Kafka topic and mode") {
+
+    val args = Array(
+      "--port",
+      "9000",
+      "--zk-hosts",
+      "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr",
+      "--consume-mode",
+      "kafka",
+      "--kafka-properties",
+      "/path/kafka.properties",
+      "--topic",
+      "kafkaTopic");
+
+    val cliParser = new LogCollectorCliParser(args)
+    assertResult(9000)(cliParser.port())
+    assertResult(
+      "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr")(
+      cliParser.zkHosts())
+    assertResult("kafka")(cliParser.mode())
+    assertResult("/path/kafka.properties")(cliParser.kafkaProps())
+    assertResult("kafkaTopic")(cliParser.topic())
+  }
 }
