@@ -18,7 +18,7 @@
 # Pulse
 
 Pulse is an Apache 2.0 licensed log aggregation framework built on top of Solr Cloud (Cloudera Search). It 
-can be used with applications written in any language, but was build especially for improving logging
+can be used with applications written in any language, but was built especially for improving logging
  in Apache Spark Streaming applications running on Apache Hadoop.
 
 Pulse gives application users full text centralized search of their logs, flexible alerts on their logs,
