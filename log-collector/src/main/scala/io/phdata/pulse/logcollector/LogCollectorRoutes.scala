@@ -16,28 +16,21 @@
 
 package io.phdata.pulse.logcollector
 
-import akka.actor.ActorSystem
 import akka.http.scaladsl.common.EntityStreamingSupport
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
 import akka.http.scaladsl.server.Directives._
-import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.domain.LogEvent
 import io.phdata.pulse.common.{ JsonSupport, SolrService }
-import spray.json._
-import DefaultJsonProtocol._
 
 /**
  * Http Rest Endpoint
  */
 class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with LazyLogging {
 
-  implicit val solrActorSystem: ActorSystem = ActorSystem()
-  implicit val solrActorMaterializer        = ActorMaterializer.create(solrActorSystem)
-
-  val streamRef = new SolrCloudStreams(solrService).groupedInsert.run()
-
   implicit val jsonStreamingSupport = EntityStreamingSupport.json()
+
+  val stream = new SolrCloudStream(solrService)
 
   /**
    * Defines /log routes
@@ -53,7 +46,7 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
         // create a streaming Source from the incoming json
         entity(as[LogEvent]) { logEvent =>
           logger.trace("received message")
-          streamRef ! (applicationName, Util.logEventToFlattenedMap(logEvent))
+          stream.put(applicationName, Util.logEventToFlattenedMap(logEvent))
 
           complete(HttpEntity(ContentTypes.`application/json`, "ok"))
         }
@@ -68,8 +61,7 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
       // create a streaming Source from the incoming json
       entity(as[LogEvent]) { logEvent =>
         logger.trace("received message")
-        streamRef ! (applicationName, Util.logEventToFlattenedMap(logEvent))
-
+        stream.put(applicationName, Util.logEventToFlattenedMap(logEvent))
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
     }
@@ -82,7 +74,7 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
       entity(as[Array[LogEvent]]) { logEvents =>
         logger.trace("received message")
         logEvents.foreach(logEvent =>
-          streamRef ! (applicationName, Util.logEventToFlattenedMap(logEvent)))
+          stream.put(applicationName, Util.logEventToFlattenedMap(logEvent)))
 
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
@@ -93,13 +85,11 @@ class LogCollectorRoutes(solrService: SolrService) extends JsonSupport with Lazy
      */
     post {
       // create a streaming Source from the incoming json string
-      entity(as[String]) { logEvent =>
+      entity(as[Array[Map[String, String]]]) { objects =>
         logger.trace("received message")
 
-        val parsedJsonArray = logEvent.parseJson.convertTo[Array[Map[String, String]]]
-
-        parsedJsonArray.foreach(jsonMap => {
-          streamRef ! (applicationName, jsonMap)
+        objects.foreach(jsonMap => {
+          stream.put(applicationName, jsonMap)
         })
 
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))

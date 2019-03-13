@@ -33,15 +33,10 @@ import spray.json._
  * Consumes JSON strings from a given broker and topic
  * parses into LogEvent
  * sends to Solr Cloud
- * @param solrService
+ * @param solrCloudStream
  */
-class PulseKafkaConsumer(solrService: SolrService) extends JsonSupport with LazyLogging {
+class PulseKafkaConsumer(solrCloudStream: SolrCloudStream) extends JsonSupport with LazyLogging {
   val MAX_TIMEOUT = 100
-
-  implicit val solrActorSystem: ActorSystem             = ActorSystem()
-  implicit val solrActorMaterializer: ActorMaterializer = ActorMaterializer.create(solrActorSystem)
-
-  val solrInputStream: ActorRef = new SolrCloudStreams(solrService).groupedInsert.run()
 
   def read(consumerProperties: Properties, topic: String): Unit = {
     val consumer = new KafkaConsumer[String, String](consumerProperties)
@@ -55,7 +50,7 @@ class PulseKafkaConsumer(solrService: SolrService) extends JsonSupport with Lazy
           logger.trace("KAFKA: Consuming " + record.value() + " from topic: " + topic)
           val logEvent    = record.value().parseJson.convertTo[LogEvent]
           val logEventMap = Util.logEventToFlattenedMap(logEvent)
-          solrInputStream ! (logEventMap.getOrElse("application", None), logEventMap)
+          solrCloudStream.put(logEventMap.getOrElse("application", ""), logEventMap)
         }
       } catch {
         case p: ParsingException => logger.error("Error parsing message from kafka broker", p)

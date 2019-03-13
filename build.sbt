@@ -99,6 +99,7 @@ lazy val dependencies =
     val junit = "junit" % "junit" % junitVersion % Test
     val junitInterface = "com.novocode" % "junit-interface" % "0.11" % Test
     val cats = "org.typelevel" %% "cats-core" % "1.1.0"
+    val monix = "io.monix" %% "monix" % monixVersion
 
     val common = Seq(scalaLogging, scalaTest, logback, commonsLogging, cats)
     val cli = Seq(scallop, scalaYaml)
@@ -124,7 +125,7 @@ lazy val `log-collector` = project
     name := "log-collector",
     mainClass in Compile := Some("io.phdata.pulse.logcollector.LogCollector"),
     settings,
-    libraryDependencies ++= dependencies.http ++ Seq(dependencies.scallop, dependencies.apacheKafka)
+    libraryDependencies ++= dependencies.http ++ Seq(dependencies.scallop, dependencies.apacheKafka, dependencies.monix)
   ).dependsOn(`test-common` % Test).dependsOn(common)
 
 lazy val `collection-roller` = project
@@ -189,3 +190,4 @@ val junitVersion = "4.12"
 val javaMailVersion = "1.4"
 val mockitoVersion = "1.10.19"
 val powerMockVersion = "1.6.3"
+val monixVersion = "2.3.3"
