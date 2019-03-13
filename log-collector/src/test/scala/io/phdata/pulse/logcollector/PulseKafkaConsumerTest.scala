@@ -45,13 +45,10 @@ class PulseKafkaConsumerTest
   var kafkaMiniCluster: KafkaMiniCluster = _
   var zooKafkaConfig: ZooKafkaConfig     = _
 
-  implicit var actorSystem: ActorSystem             = _
-  implicit var actorMaterializer: ActorMaterializer = _
-
   var solrService: SolrService            = _
   var streamProcessor: PulseKafkaConsumer = _
 
-  val SLEEP_TIME = 6000
+  val SLEEP_TIME = 3000
 
   override def beforeEach(): Unit = {
     val zkPort = util.getNextPort
@@ -60,13 +57,14 @@ class PulseKafkaConsumerTest
     kafkaMiniCluster = new KafkaMiniCluster(zooKafkaConfig)
     kafkaMiniCluster.start()
 
-    actorSystem = ActorSystem()
-    actorMaterializer = ActorMaterializer.create(actorSystem)
-
     solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress,
                                   miniSolrCloudCluster.getSolrClient)
 
-    streamProcessor = new PulseKafkaConsumer(solrService)
+    val solrCloudStream = new SolrCloudStream(solrService,
+                                              solrStreamParams =
+                                                SolrStreamParams(parallelSolrExecution = false))
+
+    streamProcessor = new PulseKafkaConsumer(solrCloudStream)
   }
 
   override def afterEach(): Unit =
@@ -154,10 +152,6 @@ class PulseKafkaConsumerTest
     val app1Collection = s"${app1Name}_1"
     val app1Alias      = s"${app1Name}_latest"
 
-    // Write first message batch to local Kafka broker
-    val messageList1 = generateMessageList(30, app1Name)
-    kafkaMiniCluster.produceMessages(TOPIC2, messageList1)
-
     // Set Kafka consumer properties
     val kafkaConsumerProps = new Properties()
 
@@ -178,6 +172,12 @@ class PulseKafkaConsumerTest
       streamProcessor.read(kafkaConsumerProps, TOPIC2)
     }
 
+    Thread.sleep(1000)
+
+    // Write first message batch to local Kafka broker
+    val messageList1 = generateMessageList(30, app1Name)
+    kafkaMiniCluster.produceMessages(TOPIC2, messageList1)
+
     // sleep until documents are flushed
     Thread.sleep(SLEEP_TIME)
 
@@ -186,6 +186,8 @@ class PulseKafkaConsumerTest
     app1Query1.set("collection", app1Alias)
 
     val query1Result = solrClient.query(app1Query1)
+
+    assertResult(15)(query1Result.getResults.getNumFound)
 
     // Write second message batch to local Kafka broker
     val messageList2 = generateMessageList(30, app1Name)
@@ -205,7 +207,6 @@ class PulseKafkaConsumerTest
 
     val query2Result = solrClient.query(app1Query2)
 
-    assertResult(15)(query1Result.getResults.getNumFound)
     assertResult(15)(query2Result.getResults.getNumFound)
   }
 }

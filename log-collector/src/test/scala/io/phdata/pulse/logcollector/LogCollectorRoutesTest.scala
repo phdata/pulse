@@ -18,15 +18,13 @@ package io.phdata.pulse.logcollector
 
 import java.io.File
 
-import akka.actor.{ ActorSystem, Props }
+import akka.actor.ActorSystem
 import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.model.{ MessageEntity, StatusCodes }
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, MessageEntity, StatusCodes }
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import io.phdata.pulse.common.SolrService
-import io.phdata.pulse.testcommon.BaseSolrCloudTest
-import io.phdata.pulse.common.{ JsonSupport, SolrService }
 import io.phdata.pulse.common.domain.LogEvent
+import io.phdata.pulse.common.{ JsonSupport, SolrService }
 import io.phdata.pulse.testcommon.BaseSolrCloudTest
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures._
@@ -103,10 +101,10 @@ class LogCollectorRoutesTest
   }
 
   test("post json array to 'json' endpoint") {
-    val docEntity = Marshal(jsonArrayDocument).to[MessageEntity].futureValue
+    val entity = HttpEntity(ContentTypes.`application/json`, jsonArrayDocument)
 
     Post(uri = "/v1/json/test")
-      .withEntity(docEntity) ~> routes ~> check {
+      .withEntity(entity) ~> routes ~> check {
       assert(status === (StatusCodes.OK))
     }
   }
