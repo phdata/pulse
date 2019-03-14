@@ -18,23 +18,20 @@ package io.phdata.pulse.logcollector
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-
-import org.scalatest.{ BeforeAndAfterEach, FunSuite }
 import java.util.Properties
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.solr.client.solrj.SolrQuery
-
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Random
+import io.phdata.pulse.common.domain.LogEvent
+import io.phdata.pulse.common.{ JsonSupport, SolrService }
 import io.phdata.pulse.logcollector.util.{ KafkaMiniCluster, ZooKafkaConfig }
 import io.phdata.pulse.testcommon.BaseSolrCloudTest
-import io.phdata.pulse.common.{ JsonSupport, SolrService }
-import io.phdata.pulse.common.domain.LogEvent
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.solr.client.solrj.SolrQuery
+import org.scalatest.{ BeforeAndAfterEach, FunSuite }
 import spray.json._
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.Random
 
 class PulseKafkaConsumerTest
     extends FunSuite
@@ -48,7 +45,7 @@ class PulseKafkaConsumerTest
   var solrService: SolrService            = _
   var streamProcessor: PulseKafkaConsumer = _
 
-  val SLEEP_TIME = 3000
+  val SLEEP_TIME = 30000
 
   override def beforeEach(): Unit = {
     val zkPort = util.getNextPort
@@ -168,11 +165,12 @@ class PulseKafkaConsumerTest
     solrService.createAlias(app1Alias, app1Collection)
 
     // run kafka consumer in separate thread for first batch
-    val f1 = Future {
+    Future {
       streamProcessor.read(kafkaConsumerProps, TOPIC2)
     }
 
-    Thread.sleep(1000)
+    // wait for the kafka consumer to be ready
+    Thread.sleep(SLEEP_TIME)
 
     // Write first message batch to local Kafka broker
     val messageList1 = generateMessageList(30, app1Name)
@@ -192,11 +190,6 @@ class PulseKafkaConsumerTest
     // Write second message batch to local Kafka broker
     val messageList2 = generateMessageList(30, app1Name)
     kafkaMiniCluster.produceMessages(TOPIC2, messageList2)
-
-    // run kafka consumer in separate thread for second batch
-    val f2 = Future {
-      streamProcessor.read(kafkaConsumerProps, TOPIC2)
-    }
 
     // sleep until documents are flushed
     Thread.sleep(SLEEP_TIME)

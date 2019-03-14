@@ -5,4 +5,5 @@ env:
   SBT_OPTS="-Xmx4096M"
 script:
   - sbt test
+  - sbt it:test
   - sbt assembly

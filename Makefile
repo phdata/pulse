@@ -13,6 +13,9 @@ jars:
 test:
 	sbt -mem 4096 test
 
+itest:
+	sbt -mem 4096 it:test
+
 version:
 	sh ./version
 
