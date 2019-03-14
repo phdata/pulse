@@ -19,12 +19,11 @@ package io.phdata.pulse.logcollector
 import io.phdata.pulse.common.SolrService
 import io.phdata.pulse.common.domain.LogEvent
 import io.phdata.pulse.testcommon.{ BaseSolrCloudTest, TestUtil }
-import monix.eval.Task
 import org.apache.solr.client.solrj.SolrQuery
 import org.scalatest.FunSuite
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import scala.concurrent.{ Await, Future }
 
 class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
@@ -33,7 +32,7 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
   val solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress, solrClient)
   // Don't use paraallel execution for tests because it breaks Travis CI
   val streamProcessor =
-    new SolrCloudStream(solrService, SolrStreamParams(parallelSolrExecution = false))
+    new SolrCloudStream(solrService)
 
   val document1 = Util.logEventToFlattenedMap(
     new LogEvent(None,
@@ -61,12 +60,11 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
 
     val testValues = List.fill(SolrStreamParams().batchSize + 100)((app1Name, document1))
 
-    val future = Future { testValues.foreach(x => streamProcessor.put(x._1, x._2)) }
+    testValues.foreach(x => streamProcessor.put(x._1, x._2))
 
     // sleep past the time documents would be flushed
-    Await.result(future, ((SolrStreamParams().batchFlushDurationSeconds * 1000) + 2000) millis)
 
-    Thread.sleep(1000)
+    Thread.sleep(3000)
 
     val app1Query = new SolrQuery("level: ERROR")
     app1Query.set("collection", app1Alias)
@@ -87,14 +85,12 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
 
     val testValues = List.fill(SolrStreamParams().batchSize + 100)((app1Name, document1))
 
-    val future = Future { testValues.foreach(x => streamProcessor.put(x._1, x._2)) }
+    testValues.foreach(x => streamProcessor.put(x._1, x._2))
 
-    Thread.sleep(1000)
+    Thread.sleep(3000)
 
     val query = new SolrQuery("level: ERROR")
     query.set("collection", alias)
-    // sleep until documents are flushed
-    Await.result(future, 5 second)
 
     val queryResult = solrClient.query(query)
 
@@ -106,7 +102,7 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
     var streamFailed = false
 
     // scalastyle:off null
-    val stream = new SolrCloudStream(null, SolrStreamParams(parallelSolrExecution = false)) {
+    val stream = new SolrCloudStream(null) {
       // Assert that this function is called without calling `System.exit` like the original function does
       override private[logcollector] def exitingOverflowMessage[A](numEvents: Long): Option[A] = {
         streamFailed = true
@@ -124,7 +120,7 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
       stream.put("app1", Map("foo" -> "bar"))
     }
 
-    Thread.sleep(2000)
+    Thread.sleep(3000)
 
     assert(streamFailed)
   }

@@ -34,8 +34,7 @@ case class SolrStreamParams(val numThreads: Int = 1,
                             val maxBufferSize: Int = 512000,
                             val batchSize: Int = 1000,
                             val batchFlushDurationSeconds: Int = 1,
-                            val overflowStrategy: String = "fail",
-                            val parallelSolrExecution: Boolean = true)
+                            val overflowStrategy: String = "fail")
 
 /*
   Writes messages to Solr using some stream transformation logic.
@@ -122,18 +121,12 @@ class SolrCloudStream(solrService: SolrService,
   private val transformation =
     subject
       .groupBy(x => x._1)
-      .map { x =>
-        val bufferedStream = x.bufferTimedAndCounted(batchFlushDuration, solrBatchSize)
-        if (solrStreamParams.parallelSolrExecution) {
-          bufferedStream
-            .mapAsync(y => Task(save(x.key, y.map(_._2))))
-            .executeOn(blockingScheduler)
-            .foreach(_ => ())
-        } else {
-          bufferedStream
-            .map(y => save(x.key, y.map(_._2)))
-            .foreach(_ => ())
-        }
+      .map { group =>
+        group
+          .bufferTimedAndCounted(batchFlushDuration, solrBatchSize)
+          .mapAsync(y => Task(save(group.key, y.map(_._2))))
+          .executeOn(blockingScheduler)
+          .foreach(_ => ())
       }
       .subscribe()
 
