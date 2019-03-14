@@ -18,23 +18,20 @@ package io.phdata.pulse.logcollector
 
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
-
-import org.scalatest.{ BeforeAndAfterEach, FunSuite }
 import java.util.Properties
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.solr.client.solrj.SolrQuery
-
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Random
+import io.phdata.pulse.common.domain.LogEvent
+import io.phdata.pulse.common.{ JsonSupport, SolrService }
 import io.phdata.pulse.logcollector.util.{ KafkaMiniCluster, ZooKafkaConfig }
 import io.phdata.pulse.testcommon.BaseSolrCloudTest
-import io.phdata.pulse.common.{ JsonSupport, SolrService }
-import io.phdata.pulse.common.domain.LogEvent
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.solr.client.solrj.SolrQuery
+import org.scalatest.{ BeforeAndAfterEach, FunSuite }
 import spray.json._
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.Random
 
 class PulseKafkaConsumerTest
     extends FunSuite
@@ -60,9 +57,7 @@ class PulseKafkaConsumerTest
     solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress,
                                   miniSolrCloudCluster.getSolrClient)
 
-    val solrCloudStream = new SolrCloudStream(solrService,
-                                              solrStreamParams =
-                                                SolrStreamParams(parallelSolrExecution = false))
+    val solrCloudStream = new SolrCloudStream(solrService)
 
     streamProcessor = new PulseKafkaConsumer(solrCloudStream)
   }
@@ -172,6 +167,7 @@ class PulseKafkaConsumerTest
       streamProcessor.read(kafkaConsumerProps, TOPIC2)
     }
 
+    // wait for the consumer to be ready
     Thread.sleep(1000)
 
     // Write first message batch to local Kafka broker
