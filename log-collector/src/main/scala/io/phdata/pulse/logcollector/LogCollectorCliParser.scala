@@ -19,7 +19,8 @@ package io.phdata.pulse.logcollector
 import org.rogach.scallop.ScallopConf
 
 class LogCollectorCliParser(args: Seq[String]) extends ScallopConf(args) {
-  lazy val port    = opt[Int]("port", required = true, descr = "Listening port")
-  lazy val zkHosts = opt[String]("zk-hosts", required = true, descr = "Zookeeper hosts")
+  lazy val port        = opt[Int]("port", required = true, descr = "Listening port")
+  lazy val zkHosts     = opt[String]("zk-hosts", required = true, descr = "Zookeeper hosts")
+  lazy val kuduMasters = opt[String]("kudu-masters", required = false, descr = "Kudu masters")
   verify()
 }
