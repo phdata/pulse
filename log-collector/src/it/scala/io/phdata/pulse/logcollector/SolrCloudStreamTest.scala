@@ -58,7 +58,7 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
     solrService.createAlias(app1Alias, app1Collection)
     solrService.createAlias(app2Alias, app2Collection)
 
-    val testValues = List.fill(SolrStreamParams().batchSize + 100)((app1Name, document1))
+    val testValues = List.fill(StreamParams().batchSize + 100)((app1Name, document1))
 
     testValues.foreach(x => streamProcessor.put(x._1, x._2))
 
@@ -83,7 +83,7 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
     solrService.createCollection(collection, 1, 1, TEST_CONF_NAME, null)
     solrService.createAlias(alias, collection)
 
-    val testValues = List.fill(SolrStreamParams().batchSize + 100)((app1Name, document1))
+    val testValues = List.fill(StreamParams().batchSize + 100)((app1Name, document1))
 
     testValues.foreach(x => streamProcessor.put(x._1, x._2))
 

@@ -16,25 +16,27 @@
 
 package io.phdata.pulse.logcollector
 
-import java.io.File
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, MessageEntity, StatusCodes }
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import io.phdata.pulse.common.domain.LogEvent
-import io.phdata.pulse.common.{ JsonSupport, SolrService }
+import io.phdata.pulse.common.JsonSupport
+import io.phdata.pulse.common.domain.{ LogEvent, TimeseriesEvent }
 import io.phdata.pulse.testcommon.BaseSolrCloudTest
+import org.mockito.Mockito.verify
+import org.mockito.{ Matchers, Mockito }
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures._
+import org.scalatest.mockito.MockitoSugar
+import spray.json._
 
 class LogCollectorRoutesTest
     extends FunSuite
     with ScalatestRouteTest
     with JsonSupport
-    with BaseSolrCloudTest {
-  val CONF_NAME = "testconf"
+    with BaseSolrCloudTest
+    with MockitoSugar {
 
   val document = new LogEvent(None,
                               "ERROR",
@@ -63,15 +65,12 @@ class LogCollectorRoutesTest
       | }
       | ]""".stripMargin
 
-  val solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress, solrClient)
-
-  solrService.uploadConfDir(
-    new File(System.getProperty("user.dir") + "/test-config/solr_configs/conf").toPath,
-    CONF_NAME)
+  val solrStream = mock[SolrCloudStream]
+  val kuduStream = mock[KuduMetricStream]
 
   implicit val actorSystem: ActorSystem = ActorSystem()
 
-  val routes = new LogCollectorRoutes(solrService).routes
+  val routes = new LogCollectorRoutes(solrStream, Some(kuduStream)).routes
 
   test("post json to endpoint") {
     val docEntity = Marshal(document).to[MessageEntity].futureValue
@@ -80,6 +79,8 @@ class LogCollectorRoutesTest
       .withEntity(docEntity) ~> routes ~> check {
       assert(status === (StatusCodes.OK))
     }
+
+    verify(solrStream).put(Matchers.anyString(), Matchers.any[Map[String, String]]())
   }
 
   test("post single log event to 'event' endpoint") {
@@ -89,6 +90,9 @@ class LogCollectorRoutesTest
       .withEntity(docEntity) ~> routes ~> check {
       assert(status === (StatusCodes.OK))
     }
+
+    verify(solrStream, Mockito.times(2))
+      .put(Matchers.anyString(), Matchers.any[Map[String, String]]())
   }
 
   test("post multiple log events to 'event' endpoint") {
@@ -98,12 +102,26 @@ class LogCollectorRoutesTest
       .withEntity(entity) ~> Route.seal(routes) ~> check {
       assert(status === (StatusCodes.OK))
     }
+
+    verify(solrStream, Mockito.times(4))
+      .put(Matchers.anyString(), Matchers.any[Map[String, String]]())
+
   }
 
   test("post json array to 'json' endpoint") {
     val entity = HttpEntity(ContentTypes.`application/json`, jsonArrayDocument)
 
     Post(uri = "/v1/json/test")
+      .withEntity(entity) ~> routes ~> check {
+      assert(status === (StatusCodes.OK))
+    }
+  }
+
+  test("post metric array to 'metric' endpoint") {
+    val entity = HttpEntity(ContentTypes.`application/json`,
+                            Seq(TimeseriesEvent(1, "foo", 1.4)).toJson.toString())
+
+    Post(uri = "/v1/metrics/test")
       .withEntity(entity) ~> routes ~> check {
       assert(status === (StatusCodes.OK))
     }

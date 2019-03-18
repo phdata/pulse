@@ -68,6 +68,10 @@ lazy val dependencies =
 
     val solrj = "org.apache.solr" % "solr-solrj" % solrjVersion
 
+    val kudu          = "org.apache.kudu" % "kudu-client"     % kuduVersion
+    val kuduTestUtils = "org.apache.kudu" % "kudu-test-utils" % kuduVersion
+    val kuduBinary    = "org.apache.kudu" % "kudu-binary"     % kuduVersion classifier "osx-x86_64"
+
     val mockito = "org.mockito" % "mockito-all" % mockitoVersion % "test,it"
 
     val powermock      = "org.powermock" % "powermock-module-junit4" % powerMockVersion % "test,it"
@@ -115,7 +119,7 @@ lazy val dependencies =
     val mocking = Seq(mockito, powermock, powerMockApi, powerMockJunit)
   }
 
-lazy val settings         = commonSettings ++ scalafmtSettings ++ assemblySettings
+lazy val settings = commonSettings ++ scalafmtSettings ++ assemblySettings
 
 lazy val `log-appender` = project
   .configs(IntegrationTest)
@@ -142,9 +146,14 @@ lazy val `log-collector` = project
     name := "log-collector",
     mainClass in Compile := Some("io.phdata.pulse.logcollector.LogCollector"),
     settings,
-    libraryDependencies ++= dependencies.http ++ Seq(dependencies.scallop,
-                                                     dependencies.apacheKafka,
-                                                     dependencies.monix)
+    libraryDependencies ++= dependencies.http ++ dependencies.mocking ++ Seq(
+      dependencies.scallop,
+      dependencies.apacheKafka,
+      dependencies.monix,
+      dependencies.kudu,
+      dependencies.kuduBinary,
+      dependencies.kuduTestUtils
+    )
   )
   .dependsOn(`test-common` % "test,it")
   .dependsOn(common)
@@ -233,3 +242,4 @@ val javaMailVersion          = "1.4"
 val mockitoVersion           = "1.10.19"
 val powerMockVersion         = "1.6.3"
 val monixVersion             = "2.3.3"
+val kuduVersion              = "1.9.0"
