@@ -26,7 +26,6 @@ import io.phdata.pulse.alertengine.notification.{
 import io.phdata.pulse.common.{ DocumentConversion, SolrService }
 import io.phdata.pulse.testcommon.{ BaseSolrCloudTest, TestUtil }
 import org.apache.solr.client.solrj.impl.CloudSolrServer
-import org.apache.solr.common.SolrInputDocument
 import org.mockito.Mockito
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{ BeforeAndAfterEach, FunSuite }

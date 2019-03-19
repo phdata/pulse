@@ -35,6 +35,7 @@ object CollectionRollerMain extends LazyLogging {
   val CLEANUP_SLEEP_INTERVAL_MILLIS = 100
   val executorService               = Executors.newSingleThreadScheduledExecutor()
 
+  // scalastyle:off method.length
   def main(args: Array[String]) {
     val parsedArgs = new CollectionRollerCliArgsParser(args)
     logger.debug(s"Parsed args: $parsedArgs")
@@ -60,34 +61,32 @@ object CollectionRollerMain extends LazyLogging {
 
       val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
 
-      try {
-        val configUploadResults =
-          collectionRoller.uploadConfigsFromDirectory(config.solrConfigSetDir)
+      val configUploadResults =
+        collectionRoller.uploadConfigsFromDirectory(config.solrConfigSetDir)
 
-        configUploadResults match {
-          case Success(_) => logger.info("Successfully uploaded config sets.")
-          case Failure(e) => logger.error("Error uploading config sets", e)
+      configUploadResults match {
+        case Success(_) => logger.info("Successfully uploaded config sets.")
+        case Failure(e) => logger.error("Error uploading config sets", e)
+      }
+
+      if (parsedArgs.daemonize()) {
+        try {
+          val scheduledFuture = executorService.scheduleAtFixedRate(
+            new CollectionRollerTask(collectionRoller, config, parsedArgs),
+            0L,
+            DAEMON_INTERVAL_MINUTES,
+            TimeUnit.MINUTES)
+          Runtime.getRuntime.addShutdownHook(shutDownHook(scheduledFuture))
+
+          executorService.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
+        } catch {
+          case e: Exception => logger.error(s"Error running CollectionRoller", e)
+        } finally {
+          executorService.shutdown()
         }
-
-        if (parsedArgs.daemonize()) {
-          try {
-            val scheduledFuture = executorService.scheduleAtFixedRate(
-              new CollectionRollerTask(collectionRoller, config, parsedArgs),
-              0L,
-              DAEMON_INTERVAL_MINUTES,
-              TimeUnit.MINUTES)
-            Runtime.getRuntime.addShutdownHook(shutDownHook(scheduledFuture))
-
-            executorService.awaitTermination(Long.MaxValue, TimeUnit.DAYS)
-          } catch {
-            case e: Exception => logger.error(s"Error running CollectionRoller", e)
-          } finally {
-            executorService.shutdown()
-          }
-        } else {
-          val collectionRollerTask = new CollectionRollerTask(collectionRoller, config, parsedArgs)
-          collectionRollerTask.run()
-        }
+      } else {
+        val collectionRollerTask = new CollectionRollerTask(collectionRoller, config, parsedArgs)
+        collectionRollerTask.run()
       }
     }
 
