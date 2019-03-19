@@ -68,13 +68,6 @@ class SolrCloudStream(solrService: SolrService,
       .map(_.toInt)
       .getOrElse(solrStreamParams.numThreads)
 
-  logger.info(s"Max buffer size `pulse.collector.stream.buffer.max` is $maxBuffersize")
-  logger.info(s"Overflow stragegy `pulse.collector.stream.overflow.strategy` ${overflowStrategy}")
-  logger.info(s"Batch size `pulse.collector.stream.batch.size`is $solrBatchSize")
-  logger.info(s"Batch flush duration `pulse.collector.stream.flush.seconds` is $batchFlushDuration")
-  logger.info(
-    s"Number of threads used to publish to Solr `pulse.collector.stream.numthreads` is $numThreads")
-
   // This stratefy will fail by signalling a function that exits the application. The original `OverflowStrategy.Fail`
   // doesn't have a clear way get a stream failure message.
   private val failOverflowStrategy =
@@ -107,6 +100,13 @@ class SolrCloudStream(solrService: SolrService,
     val javaService = Executors.newScheduledThreadPool(numThreads)
     Scheduler(javaService, AlwaysAsyncExecution)
   }
+
+  logger.info(s"Max buffer size `pulse.collector.stream.buffer.max` is $maxBuffersize")
+  logger.info(s"Overflow stragegy `pulse.collector.stream.overflow.strategy` ${overflowStrategy}")
+  logger.info(s"Batch size `pulse.collector.stream.batch.size`is $solrBatchSize")
+  logger.info(s"Batch flush duration `pulse.collector.stream.flush.seconds` is $batchFlushDuration")
+  logger.info(
+    s"Number of threads used to publish to Solr `pulse.collector.stream.numthreads` is $numThreads")
 
   // Create a subject we can write events to
   private val subject = ConcurrentSubject
