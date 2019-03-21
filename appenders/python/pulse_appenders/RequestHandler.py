@@ -7,7 +7,7 @@ import json
 
 class RequestHandler(handlers.HTTPHandler):
     """
-    Custom loggin handler
+    Custom logging handler for the Pulse log collector
     Inherits HTTPHandler class
     """
     def __init__(self,*args):
@@ -18,6 +18,7 @@ class RequestHandler(handlers.HTTPHandler):
         """
         super(RequestHandler, self).__init__(*args)
         self.debug = False
+        self.setFormatter(LogFormatter())
         
     def setDebug(self):
         self.debug = True
@@ -28,7 +29,6 @@ class RequestHandler(handlers.HTTPHandler):
         Args: Log record
         Returns: http response
         """
-        self.setFormatter(LogFormatter())
         log_entry = self.format(record)
         try: 
             requests.post(self.host+self.url, log_entry,headers={"Content-type": "application/json"}).content

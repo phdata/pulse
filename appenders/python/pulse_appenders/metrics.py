@@ -3,7 +3,7 @@ import requests
 import json
 from datetime import datetime,timezone
 
-class Metrics:
+class MetricWriter:
     """
     url: Url for Pulsee metrics endpoint, like 'http://host:port/v1/metrics/<application_name>
     """

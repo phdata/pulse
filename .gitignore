@@ -13,3 +13,6 @@ alert-engine/scripts/slack-webhook-url.txt
 *.log
 dist
 jaas.conf
+__pycache__
+*.pyc
+

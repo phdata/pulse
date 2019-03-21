@@ -3,7 +3,8 @@ import sys
 import time
 from RequestHandler import RequestHandler
 
-log_collector_host="http://host.com:port"
+log_collector_host = "http://host:port"
+application_name = "pulse_app"
 
 """
 Logger Example in python
@@ -37,7 +38,7 @@ if __name__ == "__main__":
     ch.setFormatter(formatter)
 
     # Create the http handler
-    http_handler = RequestHandler(log_collector_host,'/v2/event/python_app', 'POST')
+    http_handler = RequestHandler(log_collector_host,'/v2/event/' + application_name, 'POST')
     # Turn on debugging so we can see errors (bad url, unresponsive server, etc.)
     http_handler.setDebug()
     logger.addHandler(http_handler)
