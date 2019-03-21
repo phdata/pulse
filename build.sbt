@@ -69,8 +69,9 @@ lazy val dependencies =
     val solrj = "org.apache.solr" % "solr-solrj" % solrjVersion
 
     val kudu          = "org.apache.kudu" % "kudu-client"     % kuduVersion
-    val kuduTestUtils = "org.apache.kudu" % "kudu-test-utils" % kuduVersion
-    val kuduBinary    = "org.apache.kudu" % "kudu-binary"     % kuduVersion classifier "osx-x86_64"
+    val kuduTestUtils = "org.apache.kudu" % "kudu-test-utils" % kuduVersion % "test,it"
+    // TODO classifier make compatible with build server for when we re-enable integration tests on Travis
+    val kuduBinary    = "org.apache.kudu" % "kudu-binary"     % kuduVersion % "test,it" classifier "osx-x86_64"
 
     val mockito = "org.mockito" % "mockito-all" % mockitoVersion % "test,it"
 

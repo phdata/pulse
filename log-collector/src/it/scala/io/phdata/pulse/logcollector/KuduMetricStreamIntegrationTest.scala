@@ -38,11 +38,16 @@ class KuduMetricStreamIntegrationTest extends FunSuite with BeforeAndAfterEach {
     val stream    = new KuduMetricStream(kuduTestHarness.getClient)
     val tableName = "footable"
 
-    assert(stream.tables.isEmpty)
+    assert(stream.tableCache.isEmpty)
 
     stream.getOrCreateTable(tableName)
 
     assert(client.tableExists(tableName))
+
+    // Make sure we can add an existing table to the cache
+    stream.tableCache.clear()
+    val table = stream.getOrCreateTable(tableName)
+    assert(table != null)
   }
 
   test("Write events into Kudu") {

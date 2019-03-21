@@ -29,13 +29,26 @@ import monix.execution.Scheduler.Implicits.global
 
 import scala.concurrent.duration.Duration
 
+/**
+ * Parameters for a stream
+ * @param numThreads Max number of threads to use for the stream 'save' method
+ * @param maxBufferSize Max number of events to keep in the buffer before it overflows
+ * @param batchSize Number of events to batch up before flushing to the output source
+ * @param batchFlushDurationSeconds Max seconds to wait before flushing to the output source
+ * @param overflowStrategy Overflow stratagy when [[maxBufferSize]] is exceeded
+ */
 case class StreamParams(val numThreads: Int = 1,
                         val maxBufferSize: Int = 512000,
                         val batchSize: Int = 1000,
                         val batchFlushDurationSeconds: Int = 1,
                         val overflowStrategy: String = "fail")
 
-abstract class Stream[E](streamParams: StreamParams = StreamParams()) extends LazyLogging {
+/**
+ * Represents an abstract stream to accept events, batch them, and write them to an output source
+ * @param streamParams Configuration parameters for the stream
+ * @tparam EventType EventType being writting to the output source
+ */
+abstract class Stream[EventType](streamParams: StreamParams = StreamParams()) extends LazyLogging {
   val maxBuffersize: Int =
     sys.props
       .get("pulse.collector.stream.buffer.max")
@@ -117,14 +130,19 @@ abstract class Stream[E](streamParams: StreamParams = StreamParams()) extends La
    * @param applicationName Name of the application
    * @param data            The data object, key value pairs
    */
-  private[logcollector] def put(applicationName: String, data: E): Unit =
+  private[logcollector] def put(applicationName: String, data: EventType): Unit =
     subject.onNext((applicationName, data))
 
-  private[logcollector] def save(appName: String, events: Seq[E])
+  /**
+   * The blocking method that saves data to the output source
+   * @param appName Name of the application
+   * @param events Collection of events being saved in a single batch
+   */
+  private[logcollector] def save(appName: String, events: Seq[EventType])
 
   // Create a subject we can write events to
   private[logcollector] val subject = ConcurrentSubject
-    .publish[(String, E)](overflowStrategy.asInstanceOf[Synchronous[Nothing]])
+    .publish[(String, EventType)](overflowStrategy.asInstanceOf[Synchronous[Nothing]])
 
   /* Perform the transformation:
  - group the events by their application name, creating multiple streams, one for each application
@@ -139,7 +157,8 @@ abstract class Stream[E](streamParams: StreamParams = StreamParams()) extends La
         .bufferTimedAndCounted(batchFlushDuration, solrBatchSize)
         .mapAsync(y =>
           Task(save(group.key, y.map(_._2))).onErrorRecover {
-            case e: Throwable => logger.error("Exception writing batch", e)
+            case e: Throwable =>
+              logger.error(s"Exception writing batch for application ${group.key}", e)
         })
         .executeOn(blockingScheduler)
         .foreach(_ => ())
