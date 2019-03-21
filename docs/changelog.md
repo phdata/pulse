@@ -1,3 +1,6 @@
+# 2.3.1
+- Remove max instance restriction on the log collector role
+
 # 2.3.0
 
 - New documentation at <https://pulse-logging.readthedocs.io/en/latest/?>
