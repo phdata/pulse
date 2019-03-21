@@ -16,6 +16,7 @@
 
 package io.phdata.pulse.logcollector
 
+import java.util.Properties
 import java.util.concurrent.Executors
 
 import akka.actor.{ ActorSystem, Props }
@@ -23,6 +24,7 @@ import akka.http.scaladsl.Http
 import akka.stream.{ ActorMaterializer, Materializer }
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.SolrService
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 
 import scala.concurrent.duration.Duration
@@ -53,24 +55,48 @@ object LogCollector extends LazyLogging {
 
     val routes = new LogCollectorRoutes(solrService)
 
-    // Starts Http Service
-    def start(port: Int): Future[Unit] =
-      Http().bindAndHandle(routes.routes, "0.0.0.0", port = port)(materializer) map { binding =>
+    def serve(port: Int): Unit = {
+      // Starts Http Service
+      val httpServerFuture = Http().bindAndHandle(routes.routes, "0.0.0.0", port = port)(
+        materializer) map { binding =>
         logger.info(s"Log Collector interface bound to: ${binding.localAddress}")
       }
 
-    val s = start(cliParser.port())
+      httpServerFuture.onComplete {
+        case Success(v) => ()
+        case Failure(e) => throw new RuntimeException(e)
+      }
 
-    s.onComplete {
-      case Success(v) => ()
-      case Failure(e) => throw new RuntimeException(e)
+      // Start LogCollector HttpService
+      Await.ready(
+        httpServerFuture,
+        Duration.Inf
+      )
     }
 
-    // Start LogCollector HttpService
-    Await.ready(
-      s,
-      Duration.Inf
-    )
+    cliParser.mode() match {
+      case "kafka" => {
+        consume(solrService, cliParser.zkHosts(), cliParser.port(), cliParser.topic())
+      }
+      case _ => {
+        serve(cliParser.port())
+      }
+    }
   }
 
+  // Starts Kafka Consumer
+  def consume(solrService: SolrService, zkHost: String, port: Int, topic: String): Unit = {
+    val kafkaConsumer      = new PulseKafkaConsumer(solrService)
+    val kafkaConsumerProps = new Properties()
+
+    kafkaConsumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, s"$zkHost:$port")
+    kafkaConsumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                           "org.apache.kafka.common.serialization.StringDeserializer")
+    kafkaConsumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                           "org.apache.kafka.common.serialization.StringDeserializer")
+    kafkaConsumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+    kafkaConsumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "pulse-kafka")
+
+    kafkaConsumer.read(kafkaConsumerProps, topic)
+  }
 }
