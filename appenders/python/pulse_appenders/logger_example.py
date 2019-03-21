@@ -1,7 +1,10 @@
 import logging.config
 import sys
 import time
-from RequestsHandler import RequestsHandler
+from RequestHandler import RequestHandler
+
+log_collector_host="http://host.com:port"
+
 """
 Logger Example in python
 Creates loggers which takes custom handler created
@@ -24,8 +27,19 @@ def main(argv,logger):
 
 
 if __name__ == "__main__":
-    logger = logging.getLogger('mylogger')
-    http_handler = RequestsHandler('http://0.0.0.0:9015','/v2/event/python_app','POST')
-    logger.addHandler(http_handler)
+    logger = logging.getLogger('pulse-logger')
     logger.setLevel(logging.INFO)
+
+    # Create a console handler so we can see what's going on
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+
+    # Create the http handler
+    http_handler = RequestHandler(log_collector_host,'/v2/event/python_app', 'POST')
+    # Turn on debugging so we can see errors (bad url, unresponsive server, etc.)
+    http_handler.setDebug()
+    logger.addHandler(http_handler)
+    logger.addHandler(ch)
     main(sys.argv[1:],logger)
