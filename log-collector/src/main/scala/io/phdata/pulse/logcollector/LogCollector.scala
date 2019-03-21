@@ -45,8 +45,9 @@ object LogCollector extends LazyLogging {
 
     val cliParser = new LogCollectorCliParser(args)
 
-    val solrServer  = new CloudSolrServer(cliParser.zkHosts())
-    val solrService = new SolrService(cliParser.zkHosts(), solrServer)
+    val solrServer      = new CloudSolrServer(cliParser.zkHosts())
+    val solrService     = new SolrService(cliParser.zkHosts(), solrServer)
+    val solrCloudStream = new SolrCloudStream(solrService)
 
     // Akka System
     implicit val actorSystem: ActorSystem   = ActorSystem()
@@ -76,7 +77,7 @@ object LogCollector extends LazyLogging {
 
     cliParser.mode() match {
       case "kafka" => {
-        consume(solrService, cliParser.zkHosts(), cliParser.port(), cliParser.topic())
+        consume(solrCloudStream, cliParser.zkHosts(), cliParser.port(), cliParser.topic())
       }
       case _ => {
         serve(cliParser.port())
@@ -85,8 +86,8 @@ object LogCollector extends LazyLogging {
   }
 
   // Starts Kafka Consumer
-  def consume(solrService: SolrService, zkHost: String, port: Int, topic: String): Unit = {
-    val kafkaConsumer      = new PulseKafkaConsumer(solrService)
+  def consume(solrCloudStream: SolrCloudStream, zkHost: String, port: Int, topic: String): Unit = {
+    val kafkaConsumer      = new PulseKafkaConsumer(solrCloudStream)
     val kafkaConsumerProps = new Properties()
 
     kafkaConsumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, s"$zkHost:$port")
