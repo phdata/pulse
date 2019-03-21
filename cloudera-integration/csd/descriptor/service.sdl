@@ -40,8 +40,7 @@
         }
       ],
       "topology": {
-        "minInstances": "1",
-        "maxInstances": "10"
+        "minInstances": "1"
       },
       "startRunner": {
         "program": "scripts/control.sh",
