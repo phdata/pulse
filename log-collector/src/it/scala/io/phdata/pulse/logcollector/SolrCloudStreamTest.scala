@@ -71,7 +71,7 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
 
     val queryResult = solrClient.query(app1Query)
 
-    assertResult(1)(queryResult.getResults.getNumFound)
+    assertResult(1100)(queryResult.getResults.getNumFound)
   }
 
   test("Test flow groups by application id, flushes after max documents") {
