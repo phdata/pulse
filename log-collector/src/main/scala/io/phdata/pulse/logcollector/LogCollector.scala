@@ -16,17 +16,16 @@
 
 package io.phdata.pulse.logcollector
 
-import java.util.concurrent.Executors
-
-import akka.actor.{ ActorSystem, Props }
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.{ ActorMaterializer, Materializer }
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.SolrService
+import org.apache.kudu.client.KuduClient.KuduClientBuilder
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.{ Await, Future }
 import scala.util.{ Failure, Success }
 
 /**
@@ -45,13 +44,19 @@ object LogCollector extends LazyLogging {
 
     val solrServer  = new CloudSolrServer(cliParser.zkHosts())
     val solrService = new SolrService(cliParser.zkHosts(), solrServer)
+    val solrStream  = new SolrCloudStream(solrService)
 
-    // Akka System
+    // Akka System for the http server
     implicit val actorSystem: ActorSystem   = ActorSystem()
     implicit val materializer: Materializer = ActorMaterializer.create(actorSystem)
     implicit val ec                         = actorSystem.dispatchers.lookup("akka.actor.http-dispatcher")
 
-    val routes = new LogCollectorRoutes(solrService)
+    val kuduClient =
+      cliParser.kuduMasters.toOption.map(masters => new KuduClientBuilder(masters).build())
+
+    val kuduStream = kuduClient.map(client => new KuduMetricStream(client))
+
+    val routes = new LogCollectorRoutes(solrStream, kuduStream)
 
     // Starts Http Service
     def start(port: Int): Future[Unit] =
