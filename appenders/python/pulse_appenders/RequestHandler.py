@@ -1,8 +1,8 @@
-import requests
 from logging import handlers
 import logging
 import datetime
 import json
+from batch_requests import AutoBatchRequest
 
 
 class RequestHandler(handlers.HTTPHandler):
@@ -19,9 +19,11 @@ class RequestHandler(handlers.HTTPHandler):
         super(RequestHandler, self).__init__(*args)
         self.debug = False
         self.setFormatter(LogFormatter())
+        self.auto_batch = AutoBatchRequest(self.host + self.url)
         
     def setDebug(self):
         self.debug = True
+        self.auto_batch.debug = True
 
     def emit(self, record):
         """
@@ -30,8 +32,8 @@ class RequestHandler(handlers.HTTPHandler):
         Returns: http response
         """
         log_entry = self.format(record)
-        try: 
-            requests.post(self.host+self.url, log_entry,headers={"Content-type": "application/json"}).content
+        try:
+            self.auto_batch.add(log_entry)
         except Exception as e:
             if self.debug:
                 print(e)
@@ -51,7 +53,7 @@ class LogFormatter(logging.Formatter):
 
         Formats record to json
         Args: Log Record
-        Returns: Json formatted log record
+        Returns: Log record
         """
         data = {}
 
@@ -60,4 +62,4 @@ class LogFormatter(logging.Formatter):
         data["level"] = record.levelname
         data["message"] = record.msg
         data["threadName"] = record.threadName
-        return json.dumps(data)
+        return data
