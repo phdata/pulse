@@ -85,6 +85,12 @@ log "SMTP_PORT: $SMTP_PORT"
 log "SMTP_TLS: $SMTP_TLS"
 log "ALERT_ENGINE_CONFIG: $ALERT_ENGINE_CONFIG"
 log "COLLECTION_ROLLER_CONFIG: $COLLECTION_ROLLER_CONFIG"
+log "ALERT_ENGINE_MAX_HEAP: $ALERT_ENGINE_MAX_HEAP"
+log "ALERT_ENGINE_EXTRA_OPTS: $ALERT_ENGINE_EXTRA_OPTS"
+log "COLLECTION_ROLLER_MAX_HEAP: $COLLECTION_ROLLER_MAX_HEAP"
+log "COLLECTION_ROLLER_EXTRA_OPTS: $COLLECTION_ROLLER_EXTRA_OPTS"
+log "LOG_ROLLER_MAX_HEAP: $LOG_ROLLER_MAX_HEAP"
+log "LOG_ROLLER_EXTRA_OPTS: $LOG_ROLLER_EXTRA_OPTS"
 log "WEBSERVER_PORT: $WEBSERVER_PORT"
 log "AKKA_CONF: $AKKA_CONF"
 log "PULSE_DIST: $PULSE_DIST"
@@ -113,6 +119,8 @@ case $CMD in
     -Dlogback.configurationFile=$LOGBACK_CONFIG \
     $JAVA_PROPERTIES \
     $CSD_JAVA_OPTS \
+    -Xmx$ALERT_ENGINE_MAX_HEAP \
+    $ALERT_ENGINE_EXTRA_OPTS \
     -cp "$CLASS_PATH" io.phdata.pulse.alertengine.AlertEngineMain \
     --daemonize \
     --zk-hosts $SOLR_ZK_QUORUM \
@@ -130,6 +138,8 @@ case $CMD in
     -Dlogback.configurationFile=$LOGBACK_CONFIG \
     $CSD_JAVA_OPTS \
     $JAVA_PROPERTIES \
+    -Xmx$COLLECTION_ROLLER_MAX_HEAP \
+    $COLLECTION_ROLLER_EXTRA_OPTS \
     -cp "$CLASS_PATH" io.phdata.pulse.collectionroller.CollectionRollerMain \
     --daemonize \
     --conf $COLLECTION_ROLLER_CONFIG \
@@ -143,6 +153,8 @@ case $CMD in
     $CSD_JAVA_OPTS \
     -Dconfig.file="$AKKA_CONF" \
     -Dlogback.configurationFile=$LOGBACK_CONFIG $JAVA_PROPERTIES \
+    -Xmx$LOG_COLLECTOR_MAX_HEAP \
+    $LOG_COLLECTOR_EXTRA_OPTS \
     -cp "$CLASS_PATH" io.phdata.pulse.logcollector.LogCollector \
     --port $WEBSERVER_PORT \
     --zk-hosts $SOLR_ZK_QUORUM
