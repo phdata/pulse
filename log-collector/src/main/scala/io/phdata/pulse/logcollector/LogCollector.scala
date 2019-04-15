@@ -25,7 +25,6 @@ import akka.http.scaladsl.Http
 import akka.stream.{ ActorMaterializer, Materializer }
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.SolrService
-import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.solr.client.solrj.impl.CloudSolrServer
 
 import scala.concurrent.duration.Duration

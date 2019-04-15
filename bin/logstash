@@ -1,0 +1,11 @@
+#!/bin/bash
+set -x
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$( dirname "$SOURCE" )"
+
+source $BIN_DIR/env.sh
+
+LOGSTASH_DIR=$BIN_DIR/../../logstash-${LOGSTASH_VERSION}
+
+$LOGSTASH_DIR/bin/logstash -f $BIN_DIR/../logstash-conf/logstash-kafka.conf

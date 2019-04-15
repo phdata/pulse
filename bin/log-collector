@@ -2,6 +2,7 @@
 # Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 SOURCE="${BASH_SOURCE[0]}"
 BIN_DIR="$( dirname "$SOURCE" )"
+MODE=$1
 while [ -h "$SOURCE" ]
 do
   SOURCE="$(readlink "$SOURCE")"
@@ -11,4 +12,8 @@ done
 
 source $BIN_DIR/env.sh
 
-$BIN_DIR/../cloudera-integration/csd/scripts/control.sh start_log_collector
+if [ $MODE == "kafka" ]; then
+  $BIN_DIR/../cloudera-integration/csd/scripts/control.sh start_log_collector_kafka
+else
+  $BIN_DIR/../cloudera-integration/csd/scripts/control.sh start_log_collector
+fi
