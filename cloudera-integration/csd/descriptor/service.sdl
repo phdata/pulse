@@ -37,6 +37,25 @@
           "required": "true",
           "type": "port",
           "default": 9001
+        },
+        {
+          "name": "log.collector.max.heap.size",
+          "label": "Log collector max java heap size",
+          "description": "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in megabytes.",
+          "type": "memory",
+          "default": 4096,
+          "min": 50,
+          "softMin": 256,
+          "softMax": 16384,
+          "unit": "megabytes",
+          "scaleFactor" : 1.3
+        },
+        {
+          "name": "log.collector.extra.opts",
+          "label": "Additional java options",
+          "description": "These arguments are passed as part of the Java command line.",
+          "type": "string",
+          "default": ""
         }
       ],
       "topology": {
@@ -48,7 +67,9 @@
           "start_log_collector"
         ],
         "environmentVariables": {
-          "WEBSERVER_PORT": "${port}"
+          "WEBSERVER_PORT": "${port}",
+          "LOG_COLLECTOR_MAX_HEAP": "${log.collector.max.heap.size}",
+          "LOG_COLLECTOR_EXTRA_OPTS": "${log.collector.extra.opts}"
         }
       },
       "configWriter": {
@@ -98,6 +119,25 @@
           "required": "true",
           "type": "path",
           "pathType": "localDataFile"
+        },
+        {
+          "name": "collection.roller.max.heap.size",
+          "label": "Collection roller max java heap size",
+          "description": "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in megabytes.",
+          "type": "memory",
+          "default": 2048,
+          "min": 50,
+          "softMin": 256,
+          "softMax": 16384,
+          "unit": "megabytes",
+          "scaleFactor" : 1.3
+        },
+        {
+          "name": "collection.roller.extra.opts",
+          "label": "Additional java options",
+          "description": "These arguments are passed as part of the Java command line.",
+          "type": "string",
+          "default": ""
         }
       ],
       "topology": {
@@ -110,7 +150,9 @@
           "start_collection_roller"
         ],
         "environmentVariables": {
-          "COLLECTION_ROLLER_CONFIG": "${collection.roller.configuration.file}"
+          "COLLECTION_ROLLER_CONFIG": "${collection.roller.configuration.file}",
+          "COLLECTION_ROLLER_MAX_HEAP": "${collection.roller.max.heap.size}",
+          "COLLECTION_ROLLER_EXTRA_OPTS": "${collection.roller.extra.opts}"
         }
       },
       "kerberos": "true",
@@ -159,6 +201,25 @@
           "configurableInWizard": true,
           "required": "true",
           "type": "string"
+        },
+        {
+          "name": "alert.engine.max.heap.size",
+          "label": "Alert engine max java heap size",
+          "description": "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in megabytes.",
+          "type": "memory",
+          "default": 2048,
+          "min": 50,
+          "softMin": 256,
+          "softMax": 16384,
+          "unit": "megabytes",
+          "scaleFactor" : 1.3
+        },
+        {
+          "name": "alert.engine.extra.opts",
+          "label": "Additional java options",
+          "description": "These arguments are passed as part of the Java command line.",
+          "type": "string",
+          "default": ""
         },
         {
           "name": "smtp.user",
@@ -216,6 +277,8 @@
         ],
         "environmentVariables": {
           "ALERT_ENGINE_CONFIG": "${alert.engine.configuration.file}",
+          "ALERT_ENGINE_MAX_HEAP": "${alert.engine.max.heap.size}",
+          "ALERT_ENGINE_EXTRA_OPTS": "${alert.engine.extra.opts}",
           "SMTP_USER": "${smtp.user}",
           "SMTP_PASSWORD": "${smtp.password}",
           "SMTP_SERVER": "${smtp.server.address}",
