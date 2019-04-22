@@ -16,6 +16,8 @@
 
 package io.phdata.pulse.logcollector
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.{ ActorMaterializer, Materializer }
@@ -38,8 +40,20 @@ object LogCollector extends LazyLogging {
    *
    * @param args
    */
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
+    System.getProperty("java.security.auth.login.config") match {
+      case null => {
+        logger.info(
+          "java.security.auth.login.config is not set, continuing without kerberos authentication")
+        start(args)
+      }
+      case _ => {
+        KerberosUtil.scheduledLogin(0, 9, TimeUnit.HOURS)
+        KerberosUtil.run(start(args))
+      }
+    }
 
+  private def start(args: Array[String]): Future[Unit] = {
     val cliParser = new LogCollectorCliParser(args)
 
     val solrServer  = new CloudSolrServer(cliParser.zkHosts())
@@ -77,5 +91,4 @@ object LogCollector extends LazyLogging {
       Duration.Inf
     )
   }
-
 }
