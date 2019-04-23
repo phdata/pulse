@@ -81,7 +81,7 @@ class MetricWriter:
         :type value: float
         :rtype: requests.Response
         """
-        return self.gauge_ts(tag, value, self.unix_time_micros(datetime.utcnow()))
+        return self.gauge_ts(tag, value, datetime.utcnow())
 
     def post(self, data):
         """
@@ -91,11 +91,12 @@ class MetricWriter:
         :type data: dict
         :rtype: requests.Response
         """
-        self.buffer.append(json.dumps(data))
+        self.buffer.append(data)
+        result = None
 
         if len(self.buffer) >= self.buffer_capacity:
             try:
-                result = requests.post(self.endpoint, self.buffer, headers={"Content-type": "application/json"})
+                result = requests.post(self.endpoint, json.dumps(self.buffer), headers={"Content-type": "application/json"})
             except requests.exceptions.RequestException as e:
                 sys.stderr.write(e)
 

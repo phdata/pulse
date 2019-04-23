@@ -1,9 +1,9 @@
 from distutils.core import setup
 
 setup (
-    name='pulse',
+    name='pulse-logging',
     version='2.0',
-    packages=["pulse_appenders"],
+    packages=["pulse"],
     install_requires=['requests', 'pytz', 'six'],
     long_description=open('README.md').read()
 )
