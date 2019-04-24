@@ -38,9 +38,9 @@ class MetricWriter:
 
         :param endpoint: The REST API endpoint for the Pulse Log Collector
         :type endpoint: str
-        :param buffer_capacity: The maximum number of metrics to buffer before flushing.
-                                If no value is provided, each metric will be submitted
-                                one at a time.
+        :param buffer_capacity: The maximum number of metrics to buffer before
+                                flushing. If no value is provided, each metric
+                                will be submitted one at a time.
         :rtype: MetricWriter
         """
         self.endpoint = endpoint
@@ -49,8 +49,8 @@ class MetricWriter:
 
     def gauge_ts(self, tag, value, timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
         """
-        Log a gauge metric at the provided timestamp. Returns the response from the
-        post request.
+        Log a gauge metric at the provided timestamp. Returns the response from
+        the post request.
 
         :param tag: Tag or name of the gauge
         :type tag: str
@@ -59,11 +59,12 @@ class MetricWriter:
         :param timestamp: Timestamp at which to log the gauge metric.
         :type timestamp: str or :class:`datetime.datetime`
         :param frmt: Required if a string timestamp is provided
-                     Uses the C strftime() function, see strftime(3) documentation.
+                     Uses the C strftime() function, see strftime(3)
+                     documentation.
         :type frmt: str
         :rtype: requests.Response
         """
-        data = {}
+        data = dict()
         data["metric"] = tag
         data["value"] = value
         data["timestamp"] = self.unix_time_micros(timestamp, frmt)
@@ -72,8 +73,8 @@ class MetricWriter:
 
     def gauge(self, tag, value):
         """
-        Log a gauge metric at the current timestamp. Returns the response from the
-        post request.
+        Log a gauge metric at the current timestamp. Returns the response from
+        the post request.
 
         :param tag: Tag or name of the gauge
         :type tag: str
@@ -96,7 +97,11 @@ class MetricWriter:
 
         if len(self.buffer) >= self.buffer_capacity:
             try:
-                result = requests.post(self.endpoint, json.dumps(self.buffer), headers={"Content-type": "application/json"})
+                result = requests.post(
+                            self.endpoint,
+                            json.dumps(self.buffer),
+                            headers={"Content-type": "application/json"}
+                )
             except requests.exceptions.RequestException as e:
                 sys.stderr.write(e)
 
@@ -108,15 +113,17 @@ class MetricWriter:
         Convert incoming datetime value to a integer representing
         the number of microseconds since the unix epoch
 
-        :param timestamp: If a string is provided, a format must be provided as well.
-                          A tuple may be provided in place of the timestamp with a
-                          string value and a format. This is useful for predicates
-                          and setting values where this method is indirectly called.
-                          Timezones provided in the string are not supported at this
-                          time. UTC unless provided in a datetime object.
+        :param timestamp: If a string is provided, a format must be provided as
+                          well. A tuple may be provided in place of the
+                          timestamp with a string value and a format. This is
+                          useful for predicates and setting values where this
+                          method is indirectly called. Timezones provided in the
+                          string are not supported at this time. UTC unless
+                          provided in a datetime object.
         :type timestamp: str or :class:`datetime.datetime`
         :param frmt: Required if a string timestamp is provided
-                     Uses the C strftime() function, see strftime(3) documentation.
+                     Uses the C strftime() function, see strftime(3)
+                     documentation.
         :type frmt: str
         :rtype: int
         """
@@ -129,7 +136,7 @@ class MetricWriter:
             timestamp = datetime.strptime(timestamp[0], timestamp[1])
         else:
             raise ValueError("Invalid timestamp type. " +
-                             "You must provide a datetime.datetime or a string.")
+                             "You must provide a datetime.datetime or a string")
 
         # If datetime has a valid timezone assigned, convert it to UTC.
         if timestamp.tzinfo and timestamp.utcoffset():
