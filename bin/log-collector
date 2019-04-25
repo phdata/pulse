@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eu
 # Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 SOURCE="${BASH_SOURCE[0]}"
 BIN_DIR="$( dirname "$SOURCE" )"

@@ -36,10 +36,10 @@ class LogCollectorCliParser(args: Seq[String]) extends ScallopConf(args) {
 
   validateOpt(mode, kafkaProps, topic) {
     case (Some("kafka"), None, Some(_)) =>
-      Left("Need a kafka properties file if running kafka mode")
-    case (Some("kafka"), Some(_), None) => Left("Need a topic if running kafka mode")
+      Left("--kafka-properties argument needed if --consume-mode=kafka")
+    case (Some("kafka"), Some(_), None) => Left("--topic argument needed if --consume-mode=kafka")
     case (Some("kafka"), None, None) =>
-      Left("Need a kafka properties file and topic if running kafka mode")
+      Left("--topic and --kafka-properties arguments needed if --consume-mode=kafka")
     case _ => Right(Unit)
   }
 

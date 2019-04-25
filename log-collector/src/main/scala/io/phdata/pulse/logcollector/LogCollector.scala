@@ -52,15 +52,15 @@ object LogCollector extends LazyLogging {
 
     cliParser.mode() match {
       case "kafka" => {
-        consume(solrService, cliParser.kafkaProps(), cliParser.topic())
+        kafka(solrService, cliParser.kafkaProps(), cliParser.topic())
       }
       case _ => {
-        serve(cliParser.port(), routes)
+        http(cliParser.port(), routes)
       }
     }
   }
 
-  def serve(port: Int, routes: LogCollectorRoutes): Future[Unit] = {
+  def http(port: Int, routes: LogCollectorRoutes): Future[Unit] = {
     // Akka System
     implicit val actorSystem: ActorSystem   = ActorSystem()
     implicit val ec                         = actorSystem.dispatchers.lookup("akka.actor.http-dispatcher")
@@ -85,7 +85,7 @@ object LogCollector extends LazyLogging {
   }
 
   // Starts Kafka Consumer
-  def consume(solrService: SolrService, kafkaProps: String, topic: String): Unit = {
+  def kafka(solrService: SolrService, kafkaProps: String, topic: String): Unit = {
 
     val solrCloudStream = new SolrCloudStream(solrService)
 
