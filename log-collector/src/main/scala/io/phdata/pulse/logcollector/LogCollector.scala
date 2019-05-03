@@ -57,7 +57,7 @@ object LogCollector extends LazyLogging {
       }
     }
 
-  private def start(args: Array[String]): Future[Unit] = {
+  private def start(args: Array[String]): Unit = {
     val cliParser = new LogCollectorCliParser(args)
 
     val solrServer  = new CloudSolrServer(cliParser.zkHosts())
