@@ -31,7 +31,7 @@ class MetricWriter:
     A class which sends metrics to the Pulse Log Collector.
     """
 
-    def __init__(self, endpoint, buffer_capacity=0):
+    def __init__(self, endpoint, buffer_capacity=1000):
         """
         Initializes a MetricWriter using the provided endpoint and optional
         buffer capacity.
@@ -40,7 +40,8 @@ class MetricWriter:
         :type endpoint: str
         :param buffer_capacity: The maximum number of metrics to buffer before
                                 flushing. If no value is provided, each metric
-                                will be submitted one at a time.
+                                will be submitted one at a time. Defaults to
+                                1000.
         :rtype: MetricWriter
         """
         self.endpoint = endpoint
