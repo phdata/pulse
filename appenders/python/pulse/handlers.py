@@ -46,7 +46,7 @@ class PulseHandler(MemoryHandler):
         # Initialize Logging
         self.logger = logging.getLogger(__name__)
         handler = logging.StreamHandler(sys.stdout)
-        fmt="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d:%(threadName)s] %(message)s"
+        fmt = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d:%(threadName)s] %(message)s"
         handler.setFormatter(logging.Formatter(fmt))
         handler.setLevel(logging.INFO)
         self.logger.addHandler(handler)
