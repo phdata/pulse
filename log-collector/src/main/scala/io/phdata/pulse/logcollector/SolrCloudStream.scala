@@ -36,8 +36,9 @@ class SolrCloudStream(solrService: SolrService, streamParams: StreamParams = Str
   override private[logcollector] def save(appName: String, events: Seq[Map[String, String]]): Unit =
     if (events.nonEmpty) {
       val latestCollectionAlias = s"${appName}_latest"
-      logger.trace(s"Saving $latestCollectionAlias LogEvent: ${events.toString}")
+      logger.debug(s"Saving batch of ${events.length} to collection '$latestCollectionAlias}'")
       solrService.insertDocuments(latestCollectionAlias,
                                   events.map(DocumentConversion.mapToSolrDocument))
+      logger.debug(s"Save to $latestCollectionAlias successful")
     }
 }
