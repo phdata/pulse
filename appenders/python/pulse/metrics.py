@@ -154,7 +154,7 @@ class MetricWriter:
         Flush metrics from buffer and clear buffer.
         """
         self.logger.debug("Flushing metrics from buffer")
-        self.queue.put(self.buffer, block=False)
+        self.queue.put(list(self.buffer), block=False)
         self.buffer.clear()
 
     def handle(self, metric):
