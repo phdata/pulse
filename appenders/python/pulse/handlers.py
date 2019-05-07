@@ -80,16 +80,16 @@ class PulseHandler(MemoryHandler):
         :param buffer: List of records to send to Pulse.
         :type buffer: list(logging.LogRecord)
         """
-        # Filter and format records in buffer
-        ff_buffer = [
-            self.format(record)
+        # Filter records in buffer
+        filtered_buffer = [
+            record
             for record in buffer
             if self.filter(record)
         ]
 
         # If there are records left after filtering, post to Pulse Log Collector
-        if len(ff_buffer) > 0:
-            self.queue.put(ff_buffer, block=False)
+        if len(filtered_buffer) > 0:
+            self.queue.put(filtered_buffer, block=False)
 
     def __threadWorker(self):
         """
@@ -100,7 +100,8 @@ class PulseHandler(MemoryHandler):
             if buffer is None:
                 break
             try:
-                requests.post(self.endpoint, json.dumps(buffer),
+                requests.post(self.endpoint,
+                              json.dumps([self.format(record) for record in buffer]),
                               headers={"Content-type": "application/json"})
             except requests.exceptions.RequestException:
                 self.logger.error("---Posting Error---")
