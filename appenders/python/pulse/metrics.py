@@ -53,6 +53,7 @@ class MetricWriter:
         self.endpoint = endpoint
         self.buffer_capacity = capacity
         self.buffer = list()
+        self.debug = False
 
         # Initialize Threading
         self.thread_count = threadCount
@@ -72,6 +73,15 @@ class MetricWriter:
         self.logger.addHandler(handler)
         self.logger.setLevel(logging.INFO)
 
+    def setDebug(self):
+        """
+        Set debug mode for MetricWriter.
+        """
+        self.debug = True
+        self.logger.setLevel(logging.DEBUG)
+        for handler in self.logger.handlers:
+            handler.setLevel(logging.DEBUG)
+
     def gaugeTimestamp(self, tag, value, timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
         """
         Log a gauge metric at the provided timestamp.
@@ -87,6 +97,7 @@ class MetricWriter:
                      documentation.
         :type frmt: str
         """
+        self.logger.debug("Constructing metric data")
         data = dict()
         data["metric"] = tag
         data["value"] = value
@@ -113,16 +124,21 @@ class MetricWriter:
         while True:
             buffer = self.queue.get()
             if buffer is None:
+                self.logger.debug("Terminating thread")
                 break
             try:
-                requests.post(self.endpoint,
-                              json.dumps(buffer),
-                              headers={"Content-type": "application/json"})
+                self.logger.debug("Posting metrics to API endpoint")
+                self.logger.debug(json.dumps(buffer))
+                resp = requests.post(self.endpoint,
+                                     json.dumps(buffer),
+                                     headers={"Content-type": "application/json"})
+                self.logger.debug("Status: [%s] %s" % (resp.status_code, resp.text))
             except requests.exceptions.RequestException:
                 self.logger.error("---Posting Error---")
                 self.logger.error("---Failed Metrics Printed Below---")
                 for metric in buffer:
                     self.logger.info(json.dumps(metric))
+            self.logger.debug("Queue task completed")
             self.queue.task_done()
 
     def shouldFlush(self):
@@ -137,6 +153,7 @@ class MetricWriter:
         """
         Flush metrics from buffer and clear buffer.
         """
+        self.logger.debug("Flushing metrics from buffer")
         self.queue.put(self.buffer, block=False)
         self.buffer.clear()
 
@@ -147,6 +164,7 @@ class MetricWriter:
         :param metric: Metric to send to Pulse
         :type metric: dict
         """
+        self.logger.debug("Buffering metric")
         # Append metric to buffer and if buffer is at capacity and flush.
         self.buffer.append(metric)
         if self.shouldFlush():
@@ -156,6 +174,7 @@ class MetricWriter:
         """
         Flush remaining metrics and terminate all threads
         """
+        self.logger.debug("Cleaning up class")
         self.flush()
         for i in range(self.thread_count):
             self.queue.put(None)
