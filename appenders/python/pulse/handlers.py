@@ -30,7 +30,7 @@ class PulseHandler(MemoryHandler):
         :type threadCount: int
         :rtype: PulseHandler
         """
-        MemoryHandler.__init__(self, capacity, flushLevel)
+        super(PulseHandler, self).__init__(capacity, flushLevel)
         self.endpoint = endpoint
         self.debug = False
 
@@ -54,9 +54,12 @@ class PulseHandler(MemoryHandler):
         
     def setDebug(self):
         """
-        Set debug mode for this handler.
+        Set debug mode for MetricWriter.
         """
         self.debug = True
+        self.logger.setLevel(logging.DEBUG)
+        for handler in self.logger.handlers:
+            handler.setLevel(logging.DEBUG)
 
     def setFormatter(self, fmt):
         """
@@ -68,6 +71,7 @@ class PulseHandler(MemoryHandler):
         # Check if formatter provided returns a dictionary
         rec = logging.LogRecord("x", 0, "x", 1, "x", [], None)
         if not isinstance(fmt.format(rec), dict):
+            self.logger.error("Invalid LogFormatter")
             raise ValueError("Invalid LogFormatter: You must use a formatter " +
                              "that produces a dictionary.")
 
@@ -82,6 +86,7 @@ class PulseHandler(MemoryHandler):
         :type buffer: list(logging.LogRecord)
         """
         # Filter records in buffer
+        self.logger.debug("Filtering records in buffer")
         filtered_buffer = [
             record
             for record in buffer
@@ -89,6 +94,7 @@ class PulseHandler(MemoryHandler):
         ]
 
         # If there are records left after filtering, post to Pulse Log Collector
+        self.logger.debug("Putting record buffer into queue")
         if len(filtered_buffer) > 0:
             self.queue.put(filtered_buffer, block=False)
 
@@ -99,8 +105,10 @@ class PulseHandler(MemoryHandler):
         while True:
             buffer = self.queue.get()
             if buffer is None:
+                self.logger.debug("Terminating thread")
                 break
             try:
+                self.logger.debug("Posting records to API endpoint")
                 requests.post(self.endpoint,
                               json.dumps([self.format(record) for record in buffer]),
                               headers={"Content-type": "application/json"})
@@ -116,6 +124,7 @@ class PulseHandler(MemoryHandler):
         Flush records from buffer and clear buffer.
         """
         # Emit records in buffer, then clear buffer.
+        self.logger.debug("Flushing log records")
         self.emit(self.buffer)
         self.buffer.clear()
 
@@ -129,6 +138,7 @@ class PulseHandler(MemoryHandler):
         # Append record to buffer and if buffer is at capacity and flush.
         #
         # Note: This is the entry point from logging.Logger
+        self.logger.debug("Buffering log record")
         self.buffer.append(record)
         if self.shouldFlush(record):
             self.flush()
@@ -137,6 +147,7 @@ class PulseHandler(MemoryHandler):
         """
         Flush remaining records and terminate all threads
         """
+        self.logger.debug("Cleaning up class")
         super(PulseHandler, self).close()
         for i in range(self.thread_count):
             self.queue.put(None)
