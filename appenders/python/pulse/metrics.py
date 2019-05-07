@@ -24,34 +24,57 @@ from datetime import datetime
 from pytz import utc
 import six
 import sys
+from queue import Queue
+import threading
+import logging
 
 
+# noinspection PyPep8Naming
 class MetricWriter:
     """
     A class which sends metrics to the Pulse Log Collector.
     """
 
-    def __init__(self, endpoint, buffer_capacity=1000):
+    def __init__(self, endpoint, capacity=1000, threadCount=1):
         """
         Initializes a MetricWriter using the provided endpoint and optional
         buffer capacity.
 
         :param endpoint: The REST API endpoint for the Pulse Log Collector
         :type endpoint: str
-        :param buffer_capacity: The maximum number of metrics to buffer before
+        :param capacity: The maximum number of metrics to buffer before
                                 flushing. If no value is provided, each metric
                                 will be submitted one at a time. Defaults to
                                 1000.
+        :param threadCount: Number of threads to handle post requests.
+        :type threadCount: int
         :rtype: MetricWriter
         """
         self.endpoint = endpoint
-        self.buffer_capacity = buffer_capacity
-        self.buffer = []
+        self.buffer_capacity = capacity
+        self.buffer = list()
 
-    def gauge_ts(self, tag, value, timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
+        # Initialize Threading
+        self.thread_count = threadCount
+        self.queue = Queue()
+        self.threads = list()
+        for i in range(self.thread_count):
+            thread = threading.Thread(target=self.__threadWorker)
+            thread.start()
+            self.threads.append(thread)
+
+        # Initialize Logging
+        self.logger = logging.getLogger(__name__)
+        handler = logging.StreamHandler(sys.stdout)
+        fmt = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d:%(threadName)s] %(message)s"
+        handler.setFormatter(logging.Formatter(fmt))
+        handler.setLevel(logging.INFO)
+        self.logger.addHandler(handler)
+        self.logger.setLevel(logging.INFO)
+
+    def gaugeTimestamp(self, tag, value, timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
         """
-        Log a gauge metric at the provided timestamp. Returns the response from
-        the post request.
+        Log a gauge metric at the provided timestamp.
 
         :param tag: Tag or name of the gauge
         :type tag: str
@@ -63,19 +86,17 @@ class MetricWriter:
                      Uses the C strftime() function, see strftime(3)
                      documentation.
         :type frmt: str
-        :rtype: requests.Response
         """
         data = dict()
         data["metric"] = tag
         data["value"] = value
-        data["timestamp"] = self.unix_time_micros(timestamp, frmt)
+        data["timestamp"] = self.unixTimeMicros(timestamp, frmt)
         
-        return self.post(data)
+        self.handle(data)
 
     def gauge(self, tag, value):
         """
-        Log a gauge metric at the current timestamp. Returns the response from
-        the post request.
+        Log a gauge metric at the current timestamp.
 
         :param tag: Tag or name of the gauge
         :type tag: str
@@ -83,33 +104,66 @@ class MetricWriter:
         :type value: float
         :rtype: requests.Response
         """
-        return self.gauge_ts(tag, value, datetime.utcnow())
+        self.gaugeTimestamp(tag, value, datetime.utcnow())
 
-    def post(self, data):
+    def __threadWorker(self):
         """
-        Post metric to REST API endpoint for Pulse Log Collector.
-
-        :param data: Metric data to be logged
-        :type data: dict
-        :rtype: requests.Response
+        Method is used for threading API put requests so that they are non-blocking.
         """
-        self.buffer.append(data)
-        result = None
-
-        if len(self.buffer) >= self.buffer_capacity:
+        while True:
+            buffer = self.queue.get()
+            if buffer is None:
+                break
             try:
-                result = requests.post(
-                            self.endpoint,
-                            json.dumps(self.buffer),
-                            headers={"Content-type": "application/json"}
-                )
-            except requests.exceptions.RequestException as e:
-                sys.stderr.write(e)
+                requests.post(self.endpoint,
+                              json.dumps(buffer),
+                              headers={"Content-type": "application/json"})
+            except requests.exceptions.RequestException:
+                self.logger.error("---Posting Error---")
+                self.logger.error("---Failed Metrics Printed Below---")
+                for metric in buffer:
+                    self.logger.info(json.dumps(metric))
+            self.queue.task_done()
 
-        return result
+    def shouldFlush(self):
+        """
+        Check if the buffer is full.
+
+        :rtype: bool
+        """
+        return len(self.buffer) >= self.buffer_capacity
+
+    def flush(self):
+        """
+        Flush metrics from buffer and clear buffer.
+        """
+        self.queue.put(self.buffer, block=False)
+        self.buffer.clear()
+
+    def handle(self, metric):
+        """
+        Add metric to buffer and flush when appropriate.
+
+        :param metric: Metric to send to Pulse
+        :type metric: dict
+        """
+        # Append metric to buffer and if buffer is at capacity and flush.
+        self.buffer.append(metric)
+        if self.shouldFlush():
+            self.flush()
+
+    def close(self):
+        """
+        Flush remaining metrics and terminate all threads
+        """
+        self.flush()
+        for i in range(self.thread_count):
+            self.queue.put(None)
+        for t in self.threads:
+            t.join()
 
     @staticmethod
-    def unix_time_micros(timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
+    def unixTimeMicros(timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
         """
         Convert incoming datetime value to a integer representing
         the number of microseconds since the unix epoch
