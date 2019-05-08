@@ -47,6 +47,7 @@ class PulseKafkaConsumer(solrCloudStream: SolrCloudStream) extends JsonSupport w
           logger.trace("KAFKA: Consuming " + record.value() + " from topic: " + topic)
           val logEventMap = record.value().parseJson.convertTo[Map[String, String]]
           solrCloudStream.put(logEventMap.getOrElse("application", ""), logEventMap)
+          // TODO: Add proper error handling when application isn't supplied
         }
       } catch {
         case p: ParsingException => logger.error("Error parsing message from kafka broker", p)
