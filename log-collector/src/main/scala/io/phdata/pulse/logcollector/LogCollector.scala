@@ -81,13 +81,12 @@ object LogCollector extends LazyLogging {
     }
   }
 
+  // Starts Http Service
   def http(port: Int, routes: LogCollectorRoutes): Future[Unit] = {
-    // Akka System
     implicit val actorSystem: ActorSystem   = ActorSystem()
     implicit val ec                         = actorSystem.dispatchers.lookup("akka.actor.http-dispatcher")
     implicit val materializer: Materializer = ActorMaterializer.create(actorSystem)
 
-    // Starts Http Service
     val httpServerFuture = Http().bindAndHandle(routes.routes, "0.0.0.0", port)(materializer) map {
       binding =>
         logger.info(s"Log Collector interface bound to: ${binding.localAddress}")
@@ -98,7 +97,6 @@ object LogCollector extends LazyLogging {
       case Failure(e) => throw new RuntimeException(e)
     }
 
-    // Start LogCollector HttpService
     Await.ready(
       httpServerFuture,
       Duration.Inf
