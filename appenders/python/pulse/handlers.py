@@ -1,4 +1,5 @@
 import logging
+import atexit
 from logging.handlers import MemoryHandler
 from .batcher import PulseBatcher
 
@@ -10,8 +11,10 @@ class PulseHandler(PulseBatcher, MemoryHandler):
     are converted to JSON upon posting. You must provide a
     :class:`logging.Formatter` that returns the record as a dict.
     """
+    # Note: Method Resolution Order (MRO) self -> PulseBatcher -> MemoryHandler -> object
+    #       Some methods in this class override methods in the order noted above.
 
-    def __init__(self, endpoint, capacity=1000, flushLevel=logging.ERROR, threadCount=1):
+    def __init__(self, endpoint, capacity=1000, flushLevel=logging.ERROR, threadCount=1, logger=None):
         """
         Initializes PulseHandler using the REST API endpoint, buffer capacity, buffer flush level and thread count.
 
@@ -23,10 +26,15 @@ class PulseHandler(PulseBatcher, MemoryHandler):
         :type flushLevel: Log Level
         :param threadCount: Number of threads to handle post requests.
         :type threadCount: int
+        :param logger: :class:`logging.Logger` object for debug logging. If none is provided, a StreamHandler will
+                       be created to log to sys.stdout.
+        :type logger: logging.Logger
         :rtype: PulseHandler
         """
-        PulseBatcher.__init__(self, endpoint, capacity, threadCount)
+        PulseBatcher.__init__(self, endpoint, capacity, threadCount, logger)
         MemoryHandler.__init__(self, capacity, flushLevel)
+        # Cleanup when Python terminates
+        atexit.register(self.close())
 
     def setFormatter(self, fmt):
         """
@@ -36,6 +44,8 @@ class PulseHandler(PulseBatcher, MemoryHandler):
         :type fmt: logging.Formatter
         """
         # Check if formatter provided returns a dictionary
+        #
+        # Note: Overrides MemoryHandler.setFormatter
         rec = logging.LogRecord("x", 0, "x", 1, "x", [], None)
         if not isinstance(fmt.format(rec), dict):
             self.logger.error("Invalid LogFormatter")
@@ -49,6 +59,9 @@ class PulseHandler(PulseBatcher, MemoryHandler):
         Check for buffer full or a record at the flushLevel or higher.
         """
         # Note: Calling class method directly to avoid MRO
+        #
+        # Note: Overrides PulseBatcher.shouldFlush which overrides MemoryHandler.shouldFlush
+        #       when inherited by this class
         return MemoryHandler.shouldFlush(self, record)
 
     def flush(self):
@@ -57,6 +70,8 @@ class PulseHandler(PulseBatcher, MemoryHandler):
         """
         # Format records before flushing. This couldn't be done sooner because of the LogLevel check
         # in the shouldFlush method.
+        #
+        # Note: Overrides PulseBatcher.flush which overrides MemoryHandler.flush when inherited by this class
         self.logger.debug("Applying format to log record")
 
         self.buffer = [
@@ -73,6 +88,7 @@ class PulseHandler(PulseBatcher, MemoryHandler):
         :param record: Record to send to Pulse
         :type record: logging.LogRecord
         """
+        # Note: Overrides PulseBatcher.handle which overrides MemoryHandler.handle when inherited by this class
         self.logger.debug("Applying filter to log record")
         if self.filter(record):
             super(PulseHandler, self).handle(record)
@@ -81,5 +97,6 @@ class PulseHandler(PulseBatcher, MemoryHandler):
         """
         Flush remaining records and terminate all threads
         """
+        # Note: Overrides PulseBatcher.close which overrides MemoryHandler.close when inherited by this class
         MemoryHandler.close(self)
         PulseBatcher.close(self)

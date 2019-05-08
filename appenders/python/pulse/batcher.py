@@ -7,12 +7,12 @@ import json
 
 
 # noinspection PyPep8Naming
-class PulseBatcher:
+class PulseBatcher(object):
     """
     Class to handle batching and submission of Metrics and LogRecords to the Pulse Log Collector
     """
 
-    def __init__(self, endpoint, capacity=1000, threadCount=1):
+    def __init__(self, endpoint, capacity=1000, threadCount=1, logger=None):
         """
         Initializes PulseBatcher using the REST API endpoint, buffer capacity and thread count.
 
@@ -22,6 +22,9 @@ class PulseBatcher:
         :type capacity: int
         :param threadCount: Number of threads to handle post requests.
         :type threadCount: int
+        :param logger: :class:`logging.Logger` object for debug logging. If none is provided, a StreamHandler will
+                       be created to log to sys.stdout.
+        :type logger: logging.Logger
         :rtype: PulseBatcher
         """
 
@@ -29,6 +32,7 @@ class PulseBatcher:
         self.endpoint = endpoint
         self.debug = False
         self.buffer = list()
+        self.logger = logger
 
         # Initialize Threading
         self.thread_count = threadCount
@@ -39,14 +43,14 @@ class PulseBatcher:
             thread.start()
             self.threads.append(thread)
 
-        # Initialize Logging
-        self.logger = logging.getLogger(__name__)
-        handler = logging.StreamHandler(sys.stdout)
-        fmt = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d:%(threadName)s] %(message)s"
-        handler.setFormatter(logging.Formatter(fmt))
-        handler.setLevel(logging.INFO)
-        self.logger.addHandler(handler)
-        self.logger.setLevel(logging.INFO)
+        if not self.logger:
+            self.logger = logging.getLogger(__name__)
+            handler = logging.StreamHandler(sys.stdout)
+            fmt = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d:%(threadName)s] %(message)s"
+            handler.setFormatter(logging.Formatter(fmt))
+            handler.setLevel(logging.INFO)
+            self.logger.addHandler(handler)
+            self.logger.setLevel(logging.INFO)
 
     def setDebug(self):
         """
@@ -86,12 +90,15 @@ class PulseBatcher:
         :rtype: bool
         """
         # Item parameter is only applicable for the method overriding in the PulseHandler class
+        #
+        # Note: This method overrides MemoryHandler.shouldFlush when inherited by PulseHandler
         return len(self.buffer) >= self.capacity
 
     def flush(self):
         """
         Flush items from buffer and clear buffer.
         """
+        # Note: This method overrides MemoryHandler.flush when inherited by PulseHandler
         self.logger.debug("Flushing items from buffer")
         self.queue.put(list(self.buffer), block=False)
         self.buffer.clear()
@@ -103,6 +110,7 @@ class PulseBatcher:
         :param item: Item to send to Pulse
         :type item: dict or logging.LogRecord
         """
+        # Note: This method overrides MemoryHandler.handle when inherited by PulseHandler
         self.logger.debug("Buffering item")
         # Append metric to buffer and if buffer is at capacity and flush.
         self.buffer.append(item)
@@ -113,6 +121,7 @@ class PulseBatcher:
         """
         Flush remaining metrics and terminate all threads
         """
+        # Note: This method overrides MemoryHandler.close when inherited by PulseHandler
         self.logger.debug("Cleaning up class")
         self.flush()
         for i in range(self.thread_count):
