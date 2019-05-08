@@ -20,6 +20,7 @@
 
 from datetime import datetime
 from pytz import utc
+import atexit
 import six
 from .batcher import PulseBatcher
 
@@ -30,7 +31,7 @@ class MetricWriter(PulseBatcher):
     A class which sends metrics to the Pulse Log Collector.
     """
 
-    def __init__(self, endpoint, capacity=1000, threadCount=1):
+    def __init__(self, endpoint, capacity=1000, threadCount=1, logger=None):
         """
         Initializes a MetricWriter using the provided endpoint and optional
         buffer capacity.
@@ -43,9 +44,20 @@ class MetricWriter(PulseBatcher):
                                 1000.
         :param threadCount: Number of threads to handle post requests.
         :type threadCount: int
+        :param logger: :class:`logging.Logger` object for debug logging. If none is provided, a StreamHandler will
+                       be created to log to sys.stdout.
+        :type logger: logging.Logger
         :rtype: MetricWriter
         """
-        PulseBatcher.__init__(self, endpoint, capacity, threadCount)
+        PulseBatcher.__init__(self, endpoint, capacity, threadCount, logger)
+        # Cleanup when Python terminates
+        atexit.register(self.close())
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
     def gaugeTimestamp(self, tag, value, timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
         """
