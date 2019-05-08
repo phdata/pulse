@@ -16,4 +16,6 @@
 
 package io.phdata.pulse.common.domain
 
-case class TimeseriesEvent(timestamp: Long, metric: String, value: Double)
+case class TimeseriesRequest(table_name: String, payload: List[TimeseriesEvent])
+
+case class TimeseriesEvent(ts: Long, key: String, tag: String, value: Double)

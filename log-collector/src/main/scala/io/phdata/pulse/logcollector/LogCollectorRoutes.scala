@@ -20,9 +20,8 @@ import akka.http.scaladsl.common.EntityStreamingSupport
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes }
 import akka.http.scaladsl.server.Directives._
 import com.typesafe.scalalogging.LazyLogging
-import io.phdata.pulse.common.domain.{ LogEvent, TimeseriesEvent }
-import io.phdata.pulse.common.{ JsonSupport, SolrService }
-import org.apache.kudu.client.KuduClient
+import io.phdata.pulse.common.JsonSupport
+import io.phdata.pulse.common.domain.{ LogEvent, TimeseriesRequest }
 
 /**
  * Http Rest Endpoint
@@ -96,27 +95,20 @@ class LogCollectorRoutes(solrStream: SolrCloudStream, kuduStream: Option[KuduMet
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }
     }
-  } ~ path("v1" / "metrics" / Segment) { applicationName =>
+  } ~ path("v1" / "metrics") {
+
     /**
      * Consumes an array of metrics in the format:
-     * [{
-     *    timestamp: epoch time millis
-     *    metric: "foometric"
-     *    value: 1.5
-     * }]
+     * {"table_name":"metrics","payload":[{"ts":1,"key":"key","tag":"tag","value":1.4}]}
      */
     post {
       // create a streaming Source from the incoming json string
-      entity(as[Array[TimeseriesEvent]]) { metrics =>
-        logger.trace("received message")
-
-        metrics.foreach(metric => {
-          kuduStream
-            .map { client =>
-              client.put(applicationName, metric)
-            }
-            .getOrElse(complete(StatusCodes.NotImplemented))
-        })
+      entity(as[TimeseriesRequest]) { eventRequest =>
+        kuduStream
+          .map { client =>
+            eventRequest.payload.map(event => client.put(eventRequest.table_name, event))
+          }
+          .getOrElse(complete(StatusCodes.NotImplemented))
 
         complete(HttpEntity(ContentTypes.`application/json`, "ok"))
       }

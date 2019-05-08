@@ -51,25 +51,25 @@ class KuduMetricStreamIntegrationTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("Write events into Kudu") {
-    val appName = "fooApp"
-    val client  = kuduTestHarness.getClient
-    val numRows = 1001
+    val tableName = "fooApp"
+    val client    = kuduTestHarness.getClient
+    val numRows   = 1001
 
     val events = (1 to numRows).map { n =>
-      new TimeseriesEvent(n, appName, 1.5d)
+      new TimeseriesEvent(n, "id", "metric", 1.5d)
     }
     val stream = new KuduMetricStream(kuduTestHarness.getClient)
-    events.foreach(e => stream.put(appName, e))
+    events.foreach(e => stream.put(tableName, e))
 
     // Sleep until the table is created, 'stream.put' runs asynchronously.
-    while (!client.tableExists(stream.tableNameFromAppName(appName))) {
+    while (!client.tableExists(tableName)) {
       Thread.sleep(100)
     }
 
     // Give some time for the row to be inserted
     Thread.sleep(10000)
 
-    val table = client.openTable(stream.tableNameFromAppName(appName))
+    val table = client.openTable(tableName)
     val scanner = client
       .newScannerBuilder(table)
       .build()
