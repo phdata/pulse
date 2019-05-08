@@ -73,17 +73,14 @@ class PulseKafkaConsumerTest
   def generateLogMessage(level: String, id: Integer, application: String): String = {
     val random = scala.util.Random
 
-    LogEvent(
-      id = Some(s"$id"),
-      category = s"category ${Random.alphanumeric take 10 mkString}",
-      timestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(
-        new Timestamp(System.currentTimeMillis())),
-      level = level,
-      message = s"message ${random.nextInt(10)}",
-      threadName = s"thread ${Random.alphanumeric take 3 mkString}",
-      throwable = Some(s"Exception in thread ${Random.alphanumeric take 3 mkString}"),
-      properties = Some(Map(s"key${random.nextInt(10)}" -> s"value${random.nextInt(10)}")),
-      application = Some(application)
+    Map("id" -> Some(s"$id").get,
+      "category" -> s"category ${Random.alphanumeric take 10 mkString}",
+      "timestamp" -> new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").format(new Timestamp(System.currentTimeMillis())),
+      "level" -> level,
+      "message" -> s"message ${random.nextInt(10)}",
+      "threadName" -> s"thread ${Random.alphanumeric take 3 mkString}",
+      "throwable" -> Some(s"Exception in thread ${Random.alphanumeric take 3 mkString}").get,
+      "application" -> Some(application).get
     ).toJson.toString()
   }
 

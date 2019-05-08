@@ -18,12 +18,9 @@ package io.phdata.pulse.logcollector
 
 import java.util.{ Collections, Properties }
 
-import akka.actor.{ ActorRef, ActorSystem }
 import org.apache.kafka.clients.consumer.KafkaConsumer
-import io.phdata.pulse.common.domain.LogEvent
-import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.LazyLogging
-import io.phdata.pulse.common.{ JsonSupport, SolrService }
+import io.phdata.pulse.common.JsonSupport
 import spray.json.JsonParser.ParsingException
 
 import scala.collection.JavaConverters._
@@ -48,9 +45,9 @@ class PulseKafkaConsumer(solrCloudStream: SolrCloudStream) extends JsonSupport w
         val records = consumer.poll(MAX_TIMEOUT)
         for (record <- records.asScala) {
           logger.trace("KAFKA: Consuming " + record.value() + " from topic: " + topic)
-          val logEvent    = record.value().parseJson.convertTo[LogEvent]
-          val logEventMap = Util.logEventToFlattenedMap(logEvent)
+          val logEventMap = record.value().parseJson.convertTo[Map[String, String]]
           solrCloudStream.put(logEventMap.getOrElse("application", ""), logEventMap)
+          // TODO: Add proper error handling when application isn't supplied
         }
       } catch {
         case p: ParsingException => logger.error("Error parsing message from kafka broker", p)
