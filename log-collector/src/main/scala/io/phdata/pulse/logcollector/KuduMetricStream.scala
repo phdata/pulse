@@ -26,8 +26,9 @@ import org.apache.kudu.{ ColumnSchema, Schema, Type }
 import scala.collection.concurrent
 
 object TimeseriesEventColumns {
-  val TIMESTAMP = "timestamp"
-  val METRIC    = "metric"
+  val TIMESTAMP = "ts"
+  val KEY       = "key"
+  val TAG       = "tag"
   val VALUE     = "value"
 }
 
@@ -56,22 +57,19 @@ class KuduMetricStream(client: KuduClient) extends Stream[TimeseriesEvent] {
 
   /**
    * Save a batch of records into the Kudu table
-   * @param application The name of the application
+   * @param tableName The name of the application
    * @param metrics A sequence of metrics to write to Kudu
    */
-  override private[logcollector] def save(application: String,
-                                          metrics: Seq[TimeseriesEvent]): Unit =
+  override private[logcollector] def save(tableName: String, metrics: Seq[TimeseriesEvent]): Unit =
     try {
       if (metrics.nonEmpty) {
-        val tableName = tableNameFromAppName(application)
-        logger.debug(s"Saving batch of ${metrics.length} to table '$tableName'")
-
         val table = getOrCreateTable(tableName)
         metrics.foreach { metric =>
           val insert = table.newInsert()
           val row    = insert.getRow
-          row.addLong(TimeseriesEventColumns.TIMESTAMP, metric.timestamp)
-          row.addString(TimeseriesEventColumns.METRIC, metric.metric)
+          row.addLong(TimeseriesEventColumns.TIMESTAMP, metric.ts)
+          row.addString(TimeseriesEventColumns.KEY, metric.key)
+          row.addString(TimeseriesEventColumns.TAG, metric.tag)
           row.addDouble(TimeseriesEventColumns.VALUE, metric.value)
 
           session.apply(insert)
@@ -88,9 +86,8 @@ class KuduMetricStream(client: KuduClient) extends Stream[TimeseriesEvent] {
       }
     } catch {
       case e: KuduException =>
-        val table = tableNameFromAppName(application)
-        logger.error(s"Exception writing to table $table, removing it from the cache.")
-        tableCache.remove(tableNameFromAppName(application))
+        logger.error(s"Exception writing to table $tableName, removing it from the cache.")
+        tableCache.remove(tableName)
         throw e
     }
 
@@ -108,7 +105,11 @@ class KuduMetricStream(client: KuduClient) extends Stream[TimeseriesEvent] {
       columns.add(new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.TIMESTAMP,
                                                        Type.UNIXTIME_MICROS).key(true).build)
       columns.add(
-        new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.METRIC, Type.STRING)
+        new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.KEY, Type.STRING)
+          .key(true)
+          .build)
+      columns.add(
+        new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.TAG, Type.STRING)
           .key(true)
           .build)
       columns.add(
@@ -118,7 +119,7 @@ class KuduMetricStream(client: KuduClient) extends Stream[TimeseriesEvent] {
       val schema = new Schema(columns)
       val opts = new CreateTableOptions()
         .setRangePartitionColumns(Collections.singletonList(TimeseriesEventColumns.TIMESTAMP))
-        .addHashPartitions(Collections.singletonList(TimeseriesEventColumns.METRIC), 4)
+        .addHashPartitions(Collections.singletonList(TimeseriesEventColumns.KEY), 4)
       val table = client.createTable(tableName, schema, opts)
       tableCache.put(tableName, table)
       logger.info(s"Created Kudu table $tableName")
@@ -128,7 +129,4 @@ class KuduMetricStream(client: KuduClient) extends Stream[TimeseriesEvent] {
       tableCache.put(tableName, table)
       table
     }
-
-  private[logcollector] def tableNameFromAppName(application: String): String =
-    s"pulse_$application"
 }
