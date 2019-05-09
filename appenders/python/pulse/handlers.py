@@ -34,7 +34,7 @@ class PulseHandler(PulseBatcher, MemoryHandler):
         PulseBatcher.__init__(self, endpoint, capacity, threadCount, logger)
         MemoryHandler.__init__(self, capacity, flushLevel)
         # Cleanup when Python terminates
-        atexit.register(self.close())
+        atexit.register(self.close)
 
     def setFormatter(self, fmt):
         """
