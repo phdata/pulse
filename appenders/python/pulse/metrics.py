@@ -51,7 +51,7 @@ class MetricWriter(PulseBatcher):
         """
         PulseBatcher.__init__(self, endpoint, capacity, threadCount, logger)
         # Cleanup when Python terminates
-        atexit.register(self.close())
+        atexit.register(self.close)
 
     def __enter__(self):
         return self
