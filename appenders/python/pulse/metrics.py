@@ -19,10 +19,12 @@
 # from Apache Kudu project.
 
 from datetime import datetime
-from pytz import utc
 import atexit
+
+from pytz import utc
 import six
-from .batcher import PulseBatcher
+
+from pulse.batcher import PulseBatcher
 
 
 # noinspection PyPep8Naming
@@ -31,10 +33,11 @@ class MetricWriter(PulseBatcher):
     A class which sends metrics to the Pulse Log Collector.
     """
 
-    def __init__(self, endpoint, table, capacity=1000, threadCount=1, logger=None):
+    def __init__(self, endpoint, table, capacity=1000,
+                 threadCount=1, logger=None):
         """
-        Initializes a MetricWriter using the provided endpoint and optional
-        buffer capacity.
+        Initializes a MetricWriter using the provided endpoint, table and
+        optional buffer capacity.
 
         :param endpoint: The REST API endpoint for the Pulse Log Collector
         :type endpoint: str
@@ -46,8 +49,11 @@ class MetricWriter(PulseBatcher):
                                 1000.
         :param threadCount: Number of threads to handle post requests.
         :type threadCount: int
-        :param logger: :class:`logging.Logger` object for debug logging. If none is provided, a StreamHandler will
-                       be created to log to sys.stdout.
+        :param logger: :class:`logging.Logger` object for debug logging. If
+                       none is provided, a StreamHandler will be created to log
+                       to sys.stdout. It is recommended that you provide a
+                       logger if you plan to use more than one instance of this
+                       class.
         :type logger: logging.Logger
         :rtype: MetricWriter
         """
@@ -62,9 +68,10 @@ class MetricWriter(PulseBatcher):
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
-    def gaugeTimestamp(self, key, tag, value, timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
+    def gaugeTimestamp(self, key, tag, value, timestamp,
+                       frmt="%Y-%m-%dT%H:%M:%S.%f"):
         """
-        Log a gauge metric at the provided timestamp.
+        Gauge metric at the provided timestamp.
 
         :param key: Key or ID of the gauge
         :type key: int or str
@@ -72,7 +79,8 @@ class MetricWriter(PulseBatcher):
         :type tag: str
         :param value: Value of the gauge.
         :type value: float
-        :param timestamp: Timestamp at which to log the gauge metric.
+        :param timestamp: Timestamp at which to gauge the metric.
+                          If timezone is not provided, UTC is assumed.
         :type timestamp: str or :class:`datetime.datetime`
         :param frmt: Required if a string timestamp is provided
                      Uses the C strftime() function, see strftime(3)
@@ -85,12 +93,12 @@ class MetricWriter(PulseBatcher):
         data["metric"] = tag
         data["value"] = value
         data["ts"] = self.unixTimeMicros(timestamp, frmt)
-        
+
         self.handle(data)
 
     def gauge(self, key, tag, value):
         """
-        Log a gauge metric at the current timestamp.
+        Gauge metric at the current timestamp.
 
         :param key: Key or ID of the gauge
         :type key: int or str
@@ -111,7 +119,6 @@ class MetricWriter(PulseBatcher):
         self.queue.put(dict(self.buffer), block=False)
         self.buffer = list()
 
-
     @staticmethod
     def unixTimeMicros(timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
         """
@@ -122,8 +129,8 @@ class MetricWriter(PulseBatcher):
                           well. A tuple may be provided in place of the
                           timestamp with a string value and a format. This is
                           useful for predicates and setting values where this
-                          method is indirectly called. Timezones provided in the
-                          string are not supported at this time. UTC unless
+                          method is indirectly called. Timezones provided in
+                          the string are not supported at this time. UTC unless
                           provided in a datetime object.
         :type timestamp: str or :class:`datetime.datetime`
         :param frmt: Required if a string timestamp is provided
@@ -141,7 +148,7 @@ class MetricWriter(PulseBatcher):
             timestamp = datetime.strptime(timestamp[0], timestamp[1])
         else:
             raise ValueError("Invalid timestamp type. " +
-                             "You must provide a datetime.datetime or a string")
+                             "You must provide a datetime or a string")
 
         # If datetime has a valid timezone assigned, convert it to UTC.
         if timestamp.tzinfo and timestamp.utcoffset():
@@ -153,6 +160,8 @@ class MetricWriter(PulseBatcher):
         # Return the unixtime_micros for the provided datetime and locale.
         # Avoid timedelta.total_seconds() for py2.6 compatibility.
         td = timestamp - datetime.fromtimestamp(0, utc)
-        td_micros = td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6
+        td_micros = td.microseconds + (
+                td.seconds + td.days * 24 * 3600
+        ) * 10 ** 6
 
         return int(td_micros)
