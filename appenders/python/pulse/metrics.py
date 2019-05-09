@@ -31,13 +31,15 @@ class MetricWriter(PulseBatcher):
     A class which sends metrics to the Pulse Log Collector.
     """
 
-    def __init__(self, endpoint, capacity=1000, threadCount=1, logger=None):
+    def __init__(self, endpoint, table, capacity=1000, threadCount=1, logger=None):
         """
         Initializes a MetricWriter using the provided endpoint and optional
         buffer capacity.
 
         :param endpoint: The REST API endpoint for the Pulse Log Collector
         :type endpoint: str
+        :param table: Kudu table to store metrics in
+        :type table: str
         :param capacity: The maximum number of metrics to buffer before
                                 flushing. If no value is provided, each metric
                                 will be submitted one at a time. Defaults to
@@ -50,6 +52,7 @@ class MetricWriter(PulseBatcher):
         :rtype: MetricWriter
         """
         PulseBatcher.__init__(self, endpoint, capacity, threadCount, logger)
+        self.table = table
         # Cleanup when Python terminates
         atexit.register(self.close)
 
@@ -59,10 +62,12 @@ class MetricWriter(PulseBatcher):
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
-    def gaugeTimestamp(self, tag, value, timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
+    def gaugeTimestamp(self, key, tag, value, timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
         """
         Log a gauge metric at the provided timestamp.
 
+        :param key: Key or ID of the gauge
+        :type key: int or str
         :param tag: Tag or name of the gauge
         :type tag: str
         :param value: Value of the gauge.
@@ -76,23 +81,36 @@ class MetricWriter(PulseBatcher):
         """
         self.logger.debug("Constructing metric data")
         data = dict()
+        data["id"] = key
         data["metric"] = tag
         data["value"] = value
-        data["timestamp"] = self.unixTimeMicros(timestamp, frmt)
+        data["ts"] = self.unixTimeMicros(timestamp, frmt)
         
         self.handle(data)
 
-    def gauge(self, tag, value):
+    def gauge(self, key, tag, value):
         """
         Log a gauge metric at the current timestamp.
 
+        :param key: Key or ID of the gauge
+        :type key: int or str
         :param tag: Tag or name of the gauge
         :type tag: str
         :param value: Value of the gauge.
         :type value: float
         :rtype: requests.Response
         """
-        self.gaugeTimestamp(tag, value, datetime.utcnow())
+        self.gaugeTimestamp(key, tag, value, datetime.utcnow())
+
+    def flush(self):
+        """
+        Flush items from buffer and clear buffer.
+        """
+        # Overrides PulseBatcher.flush
+        self.buffer = {"table_name": self.table, "payload": self.buffer}
+        self.queue.put(dict(self.buffer), block=False)
+        self.buffer = list()
+
 
     @staticmethod
     def unixTimeMicros(timestamp, frmt="%Y-%m-%dT%H:%M:%S.%f"):
