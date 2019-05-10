@@ -89,8 +89,8 @@ class MetricWriter(PulseBatcher):
         """
         self.logger.debug("Constructing metric data")
         data = dict()
-        data["id"] = key
-        data["metric"] = tag
+        data["key"] = key
+        data["tag"] = tag
         data["value"] = value
         data["ts"] = self.unixTimeMicros(timestamp, frmt)
 
