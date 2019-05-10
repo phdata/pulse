@@ -51,9 +51,9 @@ class PulseHandler(PulseBatcher, MemoryHandler):
         :param fmt: Formatter to apply to log records.
         :type fmt: logging.Formatter
         """
-        # Check if formatter provided returns a dictionary
-        #
         # Note: Overrides MemoryHandler.setFormatter
+        #
+        # Check if formatter provided returns a dictionary
         rec = logging.LogRecord("x", 0, "x", 1, "x", [], None)
         if not isinstance(fmt.format(rec), dict):
             self.logger.error("Invalid LogFormatter")
