@@ -60,6 +60,13 @@ export JAAS_CONFIG="Client {
    storeKey=true
    keyTab=\"$KEYTAB_FILE\"
    principal=\"$PULSE_PRINCIPAL\";
+};
+KafkaClient {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  storeKey=true
+  keyTab=\"$KEYTAB_FILE\"
+  principal=\"$PULSE_PRINCIPAL\";
 };"
 
 echo "${JAAS_CONFIG}" > "${CONF_DIR}/jaas.conf"
@@ -158,6 +165,20 @@ case $CMD in
     -cp "$CLASS_PATH" io.phdata.pulse.logcollector.LogCollector \
     --port $WEBSERVER_PORT \
     --zk-hosts $SOLR_ZK_QUORUM
+    ;;
+
+  (start_log_collector_kafka)
+    echo "Starting Log Collector Kafka Mode on topic $KAFKA_TOPIC"
+    exec $JAVA_HOME/bin/java \
+    -XX:+UseG1GC \
+    $CSD_JAVA_OPTS \
+    -Dconfig.file="$AKKA_CONF" \
+    -Dlogback.configurationFile=$LOGBACK_CONFIG $JAVA_PROPERTIES \
+    -cp "$CLASS_PATH:$KAFKA_LIBS" io.phdata.pulse.logcollector.LogCollector \
+    --zk-hosts $SOLR_ZK_QUORUM \
+    --consume-mode kafka \
+    --kafka-properties $KAFKA_PROPS \
+    --topic $KAFKA_TOPIC
     ;;
 
   (*)

@@ -64,7 +64,9 @@ class KuduMetricStream(client: KuduClient) extends Stream[TimeseriesEvent] {
     try {
       if (metrics.nonEmpty) {
         val tableName = tableNameFromAppName(application)
-        val table     = getOrCreateTable(tableName)
+        logger.debug(s"Saving batch of ${metrics.length} to table '$tableName'")
+
+        val table = getOrCreateTable(tableName)
         metrics.foreach { metric =>
           val insert = table.newInsert()
           val row    = insert.getRow
@@ -81,6 +83,8 @@ class KuduMetricStream(client: KuduClient) extends Stream[TimeseriesEvent] {
           val errors = session.getPendingErrors
           throw new KuduRowErrorException(errors.getRowErrors.head.toString)
         }
+
+        logger.debug(s"Saved batch of ${metrics.length} to table $tableName")
       }
     } catch {
       case e: KuduException =>
