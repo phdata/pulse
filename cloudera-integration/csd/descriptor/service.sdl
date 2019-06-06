@@ -39,15 +39,20 @@
           "default": 9001
         },
         {
+          "name": "kudu.masters",
+          "label": "Kudu master addresses",
+          "description": "Kudu master addresses with port. Kudu masters are required to enable the 'metrics' endpoints.",
+          "required": "false",
+          "type": "string_array"
+        },
+        {
           "name": "log.collector.max.heap.size",
           "label": "Log collector max java heap size",
           "description": "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in megabytes.",
           "type": "memory",
-          "default": 4096,
-          "min": 50,
-          "softMin": 256,
-          "softMax": 16384,
-          "unit": "megabytes",
+          "default": 1073741824,
+          "min": 1073741824,
+          "unit": "bytes",
           "scaleFactor" : 1.3
         },
         {
@@ -69,7 +74,8 @@
         "environmentVariables": {
           "WEBSERVER_PORT": "${port}",
           "LOG_COLLECTOR_MAX_HEAP": "${log.collector.max.heap.size}",
-          "LOG_COLLECTOR_EXTRA_OPTS": "${log.collector.extra.opts}"
+          "LOG_COLLECTOR_EXTRA_OPTS": "${log.collector.extra.opts}",
+          "KUDU_MASTERS": "${kudu.masters}"
         }
       },
       "configWriter": {
@@ -125,11 +131,9 @@
           "label": "Collection roller max java heap size",
           "description": "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in megabytes.",
           "type": "memory",
-          "default": 2048,
-          "min": 50,
-          "softMin": 256,
-          "softMax": 16384,
-          "unit": "megabytes",
+          "default": 1073741824,
+          "min": 1073741824,
+          "unit": "bytes",
           "scaleFactor" : 1.3
         },
         {
@@ -207,11 +211,9 @@
           "label": "Alert engine max java heap size",
           "description": "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in megabytes.",
           "type": "memory",
-          "default": 2048,
-          "min": 50,
-          "softMin": 256,
-          "softMax": 16384,
-          "unit": "megabytes",
+          "default": 1073741824,
+          "min": 1073741824,
+          "unit": "bytes",
           "scaleFactor" : 1.3
         },
         {
