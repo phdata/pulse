@@ -39,6 +39,13 @@
           "default": 9001
         },
         {
+          "name": "kudu.masters",
+          "label": "Kudu master addresses",
+          "description": "Kudu master addresses with port. Kudu masters are required to enable the 'metrics' endpoints.",
+          "required": "false",
+          "type": "string_array"
+        },
+        {
           "name": "log.collector.max.heap.size",
           "label": "Log collector max java heap size",
           "description": "Maximum heap size for the Java process heap memory. Passed to 'java -Xmx'",
@@ -67,7 +74,8 @@
         "environmentVariables": {
           "WEBSERVER_PORT": "${port}",
           "LOG_COLLECTOR_MAX_HEAP": "${log.collector.max.heap.size}",
-          "LOG_COLLECTOR_EXTRA_OPTS": "${log.collector.extra.opts}"
+          "LOG_COLLECTOR_EXTRA_OPTS": "${log.collector.extra.opts}",
+          "KUDU_MASTERS": "${kudu.masters}"
         }
       },
       "configWriter": {

@@ -39,6 +39,9 @@ export DEFAULT_LOGBACK_CONFIG="${CONF_DIR}/logback.xml" # This is auto-generated
 export LOGBACK_CONFIG=${LOGBACK_CONFIG:-$DEFAULT_LOGBACK_CONFIG}
 export KEYTAB_FILE=${KEYTAB_FILE:-"${CONF_DIR}/pulse.keytab"}
 export AKKA_CONF=${AKKA_CONF:-"application.conf"}
+export ALERT_ENGINE_MAX_HEAP=${ALERT_ENGINE_MAX_HEAP:-"2G"}
+export COLLECTION_ROLLER_MAX_HEAP=${COLLECTION_ROLLER_MAX_HEAP:-"2G"}
+export LOG_COLLECTOR_MAX_HEAP=${LOG_COLLECTOR_MAX_HEAP:-"8G"}
 DEFAULT_COLLECTION_ROLLER_CONFIG=aux/collection-roller-default.yml
 DEFAULT_ALERT_ENGINE_CONFIG=aux/alert-engine-default.yml
 
@@ -154,6 +157,13 @@ case $CMD in
     ;;
 
   (start_log_collector)
+    if [[ -n "$KUDU_MASTERS" ]]
+    then
+      KUDU_MASTERS_FLAG="--kudu-masters $KUDU_MASTERS"
+    else
+      KUDU_MASTERS_FLAG=""
+    fi
+
     echo "Starting Server on port $WEBSERVER_PORT"
     exec $JAVA_HOME/bin/java \
     -XX:+UseG1GC \
@@ -164,7 +174,8 @@ case $CMD in
     $LOG_COLLECTOR_EXTRA_OPTS \
     -cp "$CLASS_PATH" io.phdata.pulse.logcollector.LogCollector \
     --port $WEBSERVER_PORT \
-    --zk-hosts $SOLR_ZK_QUORUM
+    --zk-hosts $SOLR_ZK_QUORUM \
+    $KUDU_MASTERS_FLAG
     ;;
 
   (start_log_collector_kafka)
