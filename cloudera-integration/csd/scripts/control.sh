@@ -180,7 +180,9 @@ case $CMD in
     $CSD_JAVA_OPTS \
     -Dconfig.file="$AKKA_CONF" \
     -Dlogback.configurationFile=$LOGBACK_CONFIG $JAVA_PROPERTIES \
-    -cp "$CLASS_PATH:$KAFKA_LIBS" io.phdata.pulse.logcollector.LogCollector \
+    -Xmx$LOG_COLLECTOR_MAX_HEAP \
+    $LOG_COLLECTOR_EXTRA_OPTS \
+    -cp "$CLASS_PATH:/opt/cloudera/parcels/CDH/lib/kafka/libs/*:/opt/cloudera/parcels/KAFKA/lib/kafka/libs/*" io.phdata.pulse.logcollector.LogCollector \
     --zk-hosts $ZK_QUORUM \
     --consume-mode kafka \
     --kafka-properties $KAFKA_PROPS \
