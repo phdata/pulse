@@ -41,7 +41,7 @@
         {
           "name": "log.collector.max.heap.size",
           "label": "Log collector max java heap size",
-          "description": "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in megabytes.",
+          "description": "Maximum heap size for the Java process heap memory. Passed to 'java -Xmx'",
           "type": "memory",
           "default": 1073741824,
           "min": 1073741824,
@@ -121,7 +121,7 @@
         {
           "name": "collection.roller.max.heap.size",
           "label": "Collection roller max java heap size",
-          "description": "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in megabytes.",
+          "description": "Maximum heap size for the Java process heap memory. Passed to 'java -Xmx'",
           "type": "memory",
           "default": 1073741824,
           "min": 1073741824,
@@ -201,7 +201,7 @@
         {
           "name": "alert.engine.max.heap.size",
           "label": "Alert engine max java heap size",
-          "description": "Maximum size for the Java process heap memory. Passed to Java -Xmx. Measured in megabytes.",
+          "description": "Maximum heap size for the Java process heap memory. Passed to 'java -Xmx'. Measured in megabytes.'",
           "type": "memory",
           "default": 1073741824,
           "min": 1073741824,
