@@ -23,5 +23,5 @@ import org.apache.solr.common.SolrDocument
  */
 case class TriggeredAlert(rule: AlertRule,
                           applicationName: String,
-                          documents: Seq[SolrDocument],
+                          documents: Seq[Map[String, _]],
                           totalNumFound: Long)

@@ -82,7 +82,7 @@ class KuduMetricStream(client: KuduClient) extends Stream[TimeseriesEvent] {
           throw new KuduRowErrorException(errors.getRowErrors.head.toString)
         }
 
-        logger.debug(s"Saved batch of ${metrics.length} to table $tableName")
+        logger.trace(s"Saved batch of ${metrics.length} to table $tableName")
       }
     } catch {
       case e: KuduException =>

@@ -110,11 +110,6 @@ log "KEYTAB_FILE: $KEYTAB_FILE"
 log "LOGBACK_CONFIG: $LOGBACK_CONFIG"
 log "CSD_JAVA_OPTS: $CSD_JAVA_OPTS"
 
-# solr zk ensemble needs to have '/solr' suffix
-IFS=', ' read -r -a zk_array <<< "$ZK_QUORUM"
-solr_zk_array=( "${zk_array[@]/%//solr}" )
-SOLR_ZK_QUORUM=${solr_zk_array[0]}
-
 case $CMD in
 
   (start_alert_engine)
@@ -133,7 +128,7 @@ case $CMD in
     $ALERT_ENGINE_EXTRA_OPTS \
     -cp "$CLASS_PATH" io.phdata.pulse.alertengine.AlertEngineMain \
     --daemonize \
-    --zk-hosts $SOLR_ZK_QUORUM \
+    --zk-hosts $ZK_QUORUM \
     --smtp-server  $SMTP_SERVER  \
     --smtp-user  $SMTP_USER  \
     --smtp-port $SMTP_PORT \
@@ -143,7 +138,7 @@ case $CMD in
     ;;
 
   (start_collection_roller)
-    echo "Starting Server with Zookeeper $SOLR_ZK_QUORUM"
+    echo "Starting Server with Zookeeper $ZK_QUORUM"
     exec $JAVA_HOME/bin/java \
     -Dlogback.configurationFile=$LOGBACK_CONFIG \
     $CSD_JAVA_OPTS \
@@ -153,7 +148,7 @@ case $CMD in
     -cp "$CLASS_PATH" io.phdata.pulse.collectionroller.CollectionRollerMain \
     --daemonize \
     --conf $COLLECTION_ROLLER_CONFIG \
-    --zk-hosts $SOLR_ZK_QUORUM
+    --zk-hosts $ZK_QUORUM
     ;;
 
   (start_log_collector)
@@ -174,7 +169,7 @@ case $CMD in
     $LOG_COLLECTOR_EXTRA_OPTS \
     -cp "$CLASS_PATH" io.phdata.pulse.logcollector.LogCollector \
     --port $WEBSERVER_PORT \
-    --zk-hosts $SOLR_ZK_QUORUM \
+    --zk-hosts $ZK_QUORUM \
     $KUDU_MASTERS_FLAG
     ;;
 
@@ -186,7 +181,7 @@ case $CMD in
     -Dconfig.file="$AKKA_CONF" \
     -Dlogback.configurationFile=$LOGBACK_CONFIG $JAVA_PROPERTIES \
     -cp "$CLASS_PATH:$KAFKA_LIBS" io.phdata.pulse.logcollector.LogCollector \
-    --zk-hosts $SOLR_ZK_QUORUM \
+    --zk-hosts $ZK_QUORUM \
     --consume-mode kafka \
     --kafka-properties $KAFKA_PROPS \
     --topic $KAFKA_TOPIC

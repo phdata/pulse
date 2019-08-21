@@ -47,19 +47,16 @@ object TestObjectGenerator {
       message: String = "The service is down.",
       threadName: String = "thread3",
       throwable: String = "NullPointerException"
-  ): SolrDocument = {
-
-    val doc: SolrDocument = new SolrDocument()
-    doc.addField("id", id)
-    doc.addField("category", category)
-    doc.addField("timestamp", timestamp)
-    doc.addField("level", level)
-    doc.addField("message", message)
-    doc.addField("threadName", threadName)
-    doc.addField("throwable", throwable)
-
-    doc
-  }
+  ): Map[String, String] =
+    Map(
+      "id"         -> "123",
+      "category"   -> "test",
+      "timestamp"  -> "2018-04-06 10:15:00",
+      "level"      -> "FATAL",
+      "message"    -> "The service is down.",
+      "threadName" -> "thread3",
+      "throwable"  -> "NullPointerException"
+    )
 
   /**
    * Method for creating logEvent test ojects
@@ -132,7 +129,7 @@ object TestObjectGenerator {
    */
   def triggeredAlert(rule: AlertRule = alertRule(),
                      applicationName: String = "Spark",
-                     documents: Seq[SolrDocument] = Seq(solrDocument()),
+                     documents: Seq[Map[String, String]] = Seq(solrDocument()),
                      totalNumFound: Long = 20): TriggeredAlert =
     TriggeredAlert(rule, applicationName, documents, totalNumFound)
 }

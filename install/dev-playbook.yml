@@ -2,13 +2,15 @@
   become: true
   vars:
     dist_path: ../dist
-    csd_name: "PULSE-{{ version }}-cdh5.jar"
-    parcel_name: "PULSE-{{ version }}-cdh5-el7.parcel"
+    csd_name: "PULSE-{{ version }}-{{ cdh_version }}.jar"
+    parcel_name: "PULSE-{{ version }}-{{ cdh_version }}-el7.parcel"
   tasks:
   - name: Remove csd
     file:
       state: absent
-      path: "/opt/cloudera/csd/{{ csd_name }}"
+      path: "/opt/cloudera/csd/PULSE*jar"
+    tags:
+      - csd
   - name: Install csd
     copy:
       src: "{{ dist_path }}/{{ csd_name }}"
@@ -16,11 +18,15 @@
       owner: cloudera-scm
       group: cloudera-scm
       mode: 0644
+    tags:
+      - csd
   - name: Remove parcel
     file:
       state: absent
       path: "/opt/cloudera/parcel-repo/{{ parcel_name }}"
     ignore_errors: true
+    tags:
+      - parcel
   - name: Install parcel
     copy:
       src: "{{ dist_path }}/{{ parcel_name }}"
@@ -28,6 +34,8 @@
       owner: cloudera-scm
       group: cloudera-scm
       mode: 0644
+    tags: 
+      - parcel
   - name: Install parcel sha
     copy:
       src: "{{ dist_path }}/{{ parcel_name }}.sha"
@@ -35,3 +43,5 @@
       owner: cloudera-scm
       group: cloudera-scm
       mode: 0644
+    tags: 
+      - parcel

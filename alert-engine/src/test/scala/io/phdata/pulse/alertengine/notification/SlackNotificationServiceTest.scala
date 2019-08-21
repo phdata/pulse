@@ -25,7 +25,7 @@ import org.scalatest.FunSuite
 import scala.io.Source.fromFile
 
 class SlackNotificationServiceTest extends FunSuite {
-  val doc: SolrDocument = TestObjectGenerator.solrDocument(threadName = "OXB Thread")
+  val doc = TestObjectGenerator.solrDocument(threadName = "OXB Thread")
 
   val path         = "alert-engine/scripts/slack-webhook-url.txt"
   val slackUrlFile = new File(path)

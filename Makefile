@@ -1,4 +1,4 @@
-version = $(shell sh ./version)
+version = ${VERSION}
 
 package: clean sbt-assembly libdir sbt-package jars
 
@@ -13,17 +13,35 @@ jars:
 test:
 	sbt -mem 4096 test
 
-itest:
-	sbt -mem 4096 it:test
+test-all: test-cdh5 test-cdh6
+
+test-cdh5: export CDH_VERSION=5
+test-cdh5: 
+	$(MAKE) test
+
+test-cdh6: export CDH_VERSION=6
+test-cdh6:
+	$(MAKE) test
 
 version:
-	sh ./version
+	echo $$VERSION
+
+version-cdh:
+	echo cdh$$CDH_VERSION
 
 dist: parcel csd
-	mkdir -p dist
-	cp cloudera-integration/parcel/target/*.parcel* dist
-	cp cloudera-integration/parcel/target/*.json dist
-	cp cloudera-integration/csd/target/*.jar* dist
+	mkdir -p dist$$CDH_VERSION
+	cp cloudera-integration/parcel/target/*.parcel* dist$$CDH_VERSION
+	cp cloudera-integration/parcel/target/*.json dist$$CDH_VERSION
+	cp cloudera-integration/csd/target/*.jar* dist$$CDH_VERSION
+
+dist-cdh5: export CDH_VERSION=5
+dist-cdh5: 
+	$(MAKE) dist
+
+dist-cdh6: export CDH_VERSION=6
+dist-cdh6:
+	$(MAKE) dist
 
 sbt-package:
 	sbt package
@@ -49,15 +67,8 @@ sbt-compile:
 csd: package
 	$(MAKE) -C cloudera-integration/csd/ package
 
-install-parcel: parcel
-	$(MAKE) -C cloudera-integration/parcel install
-
-install-csd: csd
-	$(MAKE) -C cloudera-integration/csd install
-
 .PHONY: version
-
-install: install-parcel install-csd
+.PHONY: version-cdh
 
 .PHONY: docs
 

@@ -25,18 +25,14 @@ import io.phdata.pulse.alertengine.notification.{
   NotificationServices,
   SlackNotificationService
 }
-import org.apache.solr.client.solrj.impl.{
-  CloudSolrServer,
-  HttpClientUtil,
-  Krb5HttpClientConfigurer
-}
+import io.phdata.pulse.common.SolrService
+import io.phdata.pulse.solr.SolrProvider
 
 import scala.io.Source
-import scala.util.Try
 
+// scalastyle:off method.length
 object AlertEngineMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES = 1
-  HttpClientUtil.setConfigurer(new Krb5HttpClientConfigurer())
 
   def main(args: Array[String]): Unit = {
     val parsedArgs = new AlertEngineCliParser(args)
@@ -44,7 +40,8 @@ object AlertEngineMain extends LazyLogging {
 
     val executorService = Executors.newSingleThreadScheduledExecutor()
 
-    val solrServer = new CloudSolrServer(parsedArgs.zkHost())
+    val solrServer =
+      SolrProvider.create(parsedArgs.zkHost().split(",").toList)
 
     val mailNotificationService =
       new MailNotificationService(parsedArgs.smtpServer(),
@@ -127,9 +124,10 @@ object AlertEngineMain extends LazyLogging {
 
   /**
    * Task for running an alert. Can be schduled to be run repeatedly.
+   *
    * @param parsedArgs Application arguments
    */
-  class AlertEngineTask(solrServer: CloudSolrServer,
+  class AlertEngineTask(solrService: SolrService,
                         notificationFactory: NotificationServices,
                         config: AlertEngineConfig,
                         parsedArgs: AlertEngineCliParser)
@@ -143,7 +141,7 @@ object AlertEngineMain extends LazyLogging {
         .getOrElse(List())
 
       try {
-        val engine: AlertEngine = new AlertEngineImpl(solrServer, notificationFactory)
+        val engine: AlertEngine = new AlertEngineImpl(solrService, notificationFactory)
         engine.run(config.applications, silencedApplications)
         logger.info("ending Alert Engine run")
       } catch {
@@ -153,4 +151,5 @@ object AlertEngineMain extends LazyLogging {
 
     }
   }
+
 }

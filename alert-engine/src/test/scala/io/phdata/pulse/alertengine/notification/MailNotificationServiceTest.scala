@@ -23,7 +23,7 @@ import org.scalatest.FunSuite
 import scala.io.Source._
 
 class MailNotificationServiceTest extends FunSuite {
-  val doc: SolrDocument = TestObjectGenerator.solrDocument()
+  val doc = TestObjectGenerator.solrDocument()
 
   val alertRule  = TestObjectGenerator.alertRule()
   val alertRule2 = TestObjectGenerator.alertRule(retryInterval = 20)

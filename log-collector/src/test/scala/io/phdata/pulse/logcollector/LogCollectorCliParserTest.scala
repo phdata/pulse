@@ -26,7 +26,7 @@ class LogCollectorCliParserTest extends FunSuite {
       "--port",
       "9000",
       "--zk-hosts",
-      "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr");
+      "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr")
 
     val cliParser = new LogCollectorCliParser(args)
     assertResult(9000)(cliParser.port())
@@ -47,7 +47,8 @@ class LogCollectorCliParserTest extends FunSuite {
       "--kafka-properties",
       "/path/kafka.properties",
       "--topic",
-      "kafkaTopic");
+      "kafkaTopic"
+    );
 
     val cliParser = new LogCollectorCliParser(args)
     assertResult(9000)(cliParser.port())

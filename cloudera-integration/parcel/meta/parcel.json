@@ -7,7 +7,7 @@
     "baseVersion": "{{ version }}",
     "patchCount": "0"
   },
-  "depends": "CDH (>= 5.2), CDH (<< 6.0)",
+  "depends": "CDH (>= 5.2), CDH (<< 7.0)",
   "setActiveSymlink": true,
   "scripts": {
     "defines": "pulse_parcel_env.sh"

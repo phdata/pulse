@@ -1,5 +1,6 @@
-projectVersion = $(shell make --no-print-directory --silent -C ../../ version)
-parcelVersion = $(projectVersion)-cdh5
+projectVersion = ${VERSION}
+cdh_version = cdh${CDH_VERSION}
+parcelVersion = $(projectVersion)-$(cdh_version)
 packageName = PULSE-$(parcelVersion)
 distro7 = PULSE-$(parcelVersion)-el7
 distro6 = PULSE-$(parcelVersion)-el6
@@ -15,10 +16,6 @@ package: clean jars meta conf
 
 version:
 	printf $(parcelVersion)
-
-install:
-	cp target/$(distro7).parcel* /opt/cloudera/parcel-repo
-	chown cloudera-scm: /opt/cloudera/parcel-repo/$(distro7)*
 
 sha:
 	sha1sum target/$(distro7).parcel | awk '{ print $$1 }' > target/$(distro7).parcel.sha

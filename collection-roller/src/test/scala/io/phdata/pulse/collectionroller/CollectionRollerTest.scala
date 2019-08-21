@@ -18,14 +18,11 @@ package io.phdata.pulse.collectionroller
 
 import java.time.{ ZoneOffset, ZonedDateTime }
 
-import io.phdata.pulse.common.SolrService
-import io.phdata.pulse.testcommon.{ BaseSolrCloudTest, TestUtil }
+import io.phdata.pulse.solr.{ BaseSolrCloudTest, TestUtil }
 import org.scalatest._
 
 class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
-
-  val solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress, solrClient)
-  val now         = ZonedDateTime.now(ZoneOffset.UTC)
+  val now = ZonedDateTime.now(ZoneOffset.UTC)
 
   test("create an application if it doesn't exist") {
     val appName = TestUtil.randomIdentifier()
@@ -51,7 +48,6 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     val collectionRoller = new CollectionRoller(solrService)
 
     assert(collectionRoller.uploadConfigsFromDirectory(null).isFailure)
-
   }
 
   test("fail if config dir does not exist") {
@@ -191,13 +187,16 @@ class CollectionRollerTest extends FunSuite with BaseSolrCloudTest {
     collectionRoller.run(List(app), initialTime)
     collectionRoller.rollApplications(List(app), initialTime)
 
-    //find all collections
+    // find all collections
     val appCollections =
       solrService
         .listCollections()
         .filter(_.startsWith(appName))
 
-    //delete application collections
+    solrService.deleteAlias(s"${appName}_latest")
+    solrService.deleteAlias(s"${appName}_all")
+
+    // delete application collections
     appCollections.foreach { coll =>
       solrService.deleteCollection(coll)
     }

@@ -79,8 +79,9 @@ class AlertEngineCliParserTest extends FunSuite {
     assertResult(49152)(cliParser.smtpPort())
     assertResult("silenced-applications.txt")(cliParser.silencedApplicationsFile())
     assertResult(
-      "master1.valhalla.phdata.io/solr,master2.valhalla.phdata.io/solr,master3.valhalla.phdata.io/solr")(
-      cliParser.zkHost())
+      List("master1.valhalla.phdata.io/solr",
+           "master2.valhalla.phdata.io/solr",
+           "master3.valhalla.phdata.io/solr").mkString(","))(cliParser.zkHost())
     assertResult(None)(cliParser.smtpPassword)
   }
 

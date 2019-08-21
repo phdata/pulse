@@ -169,13 +169,21 @@ class CollectionRoller(solrService: SolrService) extends AutoCloseable with Lazy
                                    application.solrConfigSetName,
                                    null)
 
-      deleteOldestCollection(application)
-
       val applicationCollections =
         solrService.listCollections().filter(_.startsWith(application.name))
 
-      solrService.createAlias(searchAliasName(application.name), applicationCollections: _*)
+      val retiredCollections = findRetiredCollections(application)
+
+      val newAlias = applicationCollections.diff(retiredCollections)
+
+      solrService.createAlias(searchAliasName(application.name), newAlias: _*)
       solrService.createAlias(latestAliasName(application.name), nextCollection)
+
+      retiredCollections.foreach { coll =>
+        logger.info(s"deleting collection $coll")
+        solrService.deleteCollection(coll)
+        logger.info(s"successfully deleted collection $coll")
+      }
     }
 
   /**
@@ -190,8 +198,9 @@ class CollectionRoller(solrService: SolrService) extends AutoCloseable with Lazy
     val collections = solrService
       .getAlias(alias)
 
-    collections
-      .map { collectionSet =>
+    collections match {
+      case None => true // No collections found, need to create a new one.
+      case Some(collectionSet) =>
         collectionSet.exists { coll =>
           val collSeconds       = CollectionNameParser.parseTimestamp(coll)
           val instant           = Instant.ofEpochSecond(collSeconds)
@@ -210,8 +219,7 @@ class CollectionRoller(solrService: SolrService) extends AutoCloseable with Lazy
 
           result
         }
-      }
-      .getOrElse(false)
+    }
 
   }
 
@@ -220,7 +228,7 @@ class CollectionRoller(solrService: SolrService) extends AutoCloseable with Lazy
    *
    * @param application The [[io.phdata.pulse.collectionroller.Application]] to operate on
    */
-  private def deleteOldestCollection(application: Application): Unit = {
+  private def findRetiredCollections(application: Application): Seq[String] = {
     val appCollections =
       solrService
         .listCollections()
@@ -231,25 +239,12 @@ class CollectionRoller(solrService: SolrService) extends AutoCloseable with Lazy
       logger.info(s"No collections need to be deleted for '${application.name}'")
       Seq()
     } else {
-      val collectionsToDelete = appCollections
+      appCollections
         .sortBy { coll =>
           CollectionNameParser.parseTimestamp(coll)
         }
         .reverse
         .drop(numCollectionsToKeep)
-
-      collectionsToDelete.foreach { coll =>
-        logger.info(s"deleting collection $coll")
-        solrService.deleteCollection(coll)
-        logger.info(s"successfully deleted collection $coll")
-      }
-      // verify collections have been delteted
-      val collections = solrService
-        .listCollections()
-        .filter(_.startsWith(application.name))
-
-      assert(collections.length == numCollectionsToKeep,
-             s"expected $numCollectionsToKeep collections but found ${collections.length}")
     }
   }
 
