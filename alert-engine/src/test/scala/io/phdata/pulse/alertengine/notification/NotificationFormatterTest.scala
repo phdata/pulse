@@ -21,7 +21,7 @@ import org.apache.solr.common.SolrDocument
 import org.scalatest.FunSuite
 
 class NotificationFormatterTest extends FunSuite {
-  val doc: SolrDocument =
+  val doc =
     TestObjectGenerator.solrDocument(level = "FATAL", message = "Service is down......")
 
   val alertRule = TestObjectGenerator.alertRule()

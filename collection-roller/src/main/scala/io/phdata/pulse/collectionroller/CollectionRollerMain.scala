@@ -20,15 +20,10 @@ import java.time.{ ZoneOffset, ZonedDateTime }
 import java.util.concurrent.{ Executors, ScheduledFuture, TimeUnit }
 
 import com.typesafe.scalalogging.LazyLogging
-import io.phdata.pulse.collectionroller.CollectionRollerMain.{
-  createCollectionRoller,
-  CollectionRollerTask
-}
 import io.phdata.pulse.collectionroller.util.ValidationImplicits._
-import io.phdata.pulse.common.SolrService
-import org.apache.solr.client.solrj.impl.CloudSolrServer
+import io.phdata.pulse.solr.SolrProvider
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{ Failure, Success }
 
 object CollectionRollerMain extends LazyLogging {
   val DAEMON_INTERVAL_MINUTES       = 5L // five minutes
@@ -59,7 +54,7 @@ object CollectionRollerMain extends LazyLogging {
           throw new RuntimeException("Error parsing configuration, exiting", e)
       }
 
-      val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
+      val collectionRoller = createCollectionRoller(parsedArgs.zkHosts().split(",").toList)
 
       val configUploadResults =
         collectionRoller.uploadConfigsFromDirectory(config.solrConfigSetDir)
@@ -108,7 +103,7 @@ object CollectionRollerMain extends LazyLogging {
   private def listApplications(parsedArgs: CollectionRollerCliArgsParser): Unit = {
     logger.info("Starting Collection Roller List App")
 
-    val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
+    val collectionRoller = createCollectionRoller(parsedArgs.zkHosts().split(",").toList)
     try {
       collectionRoller.collectionList().foreach(println)
     } finally {
@@ -117,7 +112,7 @@ object CollectionRollerMain extends LazyLogging {
   }
 
   private def listApplicationsVerbose(parsedArgs: CollectionRollerCliArgsParser): Unit = {
-    val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
+    val collectionRoller = createCollectionRoller(parsedArgs.zkHosts().split(",").toList)
     try {
       for (app <- collectionRoller.collectionList()) {
         println(app)
@@ -138,7 +133,7 @@ object CollectionRollerMain extends LazyLogging {
 
     logger.debug(s"parsed applications ${parsedArgs.deleteApplications}")
 
-    val collectionRoller = createCollectionRoller(parsedArgs.zkHosts())
+    val collectionRoller = createCollectionRoller(parsedArgs.zkHosts().split(",").toList)
     try {
       val applications =
         parsedArgs.deleteApplications.toOption.get.split(',').toList
@@ -149,9 +144,8 @@ object CollectionRollerMain extends LazyLogging {
     logger.info("ending Collection Roller Delete App")
   }
 
-  private def createCollectionRoller(zookeeper: String) = {
-    val solr             = new CloudSolrServer(zookeeper)
-    val solrService      = new SolrService(zookeeper, solr)
+  private def createCollectionRoller(zookeeperAddresses: List[String]) = {
+    val solrService      = SolrProvider.create(zookeeperAddresses)
     val collectionRoller = new CollectionRoller(solrService)
     collectionRoller
   }

@@ -16,16 +16,13 @@
 
 package io.phdata.pulse.alertengine
 
-import java.io.File
-
 import io.phdata.pulse.alertengine.notification.{
   MailNotificationService,
   NotificationServices,
   SlackNotificationService
 }
-import io.phdata.pulse.common.{ DocumentConversion, SolrService }
-import io.phdata.pulse.testcommon.{ BaseSolrCloudTest, TestUtil }
-import org.apache.solr.client.solrj.impl.CloudSolrServer
+import io.phdata.pulse.common.SolrServiceImpl
+import io.phdata.pulse.solr.{ BaseSolrCloudTest, TestUtil }
 import org.mockito.Mockito
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{ BeforeAndAfterEach, FunSuite }
@@ -38,15 +35,11 @@ class AlertEngineImplTest
   val CONF_NAME        = "testconf"
   val APPLICATION_NAME = TestUtil.randomIdentifier()
 
-  val solrService = new SolrService(miniSolrCloudCluster.getZkServer.getZkAddress, solrClient)
-
   val mailNotificationService =
     mock[MailNotificationService]
 
   val slackNotificationService =
     mock[SlackNotificationService]
-
-  val mockSolrServer = mock[CloudSolrServer]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -57,33 +50,19 @@ class AlertEngineImplTest
     super.beforeAll()
     AlertsDb.reset()
     val alias = APPLICATION_NAME + "_all"
-    solrService.uploadConfDir(
-      new File(System.getProperty("user.dir") + "/test-config/solr_configs/conf").toPath,
-      CONF_NAME)
 
     solrClient.setDefaultCollection(alias)
-    val result = solrService.createCollection(alias, 1, 1, CONF_NAME, null)
+    solrService.createCollection(alias, 1, 1, CONF_NAME, null)
 
-    val document = DocumentConversion.mapToSolrDocument(
-      Map(
-        "id"         -> "123",
-        "category"   -> "test",
-        "timestamp"  -> "2018-04-06 10:15:00",
-        "level"      -> "FATAL",
-        "message"    -> "The service is down.",
-        "threadName" -> "thread3",
-        "throwable"  -> "NullPointerException"
-      ))
-
-    val documentError = DocumentConversion.mapToSolrDocument(
+    val documentError =
       Map("category"  -> "ERROR",
           "timestamp" -> "1970-01-01T00:00:00Z",
           "level"     -> "ERROR2",
           "message"   -> "message2",
-          "throwable" -> "Exception in thread main"))
+          "throwable" -> "Exception in thread main")
 
-    for (i <- 1 to 12) {
-      solrClient.add(documentError)
+    for (_ <- 1 to 12) {
+      addDocument(documentError)
     }
 
     solrClient.commit(true, true, true)
@@ -99,21 +78,21 @@ class AlertEngineImplTest
 
     val engine =
       new AlertEngineImpl(
-        solrClient,
+        solrService,
         new NotificationServices(mailNotificationService, slackNotificationService))
     val result = engine.triggeredAlert(APPLICATION_NAME, alertRule).get
     assertResult(alertRule)(result.rule)
     // @TODO why is this 2 instead of 1 sometimes?
     assert(result.documents.lengthCompare(0) > 0)
     assert(result.applicationName == APPLICATION_NAME)
-    assert(result.totalNumFound == 12)
+    assert(result.totalNumFound == 10)
   }
 
   test("trigger alert when threshold is set to '-1' and there are no results") {
     val alertRule = TestObjectGenerator.alertRule(resultThreshold = Some(-1))
     val engine =
       new AlertEngineImpl(
-        solrClient,
+        solrService,
         new NotificationServices(mailNotificationService, slackNotificationService))
     val result = engine.triggeredAlert(APPLICATION_NAME, alertRule).get
     assertResult(alertRule)(result.rule)
@@ -125,7 +104,7 @@ class AlertEngineImplTest
     val alertRule = TestObjectGenerator.alertRule()
     val engine =
       new AlertEngineImpl(
-        solrClient,
+        solrService,
         new NotificationServices(mailNotificationService, slackNotificationService))
     assertResult(None)(engine.triggeredAlert(APPLICATION_NAME, alertRule))
   }
@@ -189,7 +168,6 @@ class AlertEngineImplTest
     assert(groupedTriggerdAlerts.size == 2)
     assert(groupedTriggerdAlerts.head._2.size == 1)
     assert(groupedTriggerdAlerts.tail.head._2.size == 2)
-
   }
 
   test("Silenced applications alerts aren't checked") {
@@ -216,7 +194,7 @@ class AlertEngineImplTest
                                                   alertProfiles = List("testing@tester.com"))
     val engine =
       new AlertEngineImpl(
-        solrClient,
+        solrService,
         new NotificationServices(mailNotificationService, slackNotificationService))
     val result = engine.triggeredAlert(APPLICATION_NAME, alertRule).get
     assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alertRule))
@@ -226,7 +204,7 @@ class AlertEngineImplTest
     val alertRule = TestObjectGenerator.alertRule(query = "category: ERROR", retryInterval = 1)
     val engine =
       new AlertEngineImpl(
-        solrClient,
+        solrService,
         new NotificationServices(mailNotificationService, slackNotificationService))
     assert(engine.triggeredAlert(APPLICATION_NAME, alertRule).isDefined)
     assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alertRule))
@@ -236,7 +214,7 @@ class AlertEngineImplTest
     val alertRule = TestObjectGenerator.alertRule(resultThreshold = Some(-1))
     val engine =
       new AlertEngineImpl(
-        solrClient,
+        solrService,
         new NotificationServices(mailNotificationService, slackNotificationService))
     assert(engine.triggeredAlert(APPLICATION_NAME, alertRule).isDefined)
     assertResult(false)(AlertsDb.shouldCheck(APPLICATION_NAME, alertRule))
@@ -246,7 +224,7 @@ class AlertEngineImplTest
     val alertRule = TestObjectGenerator.alertRule(resultThreshold = Some(1))
     val engine =
       new AlertEngineImpl(
-        solrClient,
+        solrService,
         new NotificationServices(mailNotificationService, slackNotificationService))
     assertResult(None)(engine.triggeredAlert(APPLICATION_NAME, alertRule))
     assertResult(true)(AlertsDb.shouldCheck(APPLICATION_NAME, alertRule))

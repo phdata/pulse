@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+--><schema name="pulse" version="1.0">
+  <fields>
+    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
+    <field name="category" type="string" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="timestamp" type="date" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="level" type="string" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="hostname" type="string" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="message" type="text_general" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="threadName" type="text_general" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="container_id" type="string" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="application_id" type="string" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="throwable" type="text_general" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
+    <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
+    <dynamicField name="*" type="string" indexed="true" stored="true"/>
+    <dynamicField name="*_i" type="int" indexed="true" stored="true"/>
+    <dynamicField name="*_l" type="long" indexed="true" stored="true"/>
+    <dynamicField name="*_f" type="float" indexed="true" stored="true"/>
+    <dynamicField name="*_d" type="double" indexed="true" stored="true"/>
+  </fields>
+  <uniqueKey>id</uniqueKey>
+  <copyField source="category" dest="text"/>
+  <copyField source="level" dest="text"/>
+  <copyField source="message" dest="text"/>
+  <copyField source="threadName" dest="text"/>
+  <copyField source="throwable" dest="text"/>
+  <copyField source="hostname" dest="text"/>
+  <types>
+    <!-- field type definitions. The "name" attribute is
+           just a label to be used by field definitions.  The "class"
+           attribute and any other attributes determine the real
+           behavior of the fieldType.
+             Class names starting with "solr" refer to java classes in a
+           standard package such as org.apache.solr.analysis
+        -->
+    <!-- The StrField type is not analyzed, but indexed/stored verbatim.
+           It supports doc values but in that case the field needs to be
+           single-valued and either required or have a default value.
+          -->
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true"/>
+    <fieldType name="date" class="solr.TrieDateField" docValues="true" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <!-- A general text field that has reasonable, generic
+     cross-language defaults: it tokenizes with StandardTokenizer,
+ removes stop words from case-insensitive "stopwords.txt"
+ (empty by default), and down cases.  At query time only, it
+ also applies synonyms. -->
+    <fieldType name="text_general" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <!-- in this example, we will only use synonyms at query time
+                <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+                -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" positionIncrementGap="0"/>
+  </types>
+  <!-- Similarity is the scoring routine for each document vs. a query.
+         A custom Similarity or SimilarityFactory may be specified here, but
+         the default is fine for most applications.
+         For more info: http://wiki.apache.org/solr/SchemaXml#Similarity
+      -->
+  <!--
+       <similarity class="com.example.solr.CustomSimilarityFactory">
+         <str name="paramkey">param value</str>
+       </similarity>
+      -->
+</schema>

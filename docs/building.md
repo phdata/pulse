@@ -14,6 +14,10 @@ or refresh/install the CSD in Cloudera Manager
 
 Before submitting a pull request, please make sure `make test` and `make dist` both pass successfully.
 
+## Environment Variables
+When building the project two environment variables are needed:
+- CDH_VERSION: can be one of 5 or 6. This controls the solr version for building/testing as well as the name of the parcel and csd files
+- VERSION: The version of Pulse being built
 
 ## CSD
 The CSD (Custom Service Descriptor) allows Cloudera Manager to easily
@@ -76,6 +80,17 @@ This will copy the CSD to /opt/cloudera/csd. You must be on the Cloudera Manager
 sudo make install
 ``` 
 
+### Distributions
 
+To build a distribution make sure you set the `VERSION` and `CDH_VERSION` env variables, then
+
+```$xslt
+export VERSION=2.1.2
+export CDH_VERSION=5
+make clean dist
+
+```
+
+Output will be in the `dist/` folder.
 
 

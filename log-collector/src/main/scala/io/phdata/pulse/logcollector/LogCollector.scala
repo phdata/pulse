@@ -19,16 +19,14 @@ package io.phdata.pulse.logcollector
 import java.io.FileInputStream
 import java.util.Properties
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.{ ActorMaterializer, Materializer }
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.SolrService
+import io.phdata.pulse.solr.SolrProvider
 import org.apache.kudu.client.KuduClient.KuduClientBuilder
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.solr.client.solrj.impl.CloudSolrServer
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ Await, Future }
@@ -60,8 +58,7 @@ object LogCollector extends LazyLogging {
   private def start(args: Array[String]): Unit = {
     val cliParser = new LogCollectorCliParser(args)
 
-    val solrServer  = new CloudSolrServer(cliParser.zkHosts())
-    val solrService = new SolrService(cliParser.zkHosts(), solrServer)
+    val solrService = SolrProvider.create(cliParser.zkHosts().split(",").toList)
     val solrStream  = new SolrCloudStream(solrService)
 
     val kuduClient =

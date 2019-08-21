@@ -5,5 +5,7 @@ jdk: openjdk8
 env:
   SBT_OPTS="-Xmx4096M"
 script:
-  - sbt test
+  - export CDH_VERSION=5 sbt test
+  - sbt clean
+  - export CDH_VERSION=6 sbt test
   - sbt assembly

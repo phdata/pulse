@@ -18,11 +18,7 @@ package io.phdata.pulse.alertengine
 
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.alertengine.notification.NotificationServices
-import io.phdata.pulse.common.JsonSupport
-import org.apache.solr.client.solrj.SolrQuery
-import org.apache.solr.client.solrj.impl.CloudSolrServer
-
-import scala.collection.JavaConverters._
+import io.phdata.pulse.common.{ JsonSupport, SolrService }
 
 /**
  * The Alert Engine will
@@ -30,10 +26,10 @@ import scala.collection.JavaConverters._
  * - group similar alerts
  * - send alerts via notification services, like mail or slack
  *
- * @param solrServer          Solr service used to run queries against solr collections
+ * @param solrService         Solr service used to run queries against solr collections
  * @param notificatonServices Notification services used to send notifications, like mail or slack messages
  */
-class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: NotificationServices)
+class AlertEngineImpl(solrService: SolrService, notificatonServices: NotificationServices)
     extends AlertEngine
     with JsonSupport
     with LazyLogging {
@@ -70,23 +66,19 @@ class AlertEngineImpl(solrServer: CloudSolrServer, notificatonServices: Notifica
   def triggeredAlert(applicationName: String, alertRule: AlertRule): Option[TriggeredAlert] =
     if (AlertsDb.shouldCheck(applicationName, alertRule)) {
       try {
-        val alias = s"${applicationName}_all"
-        val query = new SolrQuery(alertRule.query)
-        query.set("fl", "*") // return full results
-        query.set("collection", alias)
-        val results    = solrServer.query(query).getResults
-        val numFound   = results.getNumFound
-        val resultsSeq = results.asScala
-        val threshold  = alertRule.resultThreshold.getOrElse(0)
+        val alias     = s"${applicationName}_all"
+        val results   = solrService.query(alias, alertRule.query)
+        val numFound  = results.size
+        val threshold = alertRule.resultThreshold.getOrElse(0)
         if (threshold == -1 && results.isEmpty) {
           logger.info(
             s"Alert triggered for $applicationName on alert $alertRule at no results found condition")
           AlertsDb.markTriggered(applicationName, alertRule)
-          Some(TriggeredAlert(alertRule, applicationName, resultsSeq, 0))
-        } else if (resultsSeq.lengthCompare(threshold) > 0) {
+          Some(TriggeredAlert(alertRule, applicationName, results, 0))
+        } else if (results.lengthCompare(threshold) > 0) {
           logger.info(s"Alert triggered for $applicationName on alert $alertRule")
           AlertsDb.markTriggered(applicationName, alertRule)
-          Some(TriggeredAlert(alertRule, applicationName, resultsSeq, numFound))
+          Some(TriggeredAlert(alertRule, applicationName, results, numFound))
         } else {
           logger.info(s"No alert needed for $applicationName with alert $alertRule")
           None

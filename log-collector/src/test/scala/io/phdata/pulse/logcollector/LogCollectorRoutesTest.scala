@@ -18,14 +18,14 @@ package io.phdata.pulse.logcollector
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, MessageEntity, StatusCodes}
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, MessageEntity, StatusCodes }
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import io.phdata.pulse.common.JsonSupport
-import io.phdata.pulse.common.domain.{LogEvent, TimeseriesEvent, TimeseriesRequest}
-import io.phdata.pulse.testcommon.BaseSolrCloudTest
+import io.phdata.pulse.common.domain.{ LogEvent, TimeseriesEvent, TimeseriesRequest }
+import io.phdata.pulse.solr.BaseSolrCloudTest
 import org.mockito.Mockito.verify
-import org.mockito.{Matchers, Mockito}
+import org.mockito.{ Matchers, Mockito }
 import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.mockito.MockitoSugar
@@ -118,10 +118,8 @@ class LogCollectorRoutesTest
   }
 
   test("post metric array to 'metric' endpoint") {
-    val request = TimeseriesRequest("metrics",
-      List(TimeseriesEvent(1, "key", "tag", 1.4)))
-    val entity = HttpEntity(ContentTypes.`application/json`, request.toJson.toString()
-      )
+    val request = TimeseriesRequest("metrics", List(TimeseriesEvent(1, "key", "tag", 1.4)))
+    val entity  = HttpEntity(ContentTypes.`application/json`, request.toJson.toString())
 
     Post(uri = "/v1/metrics")
       .withEntity(entity) ~> routes ~> check {

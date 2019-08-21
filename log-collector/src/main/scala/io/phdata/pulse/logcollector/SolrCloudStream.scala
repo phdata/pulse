@@ -17,7 +17,7 @@
 package io.phdata.pulse.logcollector
 
 import com.typesafe.scalalogging.LazyLogging
-import io.phdata.pulse.common.{ DocumentConversion, SolrService }
+import io.phdata.pulse.common.SolrService
 
 /*
   Writes messages to Solr using some stream transformation logic.
@@ -37,8 +37,7 @@ class SolrCloudStream(solrService: SolrService, streamParams: StreamParams = Str
     if (events.nonEmpty) {
       val latestCollectionAlias = s"${appName}_latest"
       logger.debug(s"Saving batch of ${events.length} to collection '$latestCollectionAlias}'")
-      solrService.insertDocuments(latestCollectionAlias,
-                                  events.map(DocumentConversion.mapToSolrDocument))
+      solrService.insertDocuments(latestCollectionAlias, events)
       logger.debug(s"Save to $latestCollectionAlias successful")
     }
 }
