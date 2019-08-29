@@ -35,11 +35,11 @@ object CollectionRollerMain extends LazyLogging {
     val parsedArgs = new CollectionRollerCliArgsParser(args)
     logger.debug(s"Parsed args: $parsedArgs")
 
-    if (parsedArgs.deleteApplications.supplied) {
+    if (parsedArgs.deleteApplications.isSupplied) {
       deleteApplications(parsedArgs)
-    } else if (parsedArgs.listApplications.supplied && parsedArgs.verbose.supplied) {
+    } else if (parsedArgs.listApplications.isSupplied && parsedArgs.verbose.isSupplied) {
       listApplicationsVerbose(parsedArgs)
-    } else if (parsedArgs.listApplications.supplied) {
+    } else if (parsedArgs.listApplications.isSupplied) {
       listApplications(parsedArgs)
     } else {
       val config = try {
