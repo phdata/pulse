@@ -7,3 +7,5 @@ addSbtPlugin("com.lucidchart" % "sbt-scalafmt-coursier" % "1.12")
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0")
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.2")
+
+addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.4.2")
