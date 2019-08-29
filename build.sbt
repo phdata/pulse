@@ -4,7 +4,7 @@ import sys.process._
 
 name := "pulse"
 organization in ThisBuild := "io.phdata"
-scalaVersion in ThisBuild := "2.11.11"
+scalaVersion in ThisBuild := "2.11.12"
 lazy val projectVersion = scala.util.Properties.envOrElse("VERSION", "SNAPSHOT")
 
 concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
@@ -238,15 +238,15 @@ lazy val `log-example` = project
 // Library versions
 val logbackVersion            = "1.2.3"
 val scalaLoggingVersion       = "3.7.2"
-val scallopVersion            = "3.1.1"
+val scallopVersion            = "3.1.5"
 val scalaYamlVersion          = "0.4.0"
-val scalaTestVersion          = "3.0.4"
+val scalaTestVersion          = "3.0.8"
 val dockerTestKitVersion      = "0.9.5"
 val solrj4Version             = "4.10.3-cdh5.12.1"
 val solrj7Version             = "7.4.0-cdh6.1.1"
 val akkaHttpVersion           = "10.0.11"
 val akkaCorsVersion           = "0.2.2"
-val sprayJsonVersion          = "1.3.3"
+val sprayJsonVersion          = "1.3.5"
 val sparkVersion              = "2.2.0.cloudera1"
 val log4jVersion              = "1.2.17"
 val httpClientVersion         = "4.5.5"
@@ -254,6 +254,7 @@ val jacksonVersion            = "2.9.4"
 val junitVersion              = "4.12"
 val javaMailVersion           = "1.4"
 val mockitoVersion            = "1.10.19"
-val powerMockVersion          = "1.6.3"
+val powerMockVersion          = "1.6.6"
 val monixVersion              = "2.3.3"
-val kuduVersion               = "1.9.0"
+val kuduVersion               = "1.10.0"
+val catsCoreVersion           = "1.6.0"
