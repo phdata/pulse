@@ -65,7 +65,7 @@ object LogCollector extends LazyLogging {
     val kuduClient =
       cliParser.kuduMasters.toOption.map(masters => new KuduClientBuilder(masters).build())
 
-    val kuduStream = kuduClient.map(client => new KuduMetricStream(client))
+    val kuduStream = kuduClient.map(client => new KuduService(client))
 
     val routes = new LogCollectorRoutes(solrStream, kuduStream)
 

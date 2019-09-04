@@ -20,7 +20,7 @@ import io.phdata.pulse.common.domain.TimeseriesEvent
 import org.apache.kudu.test.KuduTestHarness
 import org.scalatest.{ BeforeAndAfterEach, FunSuite }
 
-class KuduMetricStreamIntegrationTest extends FunSuite with BeforeAndAfterEach {
+class KuduServiceIntegrationTest extends FunSuite with BeforeAndAfterEach {
   val kuduTestHarness = new KuduTestHarness()
 
   override def beforeEach(): Unit = {
@@ -35,7 +35,7 @@ class KuduMetricStreamIntegrationTest extends FunSuite with BeforeAndAfterEach {
 
   test("Create a table if it doesn't exist") {
     val client    = kuduTestHarness.getClient
-    val stream    = new KuduMetricStream(kuduTestHarness.getClient)
+    val stream    = new KuduService(kuduTestHarness.getClient)
     val tableName = "footable"
 
     assert(stream.tableCache.isEmpty)
@@ -58,8 +58,8 @@ class KuduMetricStreamIntegrationTest extends FunSuite with BeforeAndAfterEach {
     val events = (1 to numRows).map { n =>
       new TimeseriesEvent(n, "id", "metric", 1.5d)
     }
-    val stream = new KuduMetricStream(kuduTestHarness.getClient)
-    events.foreach(e => stream.put(tableName, e))
+    val stream = new KuduService(kuduTestHarness.getClient)
+    events.foreach(e => stream.save(tableName, List(e)))
 
     // Sleep until the table is created, 'stream.put' runs asynchronously.
     while (!client.tableExists(tableName)) {
