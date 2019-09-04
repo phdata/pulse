@@ -150,7 +150,7 @@
         ],
         "environmentVariables": {
           "KAFKA_TOPIC": "${topic}",
-          "LOG_COLLECTOR_MAX_HEAP": "${log.collector.max.heap.size}",
+          "LOG_COLLECTOR_MAX_HEAP": "${log.collector.kafka.max.heap.size}",
           "LOG_COLLECTOR_EXTRA_OPTS": "${log.collector.extra.opts}"
         }
       },
