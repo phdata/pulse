@@ -17,6 +17,7 @@ package: clean jars meta conf
 version:
 	printf $(parcelVersion)
 
+
 sha:
 	sha1sum target/$(distro7).parcel | awk '{ print $$1 }' > target/$(distro7).parcel.sha
 	sha1sum target/$(distro6).parcel | awk '{ print $$1 }' > target/$(distro6).parcel.sha
@@ -38,7 +39,7 @@ meta: dir
 	cp meta/pulse_parcel_env.sh target/$(packageName)/meta/pulse_parcel_env.sh
 
 conf: dir
-	cp -r conf target/$(packageName)/
+	cp -r conf$$CDH_VERSION target/$(packageName)/conf
 
 validate-parcel-json: parcel
 	../validator -p target/$(packageName)/meta/parcel.json
