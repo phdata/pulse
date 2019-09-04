@@ -9,3 +9,7 @@ script:
   - sbt clean
   - export CDH_VERSION=6 sbt test
   - sbt assembly
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt
