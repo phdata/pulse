@@ -18,6 +18,7 @@ package io.phdata.pulse.logcollector
 
 import java.util.{ ArrayList, Collections }
 
+import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.domain.TimeseriesEvent
 import org.apache.kudu.client.SessionConfiguration.FlushMode
 import org.apache.kudu.client.{ CreateTableOptions, KuduClient, KuduException, KuduTable }
@@ -36,7 +37,7 @@ object TimeseriesEventColumns {
  * A Kudu Metric stream batches data by time and record count into Kudu tables.
  * @param client
  */
-class KuduMetricStream(client: KuduClient) extends Stream[TimeseriesEvent] {
+class KuduService(client: KuduClient) extends LazyLogging {
   lazy val session = {
     val session = client.newSession()
     // Flushing is handled by the stream.
@@ -60,7 +61,7 @@ class KuduMetricStream(client: KuduClient) extends Stream[TimeseriesEvent] {
    * @param tableName The name of the application
    * @param metrics A sequence of metrics to write to Kudu
    */
-  override private[logcollector] def save(tableName: String, metrics: Seq[TimeseriesEvent]): Unit =
+  private[logcollector] def save(tableName: String, metrics: Seq[TimeseriesEvent]): Unit =
     try {
       if (metrics.nonEmpty) {
         val table = getOrCreateTable(tableName)
