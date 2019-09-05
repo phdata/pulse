@@ -141,7 +141,7 @@
         }
       ],
       "topology": {
-        "minInstances": "1"
+        "minInstances": "0"
       },
       "startRunner": {
         "program": "scripts/control.sh",
