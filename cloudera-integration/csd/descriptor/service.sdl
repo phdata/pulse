@@ -42,7 +42,8 @@
           "label": "Kudu master addresses",
           "description": "Kudu master addresses with port. Kudu masters are required to enable the 'metrics' endpoints.",
           "required": "false",
-          "type": "string_array"
+          "type": "string_array",
+          "default": []
         },
         {
           "name": "log.collector.max.heap.size",
@@ -74,7 +75,8 @@
           "WEBSERVER_PORT": "${port}",
           "LOG_COLLECTOR_MAX_HEAP": "${log.collector.max.heap.size}",
           "LOG_COLLECTOR_EXTRA_OPTS": "${log.collector.extra.opts}",
-          "KUDU_MASTERS": "${kudu.masters}"
+          "KUDU_MASTERS": "${kudu.masters}",
+          "default": []
         }
       },
       "configWriter": {
