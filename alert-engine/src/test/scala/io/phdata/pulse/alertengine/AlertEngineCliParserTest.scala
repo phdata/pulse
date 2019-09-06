@@ -85,4 +85,49 @@ class AlertEngineCliParserTest extends FunSuite {
     assertResult(None)(cliParser.smtpPassword)
   }
 
+  test("Test database url") {
+    val args = Array(
+      "--conf",
+      "sample conf",
+      "--db-url=jdbc/something"
+    )
+
+    val cliParser = new AlertEngineCliParser(args)
+
+    assertResult("jdbc/something")(cliParser.dbUrl())
+  }
+
+  test("Test database user") {
+    val args = Array(
+      "--conf",
+      "sample conf",
+      "--db-user=me"
+    )
+
+    val cliParser = new AlertEngineCliParser(args)
+    assertResult("me")(cliParser.dbUser())
+  }
+
+  test("Test database password") {
+    val args = Array(
+      "--conf",
+      "sample conf",
+      "--db-password=hello"
+    )
+
+    val cliParser = new AlertEngineCliParser(args)
+    assertResult("hello")(cliParser.dbPassword())
+  }
+
+  test("Test database options") {
+    val args = Array(
+      "--conf",
+      "sample conf",
+      "--db-options=key1=value1;key2=value2"
+    )
+
+    val cliParser = new AlertEngineCliParser(args)
+    assertResult("key1=value1;key2=value2")(cliParser.dbOptions())
+  }
+
 }

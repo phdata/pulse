@@ -1,6 +1,5 @@
 import sbt.Keys._
 import sbt._
-import sys.process._
 
 name := "pulse"
 organization in ThisBuild := "io.phdata"
@@ -127,6 +126,8 @@ lazy val dependencies =
     val http = Seq(akkaHttp, akkaHttpSprayJson, akkaCors, akkaTestKit, akkaHttpTest)
 
     val mocking = Seq(mockito, powermock, powerMockApi, powerMockJunit)
+
+    val h2 = "com.h2database" % "h2" % "1.4.199" % Test
   }
 
 lazy val settings = commonSettings ++ scalafmtSettings ++ assemblySettings
@@ -195,7 +196,8 @@ lazy val `alert-engine` = project
     libraryDependencies ++= dependencies.common ++ dependencies.solr ++ Seq(dependencies.javaMail) ++ Seq(
       dependencies.scalaYaml,
       dependencies.sprayJson,
-      dependencies.scallop) ++ dependencies.mocking
+      dependencies.scallop,
+      dependencies.h2) ++ dependencies.mocking
   )
   .dependsOn(common)
   .dependsOn(solrModule)

@@ -17,7 +17,6 @@
 package io.phdata.pulse.alertengine
 
 import io.phdata.pulse.common.domain.LogEvent
-import org.apache.solr.common.SolrDocument
 
 /**
  * TestObjectGenerator helps avoid redundant test object creation by providing methods
@@ -115,8 +114,9 @@ object TestObjectGenerator {
   def alertRule(query: String = "id : testId",
                 retryInterval: Int = 10,
                 resultThreshold: Option[Int] = None,
-                alertProfiles: List[String] = List("mailprofile1")): AlertRule =
-    AlertRule(query, retryInterval, resultThreshold, alertProfiles)
+                alertProfiles: List[String] = List("mailprofile1"),
+                alertType: Option[String] = Some(AlertTypes.SOLR)): AlertRule =
+    AlertRule(query, retryInterval, resultThreshold, alertProfiles, alertType)
 
   /**
    * Method for creating test triggered alerts
@@ -129,7 +129,7 @@ object TestObjectGenerator {
    */
   def triggeredAlert(rule: AlertRule = alertRule(),
                      applicationName: String = "Spark",
-                     documents: Seq[Map[String, String]] = Seq(solrDocument()),
+                     documents: Seq[Map[String, Any]] = Seq(solrDocument()),
                      totalNumFound: Long = 20): TriggeredAlert =
     TriggeredAlert(rule, applicationName, documents, totalNumFound)
 }

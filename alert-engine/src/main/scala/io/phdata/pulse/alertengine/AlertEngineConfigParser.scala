@@ -21,26 +21,54 @@ import net.jcazevedo.moultingyaml._
 import scala.io.Source
 
 object YamlProtocol extends DefaultYamlProtocol {
-  implicit val alert: YamlFormat[AlertRule]                = yamlFormat4(AlertRule)
+  implicit val alert: YamlFormat[AlertRule]                = yamlFormat5(AlertRule)
   implicit val mailProfile: YamlFormat[MailAlertProfile]   = yamlFormat2(MailAlertProfile)
   implicit val slackProfile: YamlFormat[SlackAlertProfile] = yamlFormat2(SlackAlertProfile)
   implicit val application: YamlFormat[Application]        = yamlFormat4(Application)
   implicit val config: YamlFormat[AlertEngineConfig]       = yamlFormat1(AlertEngineConfig)
 }
 
+object AlertTypes {
+  val SOLR: String           = "solr"
+  val SQL: String            = "sql"
+  val ALL_TYPES: Set[String] = Set(AlertTypes.SOLR, AlertTypes.SQL)
+}
+
 /**
  * Methods to parse an alert engine yaml into case classes
  */
 object AlertEngineConfigParser {
-  def getConfig(path: String): AlertEngineConfig = {
-    val yamlString = Source.fromFile(path).getLines.mkString("\n")
-    convert(yamlString)
+
+  def read(path: String): AlertEngineConfig = {
+    val source = Source.fromFile(path)
+    try {
+      val yaml = source.getLines.mkString("\n")
+      parse(yaml)
+    } finally {
+      source.close()
+    }
   }
 
-  def convert(yaml: String): AlertEngineConfig = {
+  def parse(yaml: String): AlertEngineConfig = {
+    val config = convert(yaml)
+    validateAlertRules(config)
+    config
+  }
+
+  private def convert(yaml: String): AlertEngineConfig = {
     import YamlProtocol._
     yaml.parseYaml.convertTo[AlertEngineConfig]
   }
+
+  def validateAlertRules(config: AlertEngineConfig): Unit =
+    config.applications
+      .flatMap(_.alertRules)
+      .filter(_.alertType.isDefined)
+      .foreach { rule =>
+        if (!AlertTypes.ALL_TYPES.contains(rule.alertType.get)) {
+          throw new IllegalArgumentException(s"Unknown alert type on rule: $rule")
+        }
+      }
 }
 
 case class AlertEngineConfig(applications: List[Application])
@@ -66,7 +94,8 @@ case class Application(name: String,
 case class AlertRule(query: String,
                      retryInterval: Int,
                      resultThreshold: Option[Int] = None,
-                     alertProfiles: List[String])
+                     alertProfiles: List[String],
+                     alertType: Option[String] = None)
 
 trait AlertProfile {
   val name: String

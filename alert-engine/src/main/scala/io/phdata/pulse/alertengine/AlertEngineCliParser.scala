@@ -45,14 +45,26 @@ class AlertEngineCliParser(args: Seq[String]) extends ScallopConf(args) {
     "smtp-tls",
     required = false,
     descr = "Whether to use START_TLS. Defaults to false")
-  lazy val zkHost: ScallopOption[String] = opt[String](
-    "zk-hosts",
-    required = true,
-    descr = "Zookeeper hosts. Used to connect to Solr Cloud")
   lazy val silencedApplicationsFile: ScallopOption[String] = opt[String](
     "silenced-application-file",
     required = false,
     descr = "File containing applications ignore when alerting, one application per line")
+
+  lazy val zkHost: ScallopOption[String] = opt[String](
+    "zk-hosts",
+    required = false,
+    descr = "Zookeeper hosts. Used to connect to Solr Cloud")
+
+  lazy val dbUrl: ScallopOption[String] =
+    opt[String]("db-url", required = false, descr = "URL to connect to the database")
+  lazy val dbUser: ScallopOption[String] =
+    opt[String]("db-user", required = false, descr = "User to connect to the database as")
+  lazy val dbPassword: ScallopOption[String] =
+    opt[String]("db-password", required = false, descr = "Password to connect to the database with")
+  lazy val dbOptions: ScallopOption[String] = opt[String](
+    "db-options",
+    required = false,
+    descr = "Database connection options in the form `key1=value1;key2=value2`")
 
   verify()
 }
