@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 phData Inc.
+ * Copyright 2019 phData Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,28 +18,71 @@ package io.phdata.pulse.alertengine
 
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.alertengine.notification.NotificationServices
-import io.phdata.pulse.common.{ JsonSupport, SolrService }
+import io.phdata.pulse.alertengine.trigger.{ AlertTrigger, SolrAlertTrigger, SqlAlertTrigger }
 
-/**
- * The Alert Engine will
- * - check if each alert rule is triggered
- * - group similar alerts
- * - send alerts via notification services, like mail or slack
- *
- * @param solrService         Solr service used to run queries against solr collections
- * @param notificatonServices Notification services used to send notifications, like mail or slack messages
- */
-class AlertEngineImpl(solrService: SolrService, notificatonServices: NotificationServices)
+class AlertEngineImpl(solrTrigger: Option[SolrAlertTrigger],
+                      sqlTrigger: Option[SqlAlertTrigger],
+                      val notificationServices: NotificationServices)
     extends AlertEngine
-    with JsonSupport
     with LazyLogging {
 
-  def run(applications: List[Application], silencedApplications: List[String]): Unit = {
+  if (solrTrigger.isEmpty && sqlTrigger.isEmpty) {
+    throw new IllegalStateException("At least one alert trigger must be provided")
+  }
+
+  /**
+   * Run the AlertEngine.
+   *
+   * @param applications         List of applications to alert on
+   * @param silencedApplications List of applications that have been silenced and should not alert
+   */
+  override def run(applications: List[Application], silencedApplications: List[String]): Unit = {
     val activeApplications = filterSilencedApplications(applications, silencedApplications)
     val triggeredAlerts    = allTriggeredAlerts(activeApplications)
     val groupedAlerts      = groupTriggeredAlerts(triggeredAlerts)
     notify(groupedAlerts)
   }
+
+  /**
+   * Notify all [[io.phdata.pulse.alertengine.notification.NotificationService]] when an alert
+   * is triggered.
+   *
+   * @param groupedAlerts the triggered alerts grouped by application and profile
+   */
+  def notify(
+      groupedAlerts: Map[(Application, String), Seq[(Application, TriggeredAlert, String)]]): Unit =
+    groupedAlerts.foreach {
+      case (grouping, alertApp) =>
+        sendAlert(grouping._1, grouping._2, alertApp.map(_._2))
+    }
+
+  /**
+   * Query for each alert rule to check if it should be triggered.
+   * If the 'resultThreshold' is 0 or greater, trigger if a result is found.
+   * If the 'resultThreshold' is less than 0, trigger if no documents are found.
+   *
+   * @param applicationName The application name
+   * @param alertRule       The alert rule to be checked
+   * @return an Option of [[io.phdata.pulse.alertengine.TriggeredAlert]]
+   */
+  def triggeredAlert(applicationName: String, alertRule: AlertRule): Option[TriggeredAlert] =
+    alertRule.alertType match {
+      case Some(AlertTypes.SOLR) => triggerOrElse(solrTrigger, applicationName, alertRule)
+      case Some(AlertTypes.SQL)  => triggerOrElse(sqlTrigger, applicationName, alertRule)
+      case None                  => triggerOrElse(solrTrigger, applicationName, alertRule)
+      case _ =>
+        logger.warn(s"Unknown alert type in alert rule: $alertRule")
+        None
+    }
+
+  private def triggerOrElse(trigger: Option[AlertTrigger],
+                            applicationName: String,
+                            alertRule: AlertRule): Option[TriggeredAlert] =
+    trigger.map(_.check(applicationName, alertRule)).getOrElse {
+      logger.error(
+        s"No ${alertRule.alertType} alert trigger available to process the alert rule: $alertRule")
+      None
+    }
 
   def filterSilencedApplications(applications: List[Application],
                                  silencedApplicationNames: List[String]): List[Application] = {
@@ -56,56 +99,8 @@ class AlertEngineImpl(solrService: SolrService, notificatonServices: Notificatio
       yield (application, triggeredAlert(application.name, alertRule))
 
   /**
-   * Query solr for each alert rule to check if it should be triggered.
-   * If the 'resultThreshold' is 0 or greater, trigger if a result is found.
-   * If the 'resultThreshold' is less than 0, trigger if no documents are found.
-   * @param applicationName The application name
-   * @param alertRule       The alert rule to be checked
-   * @return an Option of [[io.phdata.pulse.alertengine.TriggeredAlert]]
-   */
-  def triggeredAlert(applicationName: String, alertRule: AlertRule): Option[TriggeredAlert] =
-    if (AlertsDb.shouldCheck(applicationName, alertRule)) {
-      try {
-        val alias     = s"${applicationName}_all"
-        val results   = solrService.query(alias, alertRule.query)
-        val numFound  = results.size
-        val threshold = alertRule.resultThreshold.getOrElse(0)
-        if (threshold == -1 && results.isEmpty) {
-          logger.info(
-            s"Alert triggered for $applicationName on alert $alertRule at no results found condition")
-          AlertsDb.markTriggered(applicationName, alertRule)
-          Some(TriggeredAlert(alertRule, applicationName, results, 0))
-        } else if (results.lengthCompare(threshold) > 0) {
-          logger.info(s"Alert triggered for $applicationName on alert $alertRule")
-          AlertsDb.markTriggered(applicationName, alertRule)
-          Some(TriggeredAlert(alertRule, applicationName, results, numFound))
-        } else {
-          logger.info(s"No alert needed for $applicationName with alert $alertRule")
-          None
-        }
-      } catch {
-        case e: Exception =>
-          logger.error(s"Error running query for alert $alertRule", e)
-          None
-      }
-    } else {
-      None
-    }
-
-  /**
-   * Notify all [[io.phdata.pulse.alertengine.notification.NotificationService]] when an alert
-   * is triggered.
-   * @param groupedAlerts
-   */
-  def notify(
-      groupedAlerts: Map[(Application, String), Seq[(Application, TriggeredAlert, String)]]): Unit =
-    groupedAlerts.foreach {
-      case (grouping, alertApp) =>
-        sendAlert(grouping._1, grouping._2, alertApp.map(_._2))
-    }
-
-  /**
    * Notify based on triggered alert.
+   *
    * @param application The application configuration
    * @param profileName The profile name
    * @param alerts      A list of alerts that need to be sent
@@ -128,11 +123,11 @@ class AlertEngineImpl(solrService: SolrService, notificatonServices: Notificatio
     logger.info(s"found profiles $mailProfiles, $slackProfiles")
 
     for (profile <- mailProfiles) {
-      notificatonServices.mailService.notify(alerts, profile)
+      notificationServices.mailService.notify(alerts, profile)
     }
 
     for (profile <- slackProfiles) {
-      notificatonServices.slackService.notify(alerts, profile)
+      notificationServices.slackService.notify(alerts, profile)
     }
   }
 
@@ -154,9 +149,9 @@ class AlertEngineImpl(solrService: SolrService, notificatonServices: Notificatio
   def groupTriggeredAlerts(triggeredAlerts: List[(Application, Option[TriggeredAlert])])
     : Map[(Application, String), Seq[(Application, TriggeredAlert, String)]] = {
     // get all Some(TriggeredAlert)
-    val flattenedTriggeredAlerts: Seq[(Application, TriggeredAlert)] = triggeredAlerts.collect {
-      case (application, Some(alertOption)) =>
-        (application, alertOption)
+    val flattenedTriggeredAlerts = triggeredAlerts.collect {
+      case (application, Some(alert)) =>
+        (application, alert)
     }
 
     // join in the profiles with each application/alert
@@ -169,5 +164,4 @@ class AlertEngineImpl(solrService: SolrService, notificatonServices: Notificatio
       case (application, alert, profile) => (application, profile)
     }
   }
-
 }

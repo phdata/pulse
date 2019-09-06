@@ -25,7 +25,7 @@ import io.phdata.pulse.alertengine.notification.{
   NotificationServices,
   SlackNotificationService
 }
-import io.phdata.pulse.common.SolrService
+import io.phdata.pulse.alertengine.trigger.{ SolrAlertTrigger, SqlAlertTrigger }
 import io.phdata.pulse.solr.SolrProvider
 
 import scala.io.Source
@@ -40,9 +40,6 @@ object AlertEngineMain extends LazyLogging {
 
     val executorService = Executors.newSingleThreadScheduledExecutor()
 
-    val solrServer =
-      SolrProvider.create(parsedArgs.zkHost().split(",").toList)
-
     val mailNotificationService =
       new MailNotificationService(parsedArgs.smtpServer(),
                                   parsedArgs.smtpPort(),
@@ -56,7 +53,7 @@ object AlertEngineMain extends LazyLogging {
       new NotificationServices(mailNotificationService, slackNotificationService)
 
     val config = try {
-      AlertEngineConfigParser.getConfig(parsedArgs.conf())
+      AlertEngineConfigParser.read(parsedArgs.conf())
     } catch {
       case e: Exception =>
         logger.error("Error parsing configuration, exiting", e)
@@ -69,7 +66,7 @@ object AlertEngineMain extends LazyLogging {
       try {
 
         val scheduledFuture = executorService.scheduleAtFixedRate(
-          new AlertEngineTask(solrServer, notificationFactory, config, parsedArgs),
+          new AlertEngineTask(notificationFactory, config, parsedArgs),
           0L,
           DAEMON_INTERVAL_MINUTES,
           TimeUnit.MINUTES)
@@ -81,7 +78,7 @@ object AlertEngineMain extends LazyLogging {
         executorService.shutdown()
       }
     } else {
-      val alertTask = new AlertEngineTask(solrServer, notificationFactory, config, parsedArgs)
+      val alertTask = new AlertEngineTask(notificationFactory, config, parsedArgs)
       alertTask.run()
     }
 
@@ -95,6 +92,7 @@ object AlertEngineMain extends LazyLogging {
           }
         } catch {
           case e: InterruptedException =>
+            Thread.currentThread().interrupt()
             logger.error("Failed to clean up gracefully", e)
         }
     }
@@ -123,12 +121,11 @@ object AlertEngineMain extends LazyLogging {
     }
 
   /**
-   * Task for running an alert. Can be schduled to be run repeatedly.
+   * Task for running an alert. Can be scheduled to be run repeatedly.
    *
    * @param parsedArgs Application arguments
    */
-  class AlertEngineTask(solrService: SolrService,
-                        notificationFactory: NotificationServices,
+  class AlertEngineTask(notificationFactory: NotificationServices,
                         config: AlertEngineConfig,
                         parsedArgs: AlertEngineCliParser)
       extends Runnable {
@@ -140,8 +137,25 @@ object AlertEngineMain extends LazyLogging {
         .map(file => readSilencedApplications(file))
         .getOrElse(List())
 
+      val applications = config.applications
+
+      val alertTypes = findAlertTypes(applications)
+
+      val solrAlertTrigger = if (alertTypes.contains(AlertTypes.SOLR)) {
+        Some(createSolrAlertTrigger(parsedArgs))
+      } else {
+        None
+      }
+
+      val sqlAlertTrigger = if (alertTypes.contains(AlertTypes.SQL)) {
+        Some(createSqlAlertTrigger(parsedArgs))
+      } else {
+        None
+      }
+
       try {
-        val engine: AlertEngine = new AlertEngineImpl(solrService, notificationFactory)
+        val engine: AlertEngine =
+          new AlertEngineImpl(solrAlertTrigger, sqlAlertTrigger, notificationFactory)
         engine.run(config.applications, silencedApplications)
         logger.info("ending Alert Engine run")
       } catch {
@@ -152,4 +166,53 @@ object AlertEngineMain extends LazyLogging {
     }
   }
 
+  def findAlertTypes(applications: List[Application]): Set[String] = {
+    val alertTypes = applications
+      .flatMap(_.alertRules)
+      .flatMap(_.alertType)
+      .toSet
+
+    val unknownTypes = alertTypes -- AlertTypes.ALL_TYPES
+    if (unknownTypes.nonEmpty) {
+      throw new IllegalStateException(
+        s"Unknown alert types found: $unknownTypes, supported types are: ${AlertTypes.ALL_TYPES}")
+    }
+
+    if (alertTypes.isEmpty) {
+      Set(AlertTypes.SOLR)
+    } else {
+      alertTypes
+    }
+  }
+
+  def createSqlAlertTrigger(parser: AlertEngineCliParser): SqlAlertTrigger = {
+    val dbOptions = parser.dbOptions
+      .filter(_.trim.nonEmpty)
+      .map { value =>
+        value
+          .split(';')
+          .map(_.split('='))
+          .map {
+            case Array(key, value)               => key -> value
+            case Array(key) if !key.trim.isEmpty => key -> ""
+            case unknown =>
+              throw new IllegalArgumentException(
+                s"Invalid database option: ${unknown.mkString("=")}")
+          }
+          .toMap
+      }
+      .getOrElse(Map.empty)
+
+    if (parser.dbUrl.isEmpty) throw new IllegalStateException("Database URL not provided")
+    new SqlAlertTrigger(parser.dbUrl(),
+                        parser.dbUser.toOption.filter(_.trim.nonEmpty),
+                        parser.dbPassword.toOption.filter(_.trim.nonEmpty),
+                        dbOptions)
+  }
+
+  def createSolrAlertTrigger(parser: AlertEngineCliParser): SolrAlertTrigger = {
+    if (parser.zkHost.isEmpty) throw new IllegalStateException("ZK host not provided")
+    val solrServer = SolrProvider.create(parser.zkHost().split(",").toList)
+    new SolrAlertTrigger(solrServer)
+  }
 }
