@@ -26,7 +26,7 @@ import io.phdata.pulse.common.domain.{ LogEvent, TimeseriesRequest }
 /**
  * Http Rest Endpoint
  */
-class LogCollectorRoutes(solrStream: SolrCloudStream, kuduStream: Option[KuduService])
+class LogCollectorRoutes(solrStream: SolrCloudStream, kuduService: Option[KuduService])
     extends JsonSupport
     with LazyLogging {
 
@@ -104,7 +104,7 @@ class LogCollectorRoutes(solrStream: SolrCloudStream, kuduStream: Option[KuduSer
     post {
       // create a streaming Source from the incoming json string
       entity(as[TimeseriesRequest]) { eventRequest =>
-        kuduStream
+        kuduService
           .map { client =>
             eventRequest.payload.map(event => client.save(eventRequest.table_name, List(event)))
           }
