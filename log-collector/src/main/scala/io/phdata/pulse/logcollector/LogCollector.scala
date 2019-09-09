@@ -64,9 +64,9 @@ object LogCollector extends LazyLogging {
     val kuduClient =
       cliParser.kuduMasters.toOption.map(masters => new KuduClientBuilder(masters).build())
 
-    val kuduStream = kuduClient.map(client => new KuduService(client))
+    val kuduService = kuduClient.map(client => new KuduService(client))
 
-    val routes = new LogCollectorRoutes(solrStream, kuduStream)
+    val routes = new LogCollectorRoutes(solrStream, kuduService)
 
     cliParser.mode() match {
       case "kafka" => {

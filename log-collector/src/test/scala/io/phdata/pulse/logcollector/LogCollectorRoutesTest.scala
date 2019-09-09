@@ -30,6 +30,7 @@ import org.scalatest.FunSuite
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.mockito.MockitoSugar
 import spray.json._
+import org.mockito.Mockito.when
 
 class LogCollectorRoutesTest
     extends FunSuite
@@ -66,11 +67,11 @@ class LogCollectorRoutesTest
       | ]""".stripMargin
 
   val solrStream = mock[SolrCloudStream]
-  val kuduStream = mock[KuduService]
+  val kuduService = mock[KuduService]
 
   implicit val actorSystem: ActorSystem = ActorSystem()
 
-  val routes = new LogCollectorRoutes(solrStream, Some(kuduStream)).routes
+  val routes = new LogCollectorRoutes(solrStream, Some(kuduService)).routes
 
   test("post json to endpoint") {
     val docEntity = Marshal(document).to[MessageEntity].futureValue
@@ -154,4 +155,15 @@ class LogCollectorRoutesTest
       responseAs[String] == "Log Collector"
     }
   }
+
+  test("return 500 on bad request to kudu") {
+    when(kuduService.save _).thenThrow(new RuntimeException("Save failed"))
+
+    val caught = intercept[RuntimeException] {
+      kuduService.save _
+    }
+
+    assert(caught.getMessage === "Save failed")
+  }
+
 }

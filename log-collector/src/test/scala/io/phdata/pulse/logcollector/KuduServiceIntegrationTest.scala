@@ -35,18 +35,18 @@ class KuduServiceIntegrationTest extends FunSuite with BeforeAndAfterEach {
 
   test("Create a table if it doesn't exist") {
     val client    = kuduTestHarness.getClient
-    val stream    = new KuduService(kuduTestHarness.getClient)
+    val service    = new KuduService(kuduTestHarness.getClient)
     val tableName = "footable"
 
-    assert(stream.tableCache.isEmpty)
+    assert(service.tableCache.isEmpty)
 
-    stream.getOrCreateTable(tableName)
+    service.getOrCreateTable(tableName)
 
     assert(client.tableExists(tableName))
 
     // Make sure we can add an existing table to the cache
-    stream.tableCache.clear()
-    val table = stream.getOrCreateTable(tableName)
+    service.tableCache.clear()
+    val table = service.getOrCreateTable(tableName)
     assert(table != null)
   }
 
