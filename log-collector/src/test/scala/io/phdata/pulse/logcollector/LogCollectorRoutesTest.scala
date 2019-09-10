@@ -156,11 +156,12 @@ class LogCollectorRoutesTest
     }
   }
 
-  test("return 500 on bad request to kudu") {
-    when(kuduService.save _).thenThrow(new RuntimeException("Save failed"))
+  test("return runtimeException on bad request to kudu") {
+    when(kuduService.save(Matchers.any(), Matchers.any()))
+      .thenThrow(new RuntimeException("Save failed"))
 
     val caught = intercept[RuntimeException] {
-      kuduService.save _
+      kuduService.save(Matchers.any(), Matchers.any())
     }
 
     assert(caught.getMessage === "Save failed")
