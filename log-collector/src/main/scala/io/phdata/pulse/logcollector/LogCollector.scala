@@ -51,7 +51,7 @@ object LogCollector extends LazyLogging {
       }
       case _ => {
         KerberosUtil.scheduledLogin(0, 9, TimeUnit.HOURS)
-        KerberosUtil.run(start(args))
+        KerberosUtil.run(() => start(args))
       }
     }
 

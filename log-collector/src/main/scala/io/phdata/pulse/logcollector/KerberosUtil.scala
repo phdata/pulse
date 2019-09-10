@@ -27,21 +27,23 @@ import monix.execution.Scheduler.{ global => scheduler }
 
 object KerberosUtil extends LazyLogging {
 
-  private var lc = new LoginContext("Client")
+  private val lc = new LoginContext("Client")
 
   def scheduledLogin(initialDelay: Long, delay: Long, timeUnit: TimeUnit): Cancelable = {
     val runnableLogin = new Runnable {
-      def run(): Unit = {
-        lc = new LoginContext("Client")
+      def run(): Unit =
         login()
-      }
     }
     scheduler.scheduleWithFixedDelay(initialDelay, delay, timeUnit, runnableLogin)
   }
 
-  def run[F](function: => Any): Any =
+  def run[F](function: () => Any): Any =
     Subject.doAs(lc.getSubject, new PrivilegedAction[Any]() {
-      override def run: Any = function
+      override def run: Any = {
+        logger.info("Run block started")
+        function()
+        logger.info("Run block complete")
+      }
     })
 
   def login(): Unit = {
