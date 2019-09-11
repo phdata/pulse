@@ -156,15 +156,20 @@ class LogCollectorRoutesTest
     }
   }
 
-  test("return runtimeException on bad request to kudu") {
+  test("return 500 on bad request to kudu") {
+    val request = TimeseriesRequest("metrics", List(TimeseriesEvent(1, "key", "tag", 1.4)))
+    val entity  = HttpEntity(ContentTypes.`application/json`, request.toJson.toString())
+
     when(kuduService.save(Matchers.any(), Matchers.any()))
       .thenThrow(new RuntimeException("Save failed"))
 
-    val caught = intercept[RuntimeException] {
-      kuduService.save(Matchers.any(), Matchers.any())
+    Post(uri = "/v1/metrics")
+      .withEntity(entity) ~> routes ~> check {
+      val caught = intercept[RuntimeException] {
+        kuduService.save(Matchers.any(), Matchers.any())
+      }
+      assert(caught.getMessage === "Save failed" && status === StatusCodes.InternalServerError)
     }
-
-    assert(caught.getMessage === "Save failed")
   }
 
 }
