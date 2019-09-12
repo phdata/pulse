@@ -165,10 +165,7 @@ class LogCollectorRoutesTest
 
     Post(uri = "/v1/metrics")
       .withEntity(entity) ~> routes ~> check {
-      val caught = intercept[RuntimeException] {
-        kuduService.save(Matchers.any(), Matchers.any())
-      }
-      assert(caught.getMessage === "Save failed" && status === StatusCodes.InternalServerError)
+      assert(status === StatusCodes.InternalServerError)
     }
   }
 
