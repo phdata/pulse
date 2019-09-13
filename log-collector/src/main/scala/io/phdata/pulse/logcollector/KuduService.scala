@@ -39,7 +39,7 @@ object TimeseriesEventColumns {
  */
 class KuduService(client: KuduClient) extends LazyLogging {
   lazy val session = {
-    val session = client.newSession()
+    val session = KerberosContext.runPrivileged(client.newSession())
     // Flushing is handled by the stream.
     session.setFlushMode(FlushMode.MANUAL_FLUSH)
     session
@@ -53,7 +53,7 @@ class KuduService(client: KuduClient) extends LazyLogging {
 
   def close(): Unit =
     if (!session.isClosed) {
-      session.close()
+      KerberosContext.runPrivileged(session.close())
     }
 
   /**
@@ -64,31 +64,33 @@ class KuduService(client: KuduClient) extends LazyLogging {
   private[logcollector] def save(tableName: String, metrics: Seq[TimeseriesEvent]): Unit =
     try {
       if (metrics.nonEmpty) {
-        val table = getOrCreateTable(tableName)
-        metrics.foreach { metric =>
-          val insert = table.newInsert()
-          val row    = insert.getRow
-          row.addLong(TimeseriesEventColumns.TIMESTAMP, metric.ts)
-          row.addString(TimeseriesEventColumns.KEY, metric.key)
-          row.addString(TimeseriesEventColumns.TAG, metric.tag)
-          row.addDouble(TimeseriesEventColumns.VALUE, metric.value)
+        KerberosContext.runPrivileged {
+          val table = getOrCreateTable(tableName)
+          metrics.foreach { metric =>
+            val insert = table.newInsert()
+            val row    = insert.getRow
+            row.addLong(TimeseriesEventColumns.TIMESTAMP, metric.ts)
+            row.addString(TimeseriesEventColumns.KEY, metric.key)
+            row.addString(TimeseriesEventColumns.TAG, metric.tag)
+            row.addDouble(TimeseriesEventColumns.VALUE, metric.value)
 
-          session.apply(insert)
+            session.apply(insert)
+          }
+
+          session.flush()
+
+          if (session.countPendingErrors() > 0) {
+            val errors = session.getPendingErrors
+            throw new KuduRowErrorException(errors.getRowErrors.head.toString)
+          }
+
+          logger.trace(s"Saved batch of ${metrics.length} to table $tableName")
         }
-
-        session.flush()
-
-        if (session.countPendingErrors() > 0) {
-          val errors = session.getPendingErrors
-          throw new KuduRowErrorException(errors.getRowErrors.head.toString)
-        }
-
-        logger.trace(s"Saved batch of ${metrics.length} to table $tableName")
       }
     } catch {
       case e: KuduException =>
         logger.error(s"Exception writing to table $tableName, removing it from the cache.")
-        tableCache.remove(tableName)
+        KerberosContext.runPrivileged(tableCache.remove(tableName))
         throw e
     }
 
@@ -121,7 +123,7 @@ class KuduService(client: KuduClient) extends LazyLogging {
       val opts = new CreateTableOptions()
         .setRangePartitionColumns(Collections.singletonList(TimeseriesEventColumns.TIMESTAMP))
         .addHashPartitions(Collections.singletonList(TimeseriesEventColumns.KEY), 4)
-      val table = client.createTable(tableName, schema, opts)
+      val table = KerberosContext.runPrivileged(client.createTable(tableName, schema, opts))
       tableCache.put(tableName, table)
       logger.info(s"Created Kudu table $tableName")
       table

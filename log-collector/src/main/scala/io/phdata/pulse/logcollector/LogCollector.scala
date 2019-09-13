@@ -47,12 +47,13 @@ object LogCollector extends LazyLogging {
       case null => {
         logger.info(
           "java.security.auth.login.config is not set, continuing without kerberos authentication")
-        start(args)
       }
       case _ => {
-        KerberosUtil.scheduledLogin(0, 9, TimeUnit.HOURS)
-        KerberosUtil.run(start(args))
+        KerberosContext.scheduleKerberosLogin(0, 9, TimeUnit.HOURS)
       }
+
+      start(args)
+
     }
 
   private def start(args: Array[String]): Unit = {

@@ -25,34 +25,47 @@ import javax.security.auth.login.LoginContext
 import monix.execution.Cancelable
 import monix.execution.Scheduler.{ global => scheduler }
 
-object KerberosUtil extends LazyLogging {
+object KerberosContext extends LazyLogging {
 
-  private var lc = new LoginContext("Client")
+  lazy private val loginContext = new LoginContext("Client")
+  private var useKerberos       = false
 
-  def scheduledLogin(initialDelay: Long, delay: Long, timeUnit: TimeUnit): Cancelable = {
+  def scheduleKerberosLogin(initialDelay: Long, delay: Long, timeUnit: TimeUnit): Cancelable = {
+    useKerberos = true
     val runnableLogin = new Runnable {
-      def run(): Unit = {
-        lc = new LoginContext("Client")
+      def run(): Unit =
         login()
-      }
     }
     scheduler.scheduleWithFixedDelay(initialDelay, delay, timeUnit, runnableLogin)
   }
 
-  def run[F](function: => Any): Any =
-    Subject.doAs(lc.getSubject, new PrivilegedAction[Any]() {
-      override def run: Any = function
-    })
+  def runPrivileged[W](work: => W): W =
+    if (useKerberos) {
+      Subject.doAs(
+        loginContext.getSubject,
+        new PrivilegedAction[W]() {
+          override def run: W = {
+            logger.debug("Privileged block started")
+            val result = work
+            logger.debug("Privileged block complete")
+            result
+          }
+        }
+      )
+    } else {
+      logger.debug("Kerberos disabled. To enable kerberos call the `scheduleKerberosLogin` method.")
+      work
+    }
 
-  def login(): Unit = {
-    lc.login()
-    logger.info(s"Logging in with kerberos configuration:\n$getSubject")
+  private def login(): Unit = {
+    loginContext.login()
+    logger.info(s"Logged in with kerberos configuration:\n$getSubject")
   }
 
-  def getSubject: String =
-    if (lc.getSubject == null) {
+  private def getSubject: String =
+    if (loginContext.getSubject == null) {
       throw new Exception("Subject for LoginContext is null")
     } else {
-      lc.getSubject.toString
+      loginContext.getSubject.toString
     }
 }
