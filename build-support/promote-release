@@ -1,0 +1,8 @@
+#!/bin/bash
+set -xeu
+##  This is for promoting the artifacts from dev to releases after testing. This is a manual process. 
+SOURCE_REPO="${SOURCE_REPO:-parcels-dev}"
+TARGET_REPO="${TARGET_REPO:-parcels-release}"
+
+curl --fail -u${ARTIFACTORY_USER}:${ARTIFACTORY_TOKEN} -X POST "https://repository.phdata.io/artifactory/api/copy/${SOURCE_REPO}/phdata/pulse/${SOURCE_VERSION}?to=/${TARGET_REPO}/phdata/pulse/${TARGET_VERSION}"
+echo "Successfully moved the artifactory to ${TARGET_REPO}"
