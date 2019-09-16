@@ -9,7 +9,13 @@ repoName=${projectVersion}-${cdh_version}
 parcelVersion=$(make --no-print-directory --silent -C cloudera-integration/parcel version)
 dist=dist$CDH_VERSION
 
-curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/manifest.json "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/manifest.json"
+curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T $dist/manifest.json "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/manifest.json"
+
+for distro in "el6" "el7" "sles12"; do
+  curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T $dist/PULSE-${parcelVersion}-el7.parcel "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/PULSE-${parcelVersion}-$distro.parcel"
+  curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T $dist/PULSE-${parcelVersion}-el7.parcel.sha "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/PULSE-${parcelVersion}-$distro.parcel.sha"
+done
+
 
 for distro in "el6" "el7" "sles12"; do
   curl -u$ARTIFACTORY_USER:$ARTIFACTORY_TOKEN -T dist/PULSE-${parcelVersion}-el7.parcel "https://repository.phdata.io/artifactory/$DEPLOY_REPO/phdata/pulse/${repoName}/PULSE-${parcelVersion}-$distro.parcel"
