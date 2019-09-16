@@ -5,10 +5,12 @@ jdk: openjdk8
 env:
   SBT_OPTS="-Xmx4096M"
 script:
+  - apt-get -y install make
   - export CDH_VERSION=5 sbt test
   - sbt clean
   - export CDH_VERSION=6 sbt test
-  - sbt assembly
+  - make dist-cdh5
+  - make dist-cdh6
 cache:
   directories:
     - $HOME/.ivy2/cache
