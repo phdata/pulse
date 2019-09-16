@@ -11,9 +11,12 @@ jars:
 
 
 test:
-	sbt -mem 4096 test
+	sbt test
 
 test-all: test-cdh5 test-cdh6
+
+test-all-linux: export KUDU_BINARY_CLASSIFIER=linux-x86_64
+test-all-linux: test-cdh5 test-cdh6
 
 test-cdh5: export CDH_VERSION=5
 test-cdh5: 
@@ -54,15 +57,16 @@ parcel: package
 
 clean:
 	sbt clean
-	rm -rf dist
+	rm -rf dist5
+	rm -rf dist6
 	$(MAKE) -C cloudera-integration/parcel/ clean
 	$(MAKE) -C cloudera-integration/csd/ clean
 
 sbt-assembly:
-	sbt -mem 4096 assembly
+	sbt assembly
 
 sbt-compile:
-	sbt -mem 4096 compile
+	sbt compile
 
 csd: package
 	$(MAKE) -C cloudera-integration/csd/ package

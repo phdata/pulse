@@ -93,7 +93,7 @@ class PulseKafkaConsumerTest
     messageList
   }
 
-  test("Produce messages, creates collection and sends messages to Solr Cloud") {
+  ignore("Produce messages, creates collection and sends messages to Solr Cloud") {
     val messageCount   = 4
     val app1Name       = "pulse-kafka-test"
     val app1Collection = s"${app1Name}_1"
@@ -134,7 +134,7 @@ class PulseKafkaConsumerTest
     assertResult(messageCount)(query1Result.length)
   }
 
-  test("Send two message batches to Solr Cloud") {
+  ignore("Send two message batches to Solr Cloud") {
     val messageCount   = 4
     val app1Name       = "pulse-kafka-test2"
     val app1Collection = s"${app1Name}_1"

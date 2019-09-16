@@ -6,6 +6,9 @@ name := "pulse"
 organization in ThisBuild := "io.phdata"
 scalaVersion in ThisBuild := "2.11.12"
 lazy val projectVersion = scala.util.Properties.envOrElse("VERSION", "SNAPSHOT")
+lazy val kuduClassifier = scala.util.Properties.envOrElse("KUDU_BINARY_CLASSIFIER", "osx-x86_64")
+
+val kuduMessage = println(s"Using Kudu Binary: $kuduClassifier")
 
 concurrentRestrictions in Global += Tags.limit(Tags.Test, 1)
 val CDH5 = 5
@@ -70,7 +73,7 @@ lazy val dependencies =
     val kudu          = "org.apache.kudu" % "kudu-client"     % kuduVersion
     val kuduTestUtils = "org.apache.kudu" % "kudu-test-utils" % kuduVersion % Test
     // TODO classifier make compatible with build server for when we re-enable integration tests on Travis
-    val kuduBinary = "org.apache.kudu" % "kudu-binary" % kuduVersion % Test classifier "osx-x86_64"
+    val kuduBinary = "org.apache.kudu" % "kudu-binary" % kuduVersion % Test classifier kuduClassifier
 
     val mockito = "org.mockito" % "mockito-all" % mockitoVersion % Test
 
