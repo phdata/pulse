@@ -4,6 +4,8 @@ parcelVersion = $(projectVersion)-$(cdh_version)
 packageName = PULSE-$(parcelVersion)
 distro7 = PULSE-$(parcelVersion)-el7
 distro6 = PULSE-$(parcelVersion)-el6
+distrosles12 = PULSE-$(parcelVersion)-sles12
+
 
 package: clean jars meta conf
 	../validator -d target/$(packageName)/
@@ -11,6 +13,8 @@ package: clean jars meta conf
 	../validator -f target/$(distro7).parcel
 	tar  zcvf target/$(distro6).parcel -C target $(packageName)/
 	../validator -f target/$(distro6).parcel
+	tar  zcvf target/$(distrosles12).parcel -C target $(packageName)/
+	../validator -f target/$(distrosles12).parcel
 	$(MAKE) sha
 	$(MAKE) manifest
 
@@ -21,6 +25,8 @@ version:
 sha:
 	sha1sum target/$(distro7).parcel | awk '{ print $$1 }' > target/$(distro7).parcel.sha
 	sha1sum target/$(distro6).parcel | awk '{ print $$1 }' > target/$(distro6).parcel.sha
+	sha1sum target/$(distrosles12).parcel | awk '{ print $$1 }' > target/$(distrosles12).parcel.sha
+
 
 install-dir:
 	cp target/$(packageName) /opt/cloudera/parcel-repo
