@@ -63,9 +63,11 @@ object LogCollector extends LazyLogging {
     val solrStream  = new SolrCloudStream(solrService)
 
     val kuduClient =
-      cliParser.kuduMasters.toOption.map(masters => new KuduClientBuilder(masters).build())
+      cliParser.kuduMasters.toOption.map(masters =>
+        KerberosContext.runPrivileged(new KuduClientBuilder(masters).build()))
 
-    val kuduService = kuduClient.map(client => new KuduService(client))
+    val kuduService =
+      kuduClient.map(client => KerberosContext.runPrivileged(new KuduService(client)))
 
     val routes = new LogCollectorRoutes(solrStream, kuduService)
 
