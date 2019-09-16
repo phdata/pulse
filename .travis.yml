@@ -4,6 +4,9 @@ scala:
 jdk: openjdk8
 env:
   SBT_OPTS="-Xmx4096M"
+  VERSION=$TRAVIS_TAG
+  DEPLOY_REPO=parcels-dev
+  CDH_VERSION=6
 script:
   - sudo apt-get -y install make
   - make test-all-linux
@@ -11,3 +14,11 @@ cache:
   directories:
     - $HOME/.ivy2/cache
     - $HOME/.sbt
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: make dist-cdh5 && make dist-cdh6 && build-support/deploy.sh
+  on:
+    tags: true
+    all_branches: true
+
