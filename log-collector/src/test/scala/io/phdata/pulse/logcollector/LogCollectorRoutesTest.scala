@@ -66,7 +66,7 @@ class LogCollectorRoutesTest
       | }
       | ]""".stripMargin
 
-  val solrStream = mock[SolrCloudStream]
+  val solrStream  = mock[SolrCloudStream]
   val kuduService = mock[KuduService]
 
   implicit val actorSystem: ActorSystem = ActorSystem()
