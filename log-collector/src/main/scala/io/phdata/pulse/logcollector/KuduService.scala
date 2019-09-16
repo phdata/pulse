@@ -100,36 +100,39 @@ class KuduService(client: KuduClient) extends LazyLogging {
    * @return
    */
   private[logcollector] def getOrCreateTable(tableName: String): KuduTable =
-    if (tableCache.contains(tableName)) {
-      tableCache(tableName)
-    } else if (!client.tableExists(tableName)) {
-      logger.info(s"Kudu table not found: $tableName")
-      val columns = new ArrayList[ColumnSchema]
-      columns.add(new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.TIMESTAMP,
-                                                       Type.UNIXTIME_MICROS).key(true).build)
-      columns.add(
-        new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.KEY, Type.STRING)
-          .key(true)
-          .build)
-      columns.add(
-        new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.TAG, Type.STRING)
-          .key(true)
-          .build)
-      columns.add(
-        new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.VALUE, Type.DOUBLE)
-          .key(false)
-          .build)
-      val schema = new Schema(columns)
-      val opts = new CreateTableOptions()
-        .setRangePartitionColumns(Collections.singletonList(TimeseriesEventColumns.TIMESTAMP))
-        .addHashPartitions(Collections.singletonList(TimeseriesEventColumns.KEY), 4)
-      val table = KerberosContext.runPrivileged(client.createTable(tableName, schema, opts))
-      tableCache.put(tableName, table)
-      logger.info(s"Created Kudu table $tableName")
-      table
-    } else {
-      val table = client.openTable(tableName)
-      tableCache.put(tableName, table)
-      table
+    KerberosContext.runPrivileged {
+      if (tableCache.contains(tableName)) {
+        tableCache(tableName)
+      } else if (!client.tableExists(tableName)) {
+        logger.info(s"Kudu table not found: $tableName")
+        val columns = new ArrayList[ColumnSchema]
+        columns.add(
+          new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.TIMESTAMP,
+                                               Type.UNIXTIME_MICROS).key(true).build)
+        columns.add(
+          new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.KEY, Type.STRING)
+            .key(true)
+            .build)
+        columns.add(
+          new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.TAG, Type.STRING)
+            .key(true)
+            .build)
+        columns.add(
+          new ColumnSchema.ColumnSchemaBuilder(TimeseriesEventColumns.VALUE, Type.DOUBLE)
+            .key(false)
+            .build)
+        val schema = new Schema(columns)
+        val opts = new CreateTableOptions()
+          .setRangePartitionColumns(Collections.singletonList(TimeseriesEventColumns.TIMESTAMP))
+          .addHashPartitions(Collections.singletonList(TimeseriesEventColumns.KEY), 4)
+        val table = client.createTable(tableName, schema, opts)
+        tableCache.put(tableName, table)
+        logger.info(s"Created Kudu table $tableName")
+        table
+      } else {
+        val table = client.openTable(tableName)
+        tableCache.put(tableName, table)
+        table
+      }
     }
 }
