@@ -10,8 +10,6 @@ env:
 script:
   - sudo apt-get -y install make
   - make test-all-linux
-  - make dist-cdh5
-  - make dist-cdh6
 cache:
   directories:
     - $HOME/.ivy2/cache
@@ -19,7 +17,7 @@ cache:
 deploy:
   skip_cleanup: true
   provider: script
-  script: build-support/deploy.sh
+  script: make dist-cdh5 && make dist-cdh6 && build-support/deploy.sh
   on:
     tags: true
     all_branches: true
