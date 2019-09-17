@@ -5,6 +5,8 @@ jdk: openjdk8
 env:
   SBT_OPTS="-Xmx4096M"
   VERSION=$TRAVIS_TAG
+  DEPLOY_REPO=parcels-dev
+  CDH_VERSION=6
 script:
   - sudo apt-get -y install make
   - make test-all-linux
@@ -16,7 +18,7 @@ cache:
     - $HOME/.sbt
 deploy:
   provider: script
-  script: bash build-support/deploy
+  script: build-support/deploy.sh
   on:
     tags: true
     all_branches: true
