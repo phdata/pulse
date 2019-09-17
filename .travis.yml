@@ -14,3 +14,9 @@ cache:
   directories:
     - $HOME/.ivy2/cache
     - $HOME/.sbt
+deploy:
+  provider: script
+  script: bash build-support/deploy
+  on:
+    tags: true
+    all_branches: true
