@@ -37,7 +37,7 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
                  Some("Exception in thread main"),
                  None))
 
-  test("Test flow groups by application id, flushes after GROUP_MAX_TIME") {
+  ignore("Test flow groups by application id, flushes after GROUP_MAX_TIME") {
     val app1Name = TestUtil.randomIdentifier()
     val app2Name = TestUtil.randomIdentifier()
 
@@ -67,7 +67,7 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
     assertResult(1100)(queryResult.getResults.getNumFound)
   }
 
-  test("Test flow groups by application id, flushes after max documents") {
+  ignore("Test flow groups by application id, flushes after max documents") {
     val app1Name = TestUtil.randomIdentifier()
 
     val collection = s"${app1Name}_1"
@@ -90,7 +90,7 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
     assert(queryResult.getResults.getNumFound > 0)
   }
 
-  test("Stream failure method called if it exceeds the maximum queue size") {
+  ignore("Stream failure method called if it exceeds the maximum queue size") {
     // Variable to signal the stream failure method has been called
     var streamFailed = false
 
