@@ -1,3 +1,22 @@
+# 2.4.0
+
+- Full support of CDH6.  The Pulse alert-engine and collection-roller configuration files are 
+fully backwards compatible in this release. There is a breaking change in the CDH upgrade from 
+Solr 4 to Solr 7 meaning the indexes are not compatible. New collection configurations are provided
+ for Solr 7 and will be automatically used. Old collections should be saved, converted (or
+truncated if they are not important) when moving to Pulse 2.4.0.
+- Add a 'metrics' endpoint and Python library to call it that writes metrics to Kudu tables. 
+See `docs/metrics.md` for details.
+- Pulse can now read messages from a Kafka topic. This means that existing log shippers
+ like LogStash or FluentD can now be used with Pulse.  This feature is not well documented, 
+ if you plan to use this feature please contact the development team.
+
+Note: This release has not been tested fully on CDH5
+
+# 2.3.2 
+
+- Build parcel for sles 12 SUSE linux
+
 # 2.3.1
 - Remove max instance restriction on the log collector role
 
