@@ -1,61 +1,109 @@
 # Metrics
 
-**Note**: This functionality is experimental.
+In addition to writing logs to Solr Pulse can be used as a Metrics aggregator using Apache Kudu as a backend. 
 
-(TODO put the `log-appender` jar in Artifactory)
+## Python
 
-To use the `Metrics` class described below, add the `log-appender` jar to your project.
+### Installation
+Installing package via pip
 
-Pulse comes with some utility methods for writing out metrics (such as performance metrics or
-profiling) to your log files. These metrics can then be used in an Alert rule or graphed in a
-visualization tool.
-
-Metrics are added to the MDC (Mapped Diagnostic Context) for a single log message.
-
-Each metric is tagged with a name. The name of the metric is the name of the field in Solr.
-If the field is not pre-created in Solr a dynamic field can be used to create a metric of the
-right data type by appending a suffix to the tag:
-
-`_s`: String
-`_i`: Integer
-`_l`: Long
-`_f`: Float
-`_d`: Double
-(no suffix) : String
-
-For example, a `Long` type metric can be added using the Metrics helper class like
-
-The `Metrics` class needs to know about your specific logger because if it created one itself then
-all the line numbers and info would be for the `Metrics` class, which would be misleading.
-
-Before using the metrics class, define your logger as an `implicit` value so it will be automatically
-passed into the Metrics functions.
-
+```bash
+pip install pulse-logging
 ```
-private implicit val log: Logger = LoggerFactory.getLogger(this.getClass)
+Alternatively you could install by running the setup script.
 
-```
-Then you can create a metric:
-
-```
-Metrics.gauge("my_metric_l", 1L)
-
+```bash
+python setup.py install
 ```
 
-If you do not define your logger implicitly, you can just pass it into the `Metrics` function:
+### Usage
+#### Log Appender
+
+```python
+import logging
+from pulse import PulseHandler
+from pulse import PulseFormatter
+
+pulse_handler = PulseHandler("http://host.com:9001/v2/events/app")
+pulse_handler.setFormatter(PulseFormatter())
+pulse_handler.setLevel(logging.WARNING)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
+logger.addHandler(pulse_handler)
+
+try:
+    raise ValueError
+except ValueError as e:
+    logger.exception("Bad stuff")
+```
+
+##### Logging Configuration File Example
+
+`logging.ini` file contents
+```
+[loggers]
+keys=root
+
+[handlers]
+keys=pulse_handler
+
+[formatters]
+keys=pulse_formatter
+
+[logger_root]
+level=WARNING
+handlers=pulse_handler
+
+[handler_pulse_handler]
+class=handlers.PulseHandler
+level=WARNING
+formatter=pulse_formatter
+args=("http://host.com:9001/v2/events/app")
+
+[formatter_pulse_formatter]
+class=pulse.PulseFormatter
 
 ```
-val log: Logger = LoggerFactory.getLogger(this.getClass)
-Metrics.gauge("my_metric_l", 1L)(log)
+
+`main.py` file contents
+```python
+import logging
+from logging.config import fileConfig
+
+fileConfig("logging.ini")
+logger = logging.getLogger()
+
+try:
+    raise ValueError
+except ValueError as e:
+    logger.exception("Bad stuff")
+
 ```
 
-There is also a helper function for profiling function run times. This will write the tag 'timed_function_l'
-with the value of the runtime of the function.:
 
-```
-val result = Metrics.time("timed_function_l") {
-      Thread.sleep(10)
-      "ok"
-    }
+#### Writing Metrics
 
+```python
+from pulse import MetricWriter
+
+writer = MetricWriter("http://host.com:9001/v1/metrics", "kudu_table_name")
+writer.gauge("key1", "r2", 0.952)
+
+writer.close()
 ```
+
+
+## REST API
+To write metrics to Pulse using the REST API, use the following JSON format and post to a log-collector
+at the path `/v1/metrics/`:
+
+```json
+{"table_name":"metrics","payload":[{"ts":1,"key":"key","tag":"tag","value":1.4}]}
+```
+
+with values:
+
+- ts: (Long) a timestamp in epoch format
+- key: (String) the primary key for the metric
+- tag: (String) a tag to enable further filtering of the metric
+- value: (Double) the metric itself

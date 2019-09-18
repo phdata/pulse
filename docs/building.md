@@ -91,6 +91,6 @@ make clean dist
 
 ```
 
-Output will be in the `dist/` folder.
+Output will be in the `dist6/` or `dist5` folder depending on which CDH version you built for.
 
 
