@@ -21,6 +21,8 @@ import io.phdata.pulse.solr.{ BaseSolrCloudTest, TestUtil }
 import org.apache.solr.client.solrj.SolrQuery
 import org.scalatest.FunSuite
 
+import scala.collection.mutable
+
 class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
   val TEST_COLLECTION = TestUtil.randomIdentifier()
 
@@ -118,4 +120,28 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
     assert(streamFailed)
   }
 
+  test("should flush after n events") {
+    val stream = new TestStream(1, 10)
+
+    (1 to 10).foreach(x => stream.put("testApp", x.toString))
+    Thread.sleep(2500)
+    assert(stream.results.length === 10)
+  }
+
+  test("should flush after n seconds") {
+    val stream = new TestStream(1, 10)
+
+    (1 to 3).foreach(x => stream.put("testApp", x.toString))
+    Thread.sleep(2500)
+    assert(stream.results.length === 3)
+  }
+}
+
+class TestStream(flushDuration: Int, flushSize: Int) extends Stream[String](StreamParams()) {
+  StreamParams.apply(1, 100, flushSize, flushDuration, "fail")
+  var results: mutable.Seq[String] = mutable.Seq()
+
+  override private[logcollector] def save(appName: String, values: Seq[String]): Unit =
+    for (i <- values)
+      results :+= i
 }
