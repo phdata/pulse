@@ -8,7 +8,7 @@ jars:
 	cp log-collector/target/scala-2.11/log-collector-assembly-$(version).jar target/lib/
 	cp log-appender/target/scala-2.11/log-appender-assembly-$(version).jar target/lib/appenders/
 	cp common/target/scala-2.11/common-assembly-$(version).jar target/lib/
-
+	cp log-example/target/scala-2.11/log-example-assembly-$(version).jar target/lib/
 
 test:
 	sbt test
