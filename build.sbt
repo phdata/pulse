@@ -52,7 +52,6 @@ lazy val scalafmtSettings =
 lazy val dependencies =
   new {
     // Common depends
-    val logback        = "ch.qos.logback"             % "logback-classic" % logbackVersion
     val scalaLogging   = "com.typesafe.scala-logging" %% "scala-logging"  % scalaLoggingVersion
     val commonsLogging = "commons-logging"            % "commons-logging" % "1.2"
     val commonsCodec   = "commons-codec"              % "commons-codec"   % "1.9"
@@ -119,7 +118,7 @@ lazy val dependencies =
     val cats           = "org.typelevel" %% "cats-core"      % "1.1.0"
     val monix          = "io.monix"      %% "monix"          % monixVersion
 
-    val common = Seq(scalaLogging, scalaTest, logback, commonsLogging, cats)
+    val common = Seq(scalaLogging, scalaTest, commonsLogging, cats)
     val cli    = Seq(scallop, scalaYaml)
     val all    = common ++ cli ++ Seq(scalaDockerTest, spotifyDockerTest)
 
@@ -241,7 +240,6 @@ lazy val `log-example` = project
   .dependsOn(`log-appender`)
 
 // Library versions
-val logbackVersion            = "1.2.3"
 val scalaLoggingVersion       = "3.7.2"
 val scallopVersion            = "3.1.5"
 val scalaYamlVersion          = "0.4.0"
