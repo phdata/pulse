@@ -29,17 +29,34 @@ import org.apache.log4j.helpers.LogLog;
 
 public class HttpManager {
 
-    private CloseableHttpClient client;
     private URI address;
+    // This field should not be used directly, use httpClient() instead
+    private volatile CloseableHttpClient httpClientInstance;
+
+    private CloseableHttpClient httpClient() {
+        CloseableHttpClient result = httpClientInstance;
+        if (result == null) {
+            synchronized (this) {
+                result = httpClientInstance;
+                if (result == null) {
+                    httpClientInstance = result = createHttpClient();
+                }
+            }
+        }
+        return result;
+    }
 
     public HttpManager(URI address) {
         this.address = address;
+    }
 
+    private CloseableHttpClient createHttpClient() {
+        LogLog.debug("Initializing HttpClient");
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         cm.setDefaultMaxPerRoute(20);
         cm.setMaxTotal(200);
 
-        this.client = HttpClients.custom().setConnectionManager(cm).build();
+        return HttpClients.custom().setConnectionManager(cm).build();
     }
 
     public boolean send(String logMessage) {
@@ -48,10 +65,10 @@ public class HttpManager {
 
         StringEntity strEntity = new StringEntity(logMessage, Charset.forName("UTF8"));
         post.setEntity(strEntity);
-        LogLog.debug("Executing request: " +  post.getRequestLine());
+        LogLog.debug("Executing request: " + post.getRequestLine());
         boolean isSuccessful = false;
         try {
-            CloseableHttpResponse response = client.execute(post);
+            CloseableHttpResponse response = httpClient().execute(post);
             int statusCode = response.getStatusLine().getStatusCode();
             response.close();
 
@@ -59,12 +76,14 @@ public class HttpManager {
 
             isSuccessful = (200 <= statusCode && statusCode < 300);
         } catch (IOException ie) {
-           LogLog.error("Request failed: " + ie, ie);
+            LogLog.error("Request failed: " + ie, ie);
         }
         return isSuccessful;
     }
 
     public void close() throws IOException {
-        client.close();
+        if (httpClientInstance != null) {
+            httpClientInstance.close();
+        }
     }
 }
