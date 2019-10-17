@@ -52,6 +52,7 @@ lazy val scalafmtSettings =
 lazy val dependencies =
   new {
     // Common depends
+    val slf4jLogging   = "org.slf4j" % "slf4j-log4j12" % "1.7.5" % Test
     val scalaLogging   = "com.typesafe.scala-logging" %% "scala-logging"  % scalaLoggingVersion
     val commonsLogging = "commons-logging"            % "commons-logging" % "1.2"
     val commonsCodec   = "commons-codec"              % "commons-codec"   % "1.9"
@@ -118,7 +119,7 @@ lazy val dependencies =
     val cats           = "org.typelevel" %% "cats-core"      % "1.1.0"
     val monix          = "io.monix"      %% "monix"          % monixVersion
 
-    val common = Seq(scalaLogging, scalaTest, commonsLogging, cats)
+    val common = Seq(scalaLogging, scalaTest, slf4jLogging, commonsLogging, cats)
     val cli    = Seq(scallop, scalaYaml)
     val all    = common ++ cli ++ Seq(scalaDockerTest, spotifyDockerTest)
 
