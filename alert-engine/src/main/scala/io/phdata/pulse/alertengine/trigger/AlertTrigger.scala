@@ -1,0 +1,35 @@
+/*
+ * Copyright 2019 phData Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package io.phdata.pulse.alertengine.trigger
+
+import io.phdata.pulse.alertengine.{ AlertRule, TriggeredAlert }
+
+/**
+ * Checks if an alert rule should be triggered.
+ */
+trait AlertTrigger {
+
+  /**
+   * Checks if the alert rule should be triggered.
+   * If the 'resultThreshold' is 0 or greater, trigger if a result is found.
+   * If the 'resultThreshold' is less than 0, trigger if no documents are found.
+   * @param applicationName The application name
+   * @param alertRule       The alert rule to be checked
+   * @return an Option of [[io.phdata.pulse.alertengine.TriggeredAlert]]
+   */
+  def check(applicationName: String, alertRule: AlertRule): Option[TriggeredAlert]
+
+}

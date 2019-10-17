@@ -16,11 +16,11 @@
 
 package io.phdata.pulse.alertengine.notification
 
+import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.alertengine.{ SlackAlertProfile, TriggeredAlert }
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.DefaultHttpClient
-import com.typesafe.scalalogging.LazyLogging
 
 class SlackNotificationService() extends LazyLogging {
   def notify(alerts: Iterable[TriggeredAlert], profile: SlackAlertProfile): Unit =

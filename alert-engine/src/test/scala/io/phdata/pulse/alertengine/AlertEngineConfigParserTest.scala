@@ -20,7 +20,7 @@ import org.scalatest.FunSuite
 
 class AlertEngineConfigParserTest extends FunSuite {
 
-  test("parse config") {
+  test("parse config: no alert type") {
     val yaml =
       """---
         |applications:
@@ -50,13 +50,141 @@ class AlertEngineConfigParserTest extends FunSuite {
               TestObjectGenerator.alertRule(query = "query",
                                             retryInterval = 10,
                                             resultThreshold = Some(0),
-                                            alertProfiles = List("mailProfile1", "slackProfile1"))),
+                alertProfiles = List("mailProfile1", "slackProfile1"),
+                alertType = None)),
             Some(List(TestObjectGenerator.mailAlertProfile(name = "mailProfile1",
                                                            addresses = List("test@phdata.io")))),
             Some(List(TestObjectGenerator.slackAlertProfile()))
           ))
       )
     println(yaml)
-    assertResult(expected)(AlertEngineConfigParser.convert(yaml))
+    assertResult(expected)(AlertEngineConfigParser.parse(yaml))
   }
+
+  test("parse config: solr alert type") {
+    val yaml =
+      """---
+        |applications:
+        |- name: application1
+        |  alertRules:
+        |  - query: "query"
+        |    retryInterval: 10
+        |    resultThreshold: 0
+        |    alertProfiles:
+        |    - mailProfile1
+        |    - slackProfile1
+        |    alertType: solr
+        |  emailProfiles:
+        |  - name: mailProfile1
+        |    addresses:
+        |    - test@phdata.io
+        |  slackProfiles:
+        |  - name: slackProfile1
+        |    url : testurl.com
+        |  """.stripMargin
+
+    val expected =
+      AlertEngineConfig(
+        List(
+          Application(
+            "application1",
+            List(
+              TestObjectGenerator.alertRule(query = "query",
+                retryInterval = 10,
+                resultThreshold = Some(0),
+                alertProfiles = List("mailProfile1", "slackProfile1"),
+                alertType = Some(AlertTypes.SOLR))),
+            Some(List(TestObjectGenerator.mailAlertProfile(name = "mailProfile1",
+              addresses = List("test@phdata.io")))),
+            Some(List(TestObjectGenerator.slackAlertProfile()))
+          ))
+      )
+    println(yaml)
+    assertResult(expected)(AlertEngineConfigParser.parse(yaml))
+  }
+
+  test("parse config: sql alert type") {
+    val yaml =
+      """---
+        |applications:
+        |- name: application1
+        |  alertRules:
+        |  - query: "query"
+        |    retryInterval: 10
+        |    resultThreshold: 0
+        |    alertProfiles:
+        |    - mailProfile1
+        |    - slackProfile1
+        |    alertType: sql
+        |  emailProfiles:
+        |  - name: mailProfile1
+        |    addresses:
+        |    - test@phdata.io
+        |  slackProfiles:
+        |  - name: slackProfile1
+        |    url : testurl.com
+        |  """.stripMargin
+
+    val expected =
+      AlertEngineConfig(
+        List(
+          Application(
+            "application1",
+            List(
+              TestObjectGenerator.alertRule(query = "query",
+                retryInterval = 10,
+                resultThreshold = Some(0),
+                alertProfiles = List("mailProfile1", "slackProfile1"),
+                alertType = Some(AlertTypes.SQL))),
+            Some(List(TestObjectGenerator.mailAlertProfile(name = "mailProfile1",
+              addresses = List("test@phdata.io")))),
+            Some(List(TestObjectGenerator.slackAlertProfile()))
+          ))
+      )
+    println(yaml)
+    assertResult(expected)(AlertEngineConfigParser.parse(yaml))
+  }
+
+  test("parse config: unknown alert type") {
+    val yaml =
+      """---
+        |applications:
+        |- name: application1
+        |  alertRules:
+        |  - query: "query"
+        |    retryInterval: 10
+        |    resultThreshold: 0
+        |    alertProfiles:
+        |    - mailProfile1
+        |    - slackProfile1
+        |    alertType: blarg
+        |  emailProfiles:
+        |  - name: mailProfile1
+        |    addresses:
+        |    - test@phdata.io
+        |  slackProfiles:
+        |  - name: slackProfile1
+        |    url : testurl.com
+        |  """.stripMargin
+
+    val expected =
+      AlertEngineConfig(
+        List(
+          Application(
+            "application1",
+            List(
+              TestObjectGenerator.alertRule(query = "query",
+                retryInterval = 10,
+                resultThreshold = Some(0),
+                alertProfiles = List("mailProfile1", "slackProfile1"),
+                alertType = Some("blarg"))),
+            Some(List(TestObjectGenerator.mailAlertProfile(name = "mailProfile1",
+              addresses = List("test@phdata.io")))),
+            Some(List(TestObjectGenerator.slackAlertProfile()))
+          ))
+      )
+    println(yaml)
+    assertThrows[IllegalArgumentException](AlertEngineConfigParser.parse(yaml))
+  }
+
 }
