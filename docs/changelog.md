@@ -1,3 +1,7 @@
+# 2.4.1
+
+- Fixed NullPointerException when during log4j initialization on Cloudera CDH6. ce5a0b1352e02a898d93ab3f8f1994f78f30baf8
+
 # 2.4.0
 
 - Full support of CDH6.  The Pulse alert-engine and collection-roller configuration files are 
