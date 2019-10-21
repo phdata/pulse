@@ -153,7 +153,9 @@ lazy val `log-appender` = project
       dependencies.jacksonCore,
       dependencies.junit,
       dependencies.junitInterface,
-      dependencies.scalaTest
+      dependencies.scalaTest,
+      dependencies.monix,
+      dependencies.scalaLogging
     ) ++ dependencies.mocking
   )
   .enablePlugins(JavaServerAppPackaging)

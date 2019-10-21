@@ -1,20 +1,26 @@
 package io.phdata.pulse.log;
 
+import io.phdata.pulse.HttpStream;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.*;
 
-import static org.mockito.Mockito.times;
+import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
+
+import static org.mockito.Mockito.atLeast;
 
 public class HttpAppenderTest {
 
   private static final String SPARK_LOG_DIR = "/data1/yarn/container-logs/application_1542215373081_0707/container_1542215373081_0707_01_000002";
   private static final String APP_ID = "application_1542215373081_0707";
-  private static final String CONTAINER_ID = "01_000002";
+  FiniteDuration duration = Duration.create(1, "seconds");
+
+  @Mock
+  private HttpStream httpStream;
 
   @Mock
   private HttpManager httpManager;
@@ -25,24 +31,6 @@ public class HttpAppenderTest {
   }
 
   @Test
-  public void dontPostWhenBatchingHandlerIsntReady() {
-    Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
-
-    LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, 1, Level.INFO, "Hello, World",
-            "main", null, "ndc", null, null);
-
-    Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
-    HttpAppender appender = new HttpAppender();
-
-    appender.setHttpManager(httpManager);
-    // first event should call 'send'
-    appender.append(event);
-
-    // verify 'send' was called only once
-    Mockito.verify(httpManager, times(1)).send(Matchers.any());
-  }
-
-  @Test
   public void flushEventsOnError() {
     Logger logger = Logger.getLogger("io.phdata.pulse.log.HttpAppenderTest");
 
@@ -50,14 +38,20 @@ public class HttpAppenderTest {
             "main", null, "ndc", null, null);
 
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
-    HttpAppender appender = new HttpAppender();
 
-    appender.setHttpManager(httpManager);
+    HttpStream httpStream = new HttpStream(duration, 10, httpManager);
+
     // first event should call 'send'
-    appender.append(event);
+    httpStream.append(event);
+
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e) {
+      System.out.println("Interrupted");
+    }
 
     // verify 'send' was called
-    Mockito.verify(httpManager, times(1)).send(Matchers.any());
+    Mockito.verify(httpManager, atLeast(1)).send(Matchers.any());
   }
 
   @Test
@@ -67,17 +61,21 @@ public class HttpAppenderTest {
     LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, 1, Level.ERROR, "Hello, World",
             "main", null, "ndc", null, null);
 
-    ArgumentCaptor<String> sendArgument = ArgumentCaptor.forClass(String.class);
+    ArgumentCaptor<LoggingEvent> sendArgument = ArgumentCaptor.forClass(LoggingEvent.class);
 
     HttpAppender appender = new HttpAppender();
-
-    appender.setHttpManager(httpManager);
-    // first event should call 'send' since we are sending an error message
+    appender.setHttpStream(httpStream);
     appender.append(event);
 
-    Mockito.verify(httpManager).send(sendArgument.capture());
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      System.out.println("Interrupted");
+    }
 
-    assert (sendArgument.getValue().contains("\"hostname\":"));
+    Mockito.verify(httpStream).append(sendArgument.capture());
+
+    assert (sendArgument.getValue().getMDC("hostname") != "");
   }
 
   @Test
@@ -91,27 +89,27 @@ public class HttpAppenderTest {
       LoggingEvent event = new LoggingEvent("io.phdata.pulse.log.HttpAppenderTest", logger, 1, Level.ERROR, "Hello, World",
               "main", null, "ndc", null, null);
 
-      ArgumentCaptor<String> sendArgument = ArgumentCaptor.forClass(String.class);
+      ArgumentCaptor<LoggingEvent> sendArgument = ArgumentCaptor.forClass(LoggingEvent.class);
 
       HttpAppender appender = new HttpAppender();
-
-      appender.setHttpManager(httpManager);
-      // first event should call 'send' since we are sending an error message
+      appender.setHttpStream(httpStream);
       appender.append(event);
 
-      Mockito.verify(httpManager).send(sendArgument.capture());
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        System.out.println("Interrupted");
+      }
 
-      System.out.println(sendArgument.getValue());
-      Assert.assertTrue(sendArgument.getValue().contains("\"application_id\":\"application_1542215373081_0707\""));
-      Assert.assertTrue(sendArgument.getValue().contains("\"container_id\":\"01_000002\""));
+      Mockito.verify(httpStream).append(sendArgument.capture());
+
+      assert (sendArgument.getValue().getMDC("application_id").toString().contains( "application_1542215373081_0707"));
+      assert (sendArgument.getValue().getMDC("container_id").toString().contains("01_000002"));
     } finally {
       System.clearProperty(Util.YARN_LOG_DIR_SYSTEM_PROPERTY);
       System.clearProperty(Util.YARN_APP_ID_PROPERTY);
     }
   }
-
-
-
 }
 
 /**

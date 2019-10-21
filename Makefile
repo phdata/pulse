@@ -1,4 +1,4 @@
-version = ${VERSION}
+version = ${or ${VERSION},SNAPSHOT}
 
 package: clean sbt-assembly libdir sbt-package jars
 
