@@ -16,6 +16,7 @@
 
 package io.phdata.pulse.log;
 
+import io.phdata.pulse.HttpStream;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.LoggingEvent;
@@ -25,6 +26,9 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+
+import scala.concurrent.duration.Duration;
+import scala.concurrent.duration.FiniteDuration;
 
 /**
  * An HTTP log appender implementation for Log4j 1.2.x
@@ -39,7 +43,6 @@ public class HttpAppender extends AppenderSkeleton {
   private static final String SPARK_CONTAINER_ID = "container_id";
   private static final String SPARK_APPLICATION_ID = "application_id";
 
-
   private boolean isSparkApplication = false;
 
   // Visible for testing
@@ -51,6 +54,7 @@ public class HttpAppender extends AppenderSkeleton {
 
   private HttpManager httpManager;
   private String address;
+  private HttpStream stream;
 
   /**
    * JSON serializer
@@ -61,6 +65,7 @@ public class HttpAppender extends AppenderSkeleton {
    * Maximum buffer size.
    */
   private int bufferSize = 8192;
+  private FiniteDuration flushDuration = Duration.create(3,"seconds");
 
   /**
    * Does appender block when buffer is full.
@@ -76,6 +81,9 @@ public class HttpAppender extends AppenderSkeleton {
     } catch (UnknownHostException e) {
       LogLog.error("Could not set hostname: " + e, e);
     }
+
+    httpManager = this.getHttpManager();
+    stream = new HttpStream(flushDuration, bufferSize, httpManager);
 
     this.verifiedSparkApplication = Util.isSparkApplication();
     if (verifiedSparkApplication) {
@@ -124,8 +132,7 @@ public class HttpAppender extends AppenderSkeleton {
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
-      httpManager.send(json);
-      return;
+      stream.append(event);
     }
 
     // Set the NDC and thread name for the calling thread as these
@@ -272,11 +279,16 @@ public class HttpAppender extends AppenderSkeleton {
   /**
    * Visible for testing.
    *
-   * @param httpManager handles http connections
+   * @param httpStream handles http connections
    */
-  protected void setHttpManager(HttpManager httpManager) {
-    this.httpManager = httpManager;
+
+  protected void setHttpStream(HttpStream httpStream) {
+    this.stream = httpStream;
   }
+  protected HttpManager getHttpManager() {
+    return httpManager;
+  }
+
 
   /**
    * Logging event dispatcher. Operates on Object#wait() and Object#notifiy();
