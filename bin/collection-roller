@@ -11,4 +11,4 @@ done
 
 source $BIN_DIR/env.sh
 
-$BIN_DIR/../cloudera-integration/csd/scripts/control.sh start_collection_roller
+$BIN_DIR/control.sh start_collection_roller

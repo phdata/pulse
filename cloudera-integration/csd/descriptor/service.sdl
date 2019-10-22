@@ -67,7 +67,7 @@
         "minInstances": "1"
       },
       "startRunner": {
-        "program": "scripts/control.sh",
+        "program": "scripts/control-redirect.sh",
         "args": [
           "start_log_collector"
         ],
@@ -145,7 +145,7 @@
         "minInstances": "0"
       },
       "startRunner": {
-        "program": "scripts/control.sh",
+        "program": "scripts/control-redirect.sh",
         "args": [
           "start_log_collector_kafka"
         ],
@@ -220,7 +220,7 @@
         "maxInstances": "1"
       },
       "startRunner": {
-        "program": "scripts/control.sh",
+        "program": "scripts/control-redirect.sh",
         "args": [
           "start_collection_roller"
         ],
@@ -343,7 +343,7 @@
         "maxInstances": "1"
       },
       "startRunner": {
-        "program": "scripts/control.sh",
+        "program": "scripts/control-redirect.sh",
         "args": [
           "start_alert_engine"
         ],
