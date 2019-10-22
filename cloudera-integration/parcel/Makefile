@@ -7,7 +7,7 @@ distro6 = PULSE-$(parcelVersion)-el6
 distrosles12 = PULSE-$(parcelVersion)-sles12
 
 
-package: clean jars meta conf
+package: clean jars meta control conf
 	../validator -d target/$(packageName)/
 	tar  zcvf target/$(distro7).parcel -C target $(packageName)/
 	../validator -f target/$(distro7).parcel
@@ -34,6 +34,10 @@ install-dir:
 
 dir:
 	mkdir -p target/$(packageName)/lib
+
+control:
+	mkdir -p target/$(packageName)/scripts
+	cp ../../bin/control.sh target/$(packageName)/scripts
 
 jars: dir 
 	cp -r ../../target/lib target/$(packageName)/

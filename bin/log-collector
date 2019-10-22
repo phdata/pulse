@@ -20,7 +20,7 @@ done
 source $BIN_DIR/env.sh
 
 if [ $MODE == "kafka" ]; then
-  $BIN_DIR/../cloudera-integration/csd/scripts/control.sh start_log_collector_kafka
+  $BIN_DIR/control.sh start_log_collector_kafka
 else
-  $BIN_DIR/../cloudera-integration/csd/scripts/control.sh start_log_collector
+  $BIN_DIR/control.sh start_log_collector
 fi
