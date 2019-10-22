@@ -35,7 +35,7 @@
           "description": "Log collector web server port number",
           "required": "true",
           "type": "port",
-          "default": 9001
+          "default": 9085
         },
         {
           "name": "kudu.masters",
