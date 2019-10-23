@@ -1,2 +1,2 @@
 #!/bin/bash -x
-exec bin/control.sh $@
+exec $PULSE_DIST/scripts/control.sh $@
