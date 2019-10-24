@@ -7,7 +7,7 @@
         </layout>
     </appender>
     <appender name="http" class="io.phdata.pulse.log.HttpAppender">
-        <param name="Address" value="http://edge2.valhalla.phdata.io:9001/log?application=pulse-test-100"/>
+        <param name="Address" value="http://edge2.valhalla.phdata.io:9085/log?application=pulse-test-100"/>
 
     </appender>
     <appender name="async" class="org.apache.log4j.AsyncAppender">

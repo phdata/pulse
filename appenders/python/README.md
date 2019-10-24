@@ -20,7 +20,7 @@ import logging
 from pulse import PulseHandler
 from pulse import PulseFormatter
 
-pulse_handler = PulseHandler("http://host.com:9001/v2/events/app")
+pulse_handler = PulseHandler("http://host.com:9085/v2/events/app")
 pulse_handler.setFormatter(PulseFormatter())
 pulse_handler.setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ handlers=pulse_handler
 class=handlers.PulseHandler
 level=WARNING
 formatter=pulse_formatter
-args=("http://host.com:9001/v2/events/app")
+args=("http://host.com:9085/v2/events/app")
 
 [formatter_pulse_formatter]
 class=pulse.PulseFormatter
@@ -82,7 +82,7 @@ except ValueError as e:
 ```python
 from pulse import MetricWriter
 
-writer = MetricWriter("http://host.com:9001/v1/metrics", "kudu_table_name")
+writer = MetricWriter("http://host.com:9085/v1/metrics", "kudu_table_name")
 writer.gauge("key1", "r2", 0.952)
 
 writer.close()
