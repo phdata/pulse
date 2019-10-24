@@ -22,12 +22,10 @@ import io.phdata.pulse.Stream
 import org.scalatest.FunSuite
 
 import scala.collection.mutable
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.{Duration, FiniteDuration}
 
-class TestStream(flushDuration: Int, flushSize: Int) extends Stream[String] {
+class TestStream(flushDuration: FiniteDuration, flushSize: Int) extends Stream[String](flushDuration, flushSize) {
   var results: mutable.Seq[String] = mutable.Seq()
-  this.batchFlushDuration = Duration(flushDuration, TimeUnit.SECONDS)
-  this.batchFlushSize = flushSize
 
   override def save(values: Seq[String]): Unit =
     for (i <- values)
@@ -37,7 +35,7 @@ class TestStream(flushDuration: Int, flushSize: Int) extends Stream[String] {
 class StreamTest extends FunSuite {
 
   test("should flush after n events") {
-    val stream = new TestStream(1, 10)
+    val stream = new TestStream(Duration(1,TimeUnit.SECONDS), 10)
 
     (1 to 10).foreach(x => stream.append((x.toString)))
     Thread.sleep(2500)
@@ -45,7 +43,7 @@ class StreamTest extends FunSuite {
   }
 
   test("should flush after n second") {
-    val stream = new TestStream(1, 10)
+    val stream = new TestStream(Duration(1,TimeUnit.SECONDS), 10)
 
     (1 to 3).foreach(x => stream.append((x.toString)))
     Thread.sleep(2000)
