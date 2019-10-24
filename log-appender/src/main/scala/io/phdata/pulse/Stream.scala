@@ -16,24 +16,18 @@
 
 package io.phdata.pulse
 
-import java.util.concurrent.TimeUnit
-
 import io.phdata.pulse.log.{ HttpManager, JsonParser }
 import monix.reactive.subjects.ConcurrentSubject
 import monix.execution.Scheduler.Implicits.global
 import org.apache.log4j.spi.LoggingEvent
 
-import scala.concurrent.duration.{ Duration, FiniteDuration }
+import scala.concurrent.duration.FiniteDuration
 
-trait Stream[E] {
-  var batchFlushDuration: FiniteDuration = Duration(1, TimeUnit.SECONDS)
-  var batchFlushSize: Int                = 100
-
-  // Create a subject we can write events to
+abstract class Stream[E](flushDuration: FiniteDuration, flushSize: Int) {
   val subject = ConcurrentSubject.publish[E]
 
   subject
-    .bufferTimedAndCounted(batchFlushDuration, batchFlushSize)
+    .bufferTimedAndCounted(flushDuration, flushSize)
     .foreach(save)
 
   def append(value: E): Unit = subject.onNext(value)
@@ -42,9 +36,7 @@ trait Stream[E] {
 }
 
 class HttpStream(flushDuration: FiniteDuration, flushSize: Int, httpManager: HttpManager)
-    extends Stream[LoggingEvent] {
-  this.batchFlushDuration = flushDuration
-  this.batchFlushSize = flushSize
+    extends Stream[LoggingEvent](flushDuration, flushSize) {
 
   val jsonParser = new JsonParser
 
