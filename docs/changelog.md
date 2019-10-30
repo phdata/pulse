@@ -1,3 +1,8 @@
+# 2.4.2
+
+- Upgrade akka http to fix a memory leak where actors were not released, causing
+OOM after a period of time
+
 # 2.4.1
 
 - Fixed NullPointerException when during log4j initialization on Cloudera CDH6. ce5a0b1352e02a898d93ab3f8f1994f78f30baf8
