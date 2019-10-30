@@ -160,6 +160,10 @@
         {
           "filename" : "application.conf",
           "sourceFilename" : "aux/application.conf"
+        },
+        {
+          "filename" : "kafka.properties",
+          "sourceFilename" : "aux/kafka.properties"
         }
       ]},
       "kerberos": "true",
