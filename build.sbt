@@ -69,6 +69,7 @@ lazy val dependencies =
     val scalaTest         = "org.scalatest" %% "scalatest"                   % scalaTestVersion     % Test
     val scalaDockerTest   = "com.whisk"     %% "docker-testkit-scalatest"    % dockerTestKitVersion % Test
     val spotifyDockerTest = "com.whisk"     %% "docker-testkit-impl-spotify" % dockerTestKitVersion % Test
+    val slf4jLogging   = "org.slf4j"                  % "slf4j-log4j12"   % "1.7.5" % Test
 
     val kudu          = "org.apache.kudu" % "kudu-client"     % kuduVersion
     val kuduTestUtils = "org.apache.kudu" % "kudu-test-utils" % kuduVersion % Test
@@ -88,14 +89,15 @@ lazy val dependencies =
     val akkaHttp          = "com.typesafe.akka" %% "akka-http"            % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
     val akkaCors          = "ch.megard"         %% "akka-http-cors"       % akkaCorsVersion
+    val akka              = "com.typesafe.akka" %% "akka-actor"           % akkaVersion
 
     val akkaTestKit  = "com.typesafe.akka" %% "akka-testkit"      % "2.4.20"        % Test
     val akkaHttpTest = "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test
 
-    val solrj4 = "org.apache.solr" % "solr-solrj" % solrj4Version exclude ("org.slf4j", "*")
+    val solrj4    = "org.apache.solr" % "solr-solrj"          % solrj4Version exclude ("org.slf4j", "*")
     val solr4Test = "org.apache.solr" % "solr-test-framework" % solrj4Version % Test exclude ("org.slf4j", "*")
 
-    val solrj7 = "org.apache.solr" % "solr-solrj" % solrj7Version exclude ("org.slf4j", "*")
+    val solrj7    = "org.apache.solr" % "solr-solrj"          % solrj7Version exclude ("org.slf4j", "*")
     val solr7Test = "org.apache.solr" % "solr-test-framework" % solrj7Version % Test exclude ("org.slf4j", "*")
 
     val solr4 = Seq(solrj4, commonsCodec, solr4Test)
@@ -120,9 +122,10 @@ lazy val dependencies =
     val cats           = "org.typelevel" %% "cats-core"      % "1.1.0"
     val monix          = "io.monix"      %% "monix"          % monixVersion
 
-    val common = Seq(scalaLogging, scalaTest, logback, commonsLogging, cats)
-    val cli    = Seq(scallop, scalaYaml)
-    val all    = common ++ cli ++ Seq(scalaDockerTest, spotifyDockerTest)
+    val common = Seq(scalaLogging, scalaTest, slf4jLogging, commonsLogging, cats)
+
+    val cli = Seq(scallop, scalaYaml)
+    val all = common ++ cli ++ Seq(scalaDockerTest, spotifyDockerTest)
 
     val http = Seq(akkaHttp, akkaHttpSprayJson, akkaCors, akkaTestKit, akkaHttpTest)
 
@@ -169,7 +172,8 @@ lazy val `log-collector` = project
       dependencies.kudu,
       dependencies.kuduBinary,
       dependencies.kuduTestUtils
-    ) ++ dependencies.solr ++ dependencies.common
+    ) ++ dependencies.solr ++ dependencies.common,
+    dependencyOverrides += dependencies.akka
   )
   .dependsOn(common)
   .dependsOn(solrModule)
@@ -202,18 +206,14 @@ lazy val `alert-engine` = project
   .dependsOn(solrModule % "test->test")
 
 lazy val `common` = project
-  .settings(
-    name := "common",
-    settings,
-    libraryDependencies ++= dependencies.common ++ dependencies.http
-  )
+  .settings(name := "common", settings, libraryDependencies ++= dependencies.common :+ dependencies.akkaHttpSprayJson)
 
 lazy val `solr4` = project
   .settings(
     name := "solr4",
     settings,
     libraryDependencies ++= dependencies.common ++ dependencies.solr4 ++ Seq(
-      "org.scalatest"   %% "scalatest"          % scalaTestVersion
+      "org.scalatest" %% "scalatest" % scalaTestVersion
     )
   )
   .dependsOn(common)
@@ -223,7 +223,7 @@ lazy val solr7 = project
     name := "solr7",
     settings,
     libraryDependencies ++= (dependencies.common ++ dependencies.solr7 ++ Seq(
-      "org.scalatest"   %% "scalatest"          % scalaTestVersion
+      "org.scalatest" %% "scalatest" % scalaTestVersion
     ))
   )
   .dependsOn(common)
@@ -239,25 +239,26 @@ lazy val `log-example` = project
   .dependsOn(`log-appender`)
 
 // Library versions
-val logbackVersion            = "1.2.3"
-val scalaLoggingVersion       = "3.7.2"
-val scallopVersion            = "3.1.5"
-val scalaYamlVersion          = "0.4.0"
-val scalaTestVersion          = "3.0.8"
-val dockerTestKitVersion      = "0.9.5"
-val solrj4Version             = "4.10.3-cdh5.12.1"
-val solrj7Version             = "7.4.0-cdh6.1.1"
-val akkaHttpVersion           = "10.0.15"
-val akkaCorsVersion           = "0.2.2"
-val sprayJsonVersion          = "1.3.5"
-val sparkVersion              = "2.2.0.cloudera1"
-val log4jVersion              = "1.2.17"
-val httpClientVersion         = "4.5.5"
-val jacksonVersion            = "2.9.4"
-val junitVersion              = "4.12"
-val javaMailVersion           = "1.4"
-val mockitoVersion            = "1.10.19"
-val powerMockVersion          = "1.6.6"
-val monixVersion              = "2.3.3"
-val kuduVersion               = "1.10.0"
-val catsCoreVersion           = "1.6.0"
+val logbackVersion       = "1.2.3"
+val scalaLoggingVersion  = "3.7.2"
+val scallopVersion       = "3.1.5"
+val scalaYamlVersion     = "0.4.0"
+val scalaTestVersion     = "3.0.8"
+val dockerTestKitVersion = "0.9.5"
+val solrj4Version        = "4.10.3-cdh5.12.1"
+val solrj7Version        = "7.4.0-cdh6.1.1"
+val akkaVersion          = "2.5.8"
+val akkaHttpVersion      = "10.0.15"
+val akkaCorsVersion      = "0.2.2"
+val sprayJsonVersion     = "1.3.5"
+val sparkVersion         = "2.2.0.cloudera1"
+val log4jVersion         = "1.2.17"
+val httpClientVersion    = "4.5.5"
+val jacksonVersion       = "2.9.4"
+val junitVersion         = "4.12"
+val javaMailVersion      = "1.4"
+val mockitoVersion       = "1.10.19"
+val powerMockVersion     = "1.6.6"
+val monixVersion         = "2.3.3"
+val kuduVersion          = "1.10.0"
+val catsCoreVersion      = "1.6.0"
