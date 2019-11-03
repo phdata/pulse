@@ -20,7 +20,6 @@ import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Properties
 
-import io.phdata.pulse.common.JsonSupport
 import io.phdata.pulse.logcollector.utils.{ KafkaMiniCluster, ZooKafkaConfig }
 import io.phdata.pulse.solr.{ BaseSolrCloudTest }
 import org.apache.kafka.clients.consumer.ConsumerConfig

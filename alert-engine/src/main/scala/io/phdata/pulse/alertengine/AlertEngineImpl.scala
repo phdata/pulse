@@ -18,7 +18,7 @@ package io.phdata.pulse.alertengine
 
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.alertengine.notification.NotificationServices
-import io.phdata.pulse.common.{ JsonSupport, SolrService }
+import io.phdata.pulse.common.{ SolrService }
 
 /**
  * The Alert Engine will
@@ -31,7 +31,6 @@ import io.phdata.pulse.common.{ JsonSupport, SolrService }
  */
 class AlertEngineImpl(solrService: SolrService, notificatonServices: NotificationServices)
     extends AlertEngine
-    with JsonSupport
     with LazyLogging {
 
   def run(applications: List[Application], silencedApplications: List[String]): Unit = {

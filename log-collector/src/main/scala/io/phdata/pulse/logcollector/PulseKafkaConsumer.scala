@@ -20,7 +20,6 @@ import java.util.{ Collections, Properties }
 
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import com.typesafe.scalalogging.LazyLogging
-import io.phdata.pulse.common.JsonSupport
 import spray.json.JsonParser.ParsingException
 
 import scala.collection.JavaConverters._

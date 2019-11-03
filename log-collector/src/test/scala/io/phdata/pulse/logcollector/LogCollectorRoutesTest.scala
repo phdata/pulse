@@ -21,7 +21,6 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, MessageEntity, StatusCodes }
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import io.phdata.pulse.common.JsonSupport
 import io.phdata.pulse.common.domain.{ LogEvent, TimeseriesEvent, TimeseriesRequest }
 import io.phdata.pulse.solr.BaseSolrCloudTest
 import org.mockito.Mockito.verify

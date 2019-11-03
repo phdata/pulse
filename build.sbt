@@ -69,7 +69,7 @@ lazy val dependencies =
     val scalaTest         = "org.scalatest" %% "scalatest"                   % scalaTestVersion     % Test
     val scalaDockerTest   = "com.whisk"     %% "docker-testkit-scalatest"    % dockerTestKitVersion % Test
     val spotifyDockerTest = "com.whisk"     %% "docker-testkit-impl-spotify" % dockerTestKitVersion % Test
-    val slf4jLogging   = "org.slf4j"                  % "slf4j-log4j12"   % "1.7.5" % Test
+    val slf4jLogging   = "org.slf4j"                  % "slf4j-log4j12"   % "1.7.5"
 
     val kudu          = "org.apache.kudu" % "kudu-client"     % kuduVersion
     val kuduTestUtils = "org.apache.kudu" % "kudu-test-utils" % kuduVersion % Test
@@ -86,10 +86,10 @@ lazy val dependencies =
     val apacheKafka = "org.apache.kafka" % "kafka_2.11" % "0.10.2-kafka-2.2.0" % Provided
 
     // Http depends
+    val akkaActor         = "com.typesafe.akka" %% "akka-actor"           % akkaActorVersion
+    val akkaStream        = "com.typesafe.akka" %% "akka-stream"          % akkaActorVersion
     val akkaHttp          = "com.typesafe.akka" %% "akka-http"            % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
-    val akkaCors          = "ch.megard"         %% "akka-http-cors"       % akkaCorsVersion
-    val akka              = "com.typesafe.akka" %% "akka-actor"           % akkaVersion
 
     val akkaTestKit  = "com.typesafe.akka" %% "akka-testkit"      % "2.4.20"        % Test
     val akkaHttpTest = "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test
@@ -127,7 +127,7 @@ lazy val dependencies =
     val cli = Seq(scallop, scalaYaml)
     val all = common ++ cli ++ Seq(scalaDockerTest, spotifyDockerTest)
 
-    val http = Seq(akkaHttp, akkaHttpSprayJson, akkaCors, akkaTestKit, akkaHttpTest)
+    val http = Seq(akkaHttp, akkaHttpSprayJson, akkaTestKit, akkaHttpTest, akkaActor, akkaStream)
 
     val mocking = Seq(mockito, powermock, powerMockApi, powerMockJunit)
   }
@@ -172,8 +172,7 @@ lazy val `log-collector` = project
       dependencies.kudu,
       dependencies.kuduBinary,
       dependencies.kuduTestUtils
-    ) ++ dependencies.solr ++ dependencies.common,
-    dependencyOverrides += dependencies.akka
+    ) ++ dependencies.solr ++ dependencies.common
   )
   .dependsOn(common)
   .dependsOn(solrModule)
@@ -198,7 +197,6 @@ lazy val `alert-engine` = project
     settings,
     libraryDependencies ++= dependencies.common ++ dependencies.solr ++ Seq(dependencies.javaMail) ++ Seq(
       dependencies.scalaYaml,
-      dependencies.sprayJson,
       dependencies.scallop) ++ dependencies.mocking
   )
   .dependsOn(common)
@@ -206,7 +204,7 @@ lazy val `alert-engine` = project
   .dependsOn(solrModule % "test->test")
 
 lazy val `common` = project
-  .settings(name := "common", settings, libraryDependencies ++= dependencies.common :+ dependencies.akkaHttpSprayJson)
+  .settings(name := "common", settings, libraryDependencies ++= dependencies.common)
 
 lazy val `solr4` = project
   .settings(
@@ -247,9 +245,8 @@ val scalaTestVersion     = "3.0.8"
 val dockerTestKitVersion = "0.9.5"
 val solrj4Version        = "4.10.3-cdh5.12.1"
 val solrj7Version        = "7.4.0-cdh6.1.1"
-val akkaVersion          = "2.5.8"
-val akkaHttpVersion      = "10.0.15"
-val akkaCorsVersion      = "0.2.2"
+val akkaActorVersion     = "2.5.23"
+val akkaHttpVersion      = "10.1.10"
 val sprayJsonVersion     = "1.3.5"
 val sparkVersion         = "2.2.0.cloudera1"
 val log4jVersion         = "1.2.17"
