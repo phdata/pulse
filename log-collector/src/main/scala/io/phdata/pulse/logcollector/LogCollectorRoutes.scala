@@ -20,7 +20,6 @@ import akka.http.scaladsl.common.EntityStreamingSupport
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, StatusCodes }
 import akka.http.scaladsl.server.Directives._
 import com.typesafe.scalalogging.LazyLogging
-import io.phdata.pulse.common.JsonSupport
 import io.phdata.pulse.common.domain.{ LogEvent, TimeseriesRequest }
 
 /**

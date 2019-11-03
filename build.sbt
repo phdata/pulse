@@ -52,7 +52,7 @@ lazy val scalafmtSettings =
 lazy val dependencies =
   new {
     // Common depends
-    val slf4jLogging   = "org.slf4j"                  % "slf4j-log4j12"   % "1.7.5" % Test
+    val slf4jLogging   = "org.slf4j"                  % "slf4j-log4j12"   % "1.7.5"
     val scalaLogging   = "com.typesafe.scala-logging" %% "scala-logging"  % scalaLoggingVersion
     val commonsLogging = "commons-logging"            % "commons-logging" % "1.2"
     val commonsCodec   = "commons-codec"              % "commons-codec"   % "1.9"
@@ -84,9 +84,10 @@ lazy val dependencies =
     val apacheKafka = "org.apache.kafka" % "kafka_2.11" % "0.10.2-kafka-2.2.0" % Provided
 
     // Http depends
+    val akkaActor         = "com.typesafe.akka" %% "akka-actor"           % akkaActorVersion
+    val akkaStream        = "com.typesafe.akka" %% "akka-stream"          % akkaActorVersion
     val akkaHttp          = "com.typesafe.akka" %% "akka-http"            % akkaHttpVersion
     val akkaHttpSprayJson = "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion
-    val akkaCors          = "ch.megard"         %% "akka-http-cors"       % akkaCorsVersion
 
     val akkaTestKit  = "com.typesafe.akka" %% "akka-testkit"      % "2.4.20"        % Test
     val akkaHttpTest = "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test
@@ -123,7 +124,7 @@ lazy val dependencies =
     val cli    = Seq(scallop, scalaYaml)
     val all    = common ++ cli ++ Seq(scalaDockerTest, spotifyDockerTest)
 
-    val http = Seq(akkaHttp, akkaHttpSprayJson, akkaCors, akkaTestKit, akkaHttpTest)
+    val http = Seq(akkaHttp, akkaHttpSprayJson, akkaTestKit, akkaHttpTest, akkaActor, akkaStream)
 
     val mocking = Seq(mockito, powermock, powerMockApi, powerMockJunit)
 
@@ -197,7 +198,6 @@ lazy val `alert-engine` = project
     settings,
     libraryDependencies ++= dependencies.common ++ dependencies.solr ++ Seq(dependencies.javaMail) ++ Seq(
       dependencies.scalaYaml,
-      dependencies.sprayJson,
       dependencies.scallop,
       dependencies.h2) ++ dependencies.mocking
   )
@@ -206,11 +206,7 @@ lazy val `alert-engine` = project
   .dependsOn(solrModule % "test->test")
 
 lazy val `common` = project
-  .settings(
-    name := "common",
-    settings,
-    libraryDependencies ++= dependencies.common ++ dependencies.http
-  )
+  .settings(name := "common", settings, libraryDependencies ++= dependencies.common)
 
 lazy val `solr4` = project
   .settings(
@@ -242,25 +238,25 @@ lazy val `log-example` = project
   )
   .dependsOn(`log-appender`)
 
-// Library versions
-val scalaLoggingVersion       = "3.7.2"
-val scallopVersion            = "3.1.5"
-val scalaYamlVersion          = "0.4.0"
-val scalaTestVersion          = "3.0.8"
-val dockerTestKitVersion      = "0.9.5"
-val solrj4Version             = "4.10.3-cdh5.12.1"
-val solrj7Version             = "7.4.0-cdh6.1.1"
-val akkaHttpVersion           = "10.0.15"
-val akkaCorsVersion           = "0.2.2"
-val sprayJsonVersion          = "1.3.5"
-val sparkVersion              = "2.2.0.cloudera1"
-val log4jVersion              = "1.2.17"
-val httpClientVersion         = "4.5.5"
-val jacksonVersion            = "2.9.4"
-val junitVersion              = "4.12"
-val javaMailVersion           = "1.4"
-val mockitoVersion            = "1.10.19"
-val powerMockVersion          = "1.6.6"
-val monixVersion              = "2.3.3"
-val kuduVersion               = "1.10.0"
-val catsCoreVersion           = "1.6.0"
+val logbackVersion       = "1.2.3"
+val scalaLoggingVersion  = "3.7.2"
+val scallopVersion       = "3.1.5"
+val scalaYamlVersion     = "0.4.0"
+val scalaTestVersion     = "3.0.8"
+val dockerTestKitVersion = "0.9.5"
+val solrj4Version        = "4.10.3-cdh5.12.1"
+val solrj7Version        = "7.4.0-cdh6.1.1"
+val akkaActorVersion     = "2.5.23"
+val akkaHttpVersion      = "10.1.10"
+val sprayJsonVersion     = "1.3.5"
+val sparkVersion         = "2.2.0.cloudera1"
+val log4jVersion         = "1.2.17"
+val httpClientVersion    = "4.5.5"
+val jacksonVersion       = "2.9.4"
+val junitVersion         = "4.12"
+val javaMailVersion      = "1.4"
+val mockitoVersion       = "1.10.19"
+val powerMockVersion     = "1.6.6"
+val monixVersion         = "2.3.3"
+val kuduVersion          = "1.10.0"
+val catsCoreVersion      = "1.6.0"
