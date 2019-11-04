@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package io.phdata.pulse.metrics
+package io.phdata.pulse
 
 import java.util.concurrent.TimeUnit
 
-import io.phdata.pulse.Stream
 import org.scalatest.FunSuite
 
 import scala.collection.mutable
-import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.concurrent.duration._
 
-class TestStream(flushDuration: FiniteDuration, flushSize: Int) extends Stream[String](flushDuration, flushSize) {
+class TestStream(flushDuration: FiniteDuration, flushSize: Int, maxBuffer: Int)
+    extends Stream[String](flushDuration, flushSize, maxBuffer) {
   var results: mutable.Seq[String] = mutable.Seq()
 
   override def save(values: Seq[String]): Unit =
@@ -34,8 +34,12 @@ class TestStream(flushDuration: FiniteDuration, flushSize: Int) extends Stream[S
 
 class StreamTest extends FunSuite {
 
+  val DEFAULT_MAX_BUFFER = 1000
+  val DEFAULT_FLUSH_SIZE = 10
+
   test("should flush after n events") {
-    val stream = new TestStream(Duration(1,TimeUnit.SECONDS), 10)
+    val stream =
+      new TestStream(1 seconds, DEFAULT_FLUSH_SIZE, DEFAULT_MAX_BUFFER)
 
     (1 to 10).foreach(x => stream.append((x.toString)))
     Thread.sleep(2500)
@@ -43,10 +47,12 @@ class StreamTest extends FunSuite {
   }
 
   test("should flush after n second") {
-    val stream = new TestStream(Duration(1,TimeUnit.SECONDS), 10)
+    val stream =
+      new TestStream(1 seconds, DEFAULT_FLUSH_SIZE, DEFAULT_MAX_BUFFER)
 
     (1 to 3).foreach(x => stream.append((x.toString)))
-    Thread.sleep(2000)
+    Thread.sleep(3000)
     assert(stream.results.length === 3)
   }
+
 }
