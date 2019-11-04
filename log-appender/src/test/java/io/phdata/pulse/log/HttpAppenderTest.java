@@ -39,7 +39,7 @@ public class HttpAppenderTest {
 
     Mockito.when(httpManager.send(Matchers.any())).thenReturn(true);
 
-    HttpStream httpStream = new HttpStream(duration, 10, httpManager);
+    HttpStream httpStream = new HttpStream(duration, 10, 100, httpManager);
 
     // first event should call 'send'
     httpStream.append(event);
