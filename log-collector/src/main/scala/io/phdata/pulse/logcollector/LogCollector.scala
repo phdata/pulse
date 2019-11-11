@@ -94,7 +94,10 @@ object LogCollector extends LazyLogging {
 
     httpServerFuture.onComplete {
       case Success(v) => ()
-      case Failure(e) => throw new RuntimeException(e)
+      case Failure(ex) => {
+        logger.error("HTTP server failed, exiting. ", ex)
+        System.exit(1)
+      }
     }
 
     Await.ready(
