@@ -116,12 +116,12 @@
       "jvmBased" : "true",
       "parameters": [
         {
-          "name": "topic",
+          "name": "log.collector.kafka.topic",
           "label": "Log Collector Kafka Topic",
           "description": "Kafka topic name for log messages sent to logstash and picked up via Log Collector in kafka mode. Takes as an argument a single topic.",
           "required": "false",
           "type": "string",
-          "default": "pulse-kafka-topic"
+          "default": ""
         },
         {
           "name": "log.collector.kafka.max.heap.size",
@@ -150,7 +150,7 @@
           "start_log_collector_kafka"
         ],
         "environmentVariables": {
-          "KAFKA_TOPIC": "${topic}",
+          "KAFKA_TOPIC": "${log.collector.kafka.topic}",
           "LOG_COLLECTOR_MAX_HEAP": "${log.collector.kafka.max.heap.size}",
           "LOG_COLLECTOR_EXTRA_OPTS": "${log.collector.extra.opts}"
         }
