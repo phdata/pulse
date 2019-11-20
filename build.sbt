@@ -38,7 +38,8 @@ lazy val commonSettings = Seq(
 lazy val assemblySettings = Seq(
   test in assembly := {},
   assemblyShadeRules in assembly := Seq(
-    ShadeRule.rename("org.apache.http.**" -> "io.phdata.pulse.shade.org.apache.http.@1").inAll
+    ShadeRule.rename("org.apache.http.**" -> "io.phdata.pulse.shade.org.apache.http.@1").inAll,
+    ShadeRule.rename("scala.**" -> "io.phdata.pulse.shade.scala.@1").inAll
   )
 )
 
