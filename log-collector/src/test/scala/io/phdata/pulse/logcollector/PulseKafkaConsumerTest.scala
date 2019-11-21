@@ -20,10 +20,11 @@ import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Properties
 
-import io.phdata.pulse.logcollector.utils.{ KafkaMiniCluster, ZooKafkaConfig }
-import io.phdata.pulse.solr.{ BaseSolrCloudTest }
+import com.typesafe.scalalogging.LazyLogging
+import io.phdata.pulse.logcollector.utils.{KafkaMiniCluster, ZooKafkaConfig}
+import io.phdata.pulse.solr.BaseSolrCloudTest
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.scalatest.{ BeforeAndAfterEach, FunSuite }
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 import spray.json._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,6 +35,7 @@ class PulseKafkaConsumerTest
     extends FunSuite
     with BeforeAndAfterEach
     with JsonSupport
+    with LazyLogging
     with BaseSolrCloudTest {
   // start kafka minicluster (broker)
   var kafkaMiniCluster: KafkaMiniCluster = _
@@ -100,8 +102,8 @@ class PulseKafkaConsumerTest
 
     // Write messages to local Kafka broker
     val messageList = generateMessageList(messageCount, app1Name)
-    println(messageList.length)
-    println(messageList)
+    logger.info(s"The length of message list is ${messageList.length}")
+    logger.info(s"The message list is $messageList")
     kafkaMiniCluster.produceMessages(TOPIC1, messageList)
 
     // Set Kafka consumer properties
@@ -128,9 +130,10 @@ class PulseKafkaConsumerTest
     // sleep until documents are flushed
     Thread.sleep(SLEEP_TIME)
 
+    logger.info(s"solrService class type is ${solrService.getClass}")
     // Query for ERROR log messages
     val query1Result = solrService.query(app1Alias, "*")
-    
+    logger.info(s"The first query result is $query1Result")
     assertResult(messageCount)(query1Result.length)
   }
 
@@ -191,6 +194,6 @@ class PulseKafkaConsumerTest
     // Query for ERROR log messages
     val query2Result = solrService.query(app1Alias, "*")
 
-    assertResult(messageCount * 2)(query2Result.length)
+    assertResult(messageCount)(query2Result.length)
   }
 }
