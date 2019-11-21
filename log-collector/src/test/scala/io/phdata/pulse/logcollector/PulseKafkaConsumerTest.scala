@@ -41,7 +41,7 @@ class PulseKafkaConsumerTest
 
   var streamProcessor: PulseKafkaConsumer = _
 
-  val SLEEP_TIME = 3000
+  val SLEEP_TIME = 15000
 
   override def beforeEach(): Unit = {
     val zkPort = ServiceUtil.getNextPort
@@ -129,7 +129,7 @@ class PulseKafkaConsumerTest
 
     // Query for ERROR log messages
     val query1Result = solrService.query(app1Alias, "*")
-
+    
     assertResult(messageCount)(query1Result.length)
   }
 
