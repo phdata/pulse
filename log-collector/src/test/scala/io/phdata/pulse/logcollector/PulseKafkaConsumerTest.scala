@@ -41,7 +41,7 @@ class PulseKafkaConsumerTest
 
   var streamProcessor: PulseKafkaConsumer = _
 
-  val SLEEP_TIME = 15000
+  val SLEEP_TIME = 5000
 
   override def beforeEach(): Unit = {
     val zkPort = ServiceUtil.getNextPort
@@ -117,6 +117,7 @@ class PulseKafkaConsumerTest
     kafkaConsumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "pulse-kafka")
 
     solrService.createCollection(app1Collection, 1, 1, "testconf", null)
+    Thread.sleep(SLEEP_TIME)
     solrService.createAlias(app1Alias, app1Collection)
 
     //  run kafka consumer in separate thread
@@ -152,6 +153,7 @@ class PulseKafkaConsumerTest
     kafkaConsumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "pulse-kafka")
 
     solrService.createCollection(app1Collection, 1, 1, "testconf", null)
+    Thread.sleep(SLEEP_TIME)
     solrService.createAlias(app1Alias, app1Collection)
 
     // run kafka consumer in separate thread for first batch
