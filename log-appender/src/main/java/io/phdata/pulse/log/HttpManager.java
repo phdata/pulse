@@ -23,6 +23,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.log4j.helpers.LogLog;
@@ -56,7 +57,7 @@ public class HttpManager {
         cm.setDefaultMaxPerRoute(20);
         cm.setMaxTotal(200);
 
-        return HttpClients.custom().setConnectionManager(cm).build();
+        return HttpClients.custom().setConnectionManager(cm).setKeepAliveStrategy(DefaultConnectionKeepAliveStrategy.INSTANCE).build();
     }
 
     public boolean send(String logMessage) {
