@@ -43,7 +43,7 @@ class PulseKafkaConsumerTest
 
   var streamProcessor: PulseKafkaConsumer = _
 
-  val SLEEP_TIME = 30000
+  val SLEEP_TIME = 60000
 
   override def beforeEach(): Unit = {
     val zkPort = ServiceUtil.getNextPort
@@ -118,10 +118,15 @@ class PulseKafkaConsumerTest
     kafkaConsumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
     kafkaConsumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "pulse-kafka")
 
+    logger.info(s"kafkaConsumerProps are $kafkaConsumerProps")
+
     logger.info(s"solrService is creating a collection: $app1Collection")
     solrService.createCollection(app1Collection, 1, 1, "testconf", null)
+    logger.info(s"solrService collections are : ${solrService.listCollections()}")
+
     logger.info(s"solrService is creating a alias: $app1Alias")
     solrService.createAlias(app1Alias, app1Collection)
+    logger.info(s"solrService alias are : ${solrService.listAliases()}")
 
     //  run kafka consumer in separate thread
     val f = Future {
