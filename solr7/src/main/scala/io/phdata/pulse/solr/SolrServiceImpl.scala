@@ -20,19 +20,13 @@ import java.nio.file.Path
 import java.util
 
 import org.apache.solr.client.solrj.SolrQuery
-import org.apache.solr.client.solrj.impl.{ BinaryResponseParser, CloudSolrClient }
+import org.apache.solr.client.solrj.impl.{BinaryResponseParser, CloudSolrClient}
 import org.apache.solr.client.solrj.request.AbstractUpdateRequest.ACTION
-import org.apache.solr.client.solrj.request.{ QueryRequest, UpdateRequest }
+import org.apache.solr.client.solrj.request.{QueryRequest, UpdateRequest}
 import org.apache.solr.common.SolrInputDocument
-import org.apache.solr.common.cloud.{ SolrZkClient, ZkConfigManager, ZkStateReader }
+import org.apache.solr.common.cloud.{SolrZkClient, ZkConfigManager, ZkStateReader}
 import org.apache.solr.common.params.CollectionParams.CollectionAction
-import org.apache.solr.common.params.{
-  CollectionAdminParams,
-  CoreAdminParams,
-  ModifiableSolrParams
-}
-
-import scala.collection.JavaConversions._
+import org.apache.solr.common.params.{CollectionAdminParams, CoreAdminParams, ModifiableSolrParams}
 import org.apache.solr.common.util.NamedList
 
 import scala.collection.JavaConversions._
@@ -142,7 +136,7 @@ class SolrServiceImpl(zkAddresses: List[String], solr: CloudSolrClient) extends 
     solrQuery.set("fl", "*") // return full results
     solrQuery.set("collection", collection)
     val results = solr.query(solrQuery).getResults
-
+    logger.info(s"solrQuery results are $results")
     results.toSeq.map(_.entrySet().toSeq.map(x => x.getKey -> x.getValue).toMap)
   }
 
