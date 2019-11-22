@@ -137,6 +137,7 @@ class PulseKafkaConsumerTest
     Thread.sleep(SLEEP_TIME)
 
     // Query for ERROR log messages
+    logger.info("solrService query will be called")
     val query1Result = solrService.query(app1Alias, "*")
     logger.info(s"The first query result is $query1Result")
     assertResult(messageCount)(query1Result.length)
