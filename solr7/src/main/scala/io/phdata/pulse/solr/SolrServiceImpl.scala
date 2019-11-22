@@ -132,7 +132,9 @@ class SolrServiceImpl(zkAddresses: List[String], solr: CloudSolrClient) extends 
   }
 
   override def query(collection: String, query: String): Seq[Map[String, _]] = {
+    logger.info("solrService is starting querying")
     val solrQuery = new SolrQuery(query)
+    logger.info("solrService is created solrQuery")
     solrQuery.set("fl", "*") // return full results
     solrQuery.set("collection", collection)
     val results = solr.query(solrQuery).getResults
