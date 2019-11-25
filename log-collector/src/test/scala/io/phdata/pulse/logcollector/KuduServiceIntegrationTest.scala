@@ -33,7 +33,7 @@ class KuduServiceIntegrationTest extends FunSuite with BeforeAndAfterEach {
     kuduTestHarness.after()
   }
 
-  ignore("Create a table if it doesn't exist") {
+  test("Create a table if it doesn't exist") {
     val client    = kuduTestHarness.getClient
     val service   = new KuduService(kuduTestHarness.getClient)
     val tableName = "footable"
@@ -50,7 +50,7 @@ class KuduServiceIntegrationTest extends FunSuite with BeforeAndAfterEach {
     assert(table != null)
   }
 
-  ignore("Write events into Kudu") {
+  test("Write events into Kudu") {
     val tableName = "fooApp"
     val client    = kuduTestHarness.getClient
     val numRows   = 1001
