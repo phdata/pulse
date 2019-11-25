@@ -16,11 +16,12 @@
 
 package io.phdata.pulse.logcollector
 
+import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pulse.common.domain.TimeseriesEvent
 import org.apache.kudu.test.KuduTestHarness
-import org.scalatest.{ BeforeAndAfterEach, FunSuite }
+import org.scalatest.{BeforeAndAfterEach, FunSuite}
 
-class KuduServiceIntegrationTest extends FunSuite with BeforeAndAfterEach {
+class KuduServiceIntegrationTest extends FunSuite with BeforeAndAfterEach with LazyLogging{
   val kuduTestHarness = new KuduTestHarness()
 
   override def beforeEach(): Unit = {
@@ -34,6 +35,7 @@ class KuduServiceIntegrationTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("Create a table if it doesn't exist") {
+    logger.info("Creating a table test is started")
     val client    = kuduTestHarness.getClient
     val service   = new KuduService(kuduTestHarness.getClient)
     val tableName = "footable"
@@ -51,6 +53,7 @@ class KuduServiceIntegrationTest extends FunSuite with BeforeAndAfterEach {
   }
 
   test("Write events into Kudu") {
+    logger.info("Writing events into Kudu test is started")
     val tableName = "fooApp"
     val client    = kuduTestHarness.getClient
     val numRows   = 1001

@@ -2,12 +2,29 @@ language: scala
 scala:
   - 2.11.12
 jdk: openjdk8
+sudo: required
 env:
   SBT_OPTS="-Xmx4096M"
   VERSION=$TRAVIS_TAG
   DEPLOY_REPO=parcels-dev
   CDH_VERSION=6
+  matrix:
+  - OS_TYPE=centos OS_VERSION=7
+services:
+  - docker
+before_install:
+  - sudo apt-get update
+  - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
+  - sudo service docker restart
+  - sleep 5
+  - sudo docker pull centos:centos${OS_VERSION}
 script:
+  - docker run --privileged -d -ti -e "container=docker"  -v /sys/fs/cgroup:/sys/fs/cgroup -v `pwd`:/htcondor-ce:rw  centos:centos${OS_VERSION}   /usr/sbin/init
+  - DOCKER_CONTAINER_ID=$(docker ps | grep centos | awk '{print $1}')
+  - docker logs $DOCKER_CONTAINER_ID
+  - docker exec -ti $DOCKER_CONTAINER_ID /bin/bash -xec "bash -xe /htcondor-ce/tests/test_inside_docker.sh ${OS_VERSION};
+  - echo -ne \"------\nEND HTCONDOR-CE TESTS\n\";"
+  - docker ps -a
   - sudo apt-get -y install make
   - make test-all-linux
 cache:
@@ -17,7 +34,11 @@ cache:
 deploy:
   skip_cleanup: true
   provider: script
-  script: make dist-cdh5 && make dist-cdh6 && build-support/deploy.sh
+  script: 
+  - make dist-cdh5 && make dist-cdh6 && build-support/deploy.sh
+  - DOCKER_CONTAINER_ID=$(docker ps | grep centos | awk '{print $1}')
+  - docker stop $DOCKER_CONTAINER_ID
+  - docker rm -v $DOCKER_CONTAINER_ID  
   on:
     tags: true
     all_branches: true
