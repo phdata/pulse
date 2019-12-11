@@ -103,7 +103,7 @@
         "filename" : "log-collector.log",
         "modifiable" : true,
         "configName" : "log.dir",
-        "loggingType" : "logback",
+        "loggingType" : "log4j",
         "additionalConfigs" : [
 
         ]
@@ -179,7 +179,7 @@
         "filename" : "log-collector-kafka.log",
         "modifiable" : true,
         "configName" : "log.dir",
-        "loggingType" : "logback",
+        "loggingType" : "log4j",
         "additionalConfigs" : [
 
         ]
@@ -259,7 +259,7 @@
         "filename" : "collection-roller.log",
         "modifiable" : true,
         "configName" : "log.dir",
-        "loggingType" : "logback",
+        "loggingType" : "log4j",
         "additionalConfigs" : [
 
         ]
@@ -391,7 +391,7 @@
         "filename" : "alert-engine.log",
         "modifiable" : true,
         "configName" : "log.dir",
-        "loggingType" : "logback",
+        "loggingType" : "log4j",
         "additionalConfigs" : [
 
         ]

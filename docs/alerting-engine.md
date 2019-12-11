@@ -59,8 +59,7 @@ A helper script for running the alert engine is located at `bin/alert-engine`.
 
 Example usage of the Alert Engine:
 ```bash
-java -Dlogback.configurationFile=logback.xml \
-    -Djava.security.auth.login.config=jaas.conf \
+java -Djava.security.auth.login.config=jaas.conf \
     -cp <path-to-alert-engine-assembly> io.phdata.pulse.alertengine.AlertEngineMain \
     --daemonize --zk-hosts master1.valhalla.phdata.io:2181/solr \
     --smtp-server smtp.gmail.com --smtp-user user@company.com \

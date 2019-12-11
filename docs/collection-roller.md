@@ -69,7 +69,6 @@ To run the collection roller from the command line looks like
 
 ```bash
 $ java -DXmx=2147483648 \
-    -Dlogback.configurationFile=logback.xml \
     -Djava.security.auth.login.config=./jaas.conf \
     -Dsun.security.krb5.debug=false \
     -cp <path-to-collection-roller-assembly> io.phdata.pulse.collectionroller.CollectionRollerMain \
