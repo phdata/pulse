@@ -239,7 +239,6 @@ lazy val `log-example` = project
   )
   .dependsOn(`log-appender`)
 
-val logbackVersion       = "1.2.3"
 val scalaLoggingVersion  = "3.7.2"
 val scallopVersion       = "3.1.5"
 val scalaYamlVersion     = "0.4.0"
