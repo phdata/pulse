@@ -69,7 +69,7 @@ lazy val dependencies =
     val scalaTest         = "org.scalatest" %% "scalatest"                   % scalaTestVersion     % Test
     val scalaDockerTest   = "com.whisk"     %% "docker-testkit-scalatest"    % dockerTestKitVersion % Test
     val spotifyDockerTest = "com.whisk"     %% "docker-testkit-impl-spotify" % dockerTestKitVersion % Test
-    val slf4jLogging   = "org.slf4j"                  % "slf4j-log4j12"   % "1.7.5"
+    val slf4jLogging   = "org.slf4j"                  % "slf4j-api"   % "1.7.5"
 
     val kudu          = "org.apache.kudu" % "kudu-client"     % kuduVersion
     val kuduTestUtils = "org.apache.kudu" % "kudu-test-utils" % kuduVersion % Test
@@ -94,11 +94,11 @@ lazy val dependencies =
     val akkaTestKit  = "com.typesafe.akka" %% "akka-testkit"      % "2.4.20"        % Test
     val akkaHttpTest = "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test
 
-    val solrj4    = "org.apache.solr" % "solr-solrj"          % solrj4Version exclude ("org.slf4j", "*")
-    val solr4Test = "org.apache.solr" % "solr-test-framework" % solrj4Version % Test exclude ("org.slf4j", "*")
+    val solrj4    = "org.apache.solr" % "solr-solrj"          % solrj4Version excludeAll(ExclusionRule(organization = "org.slf4j" ))
+    val solr4Test = "org.apache.solr" % "solr-test-framework" % solrj4Version % Test excludeAll(ExclusionRule(organization = "org.slf4j" ))
 
-    val solrj7    = "org.apache.solr" % "solr-solrj"          % solrj7Version exclude ("org.slf4j", "*")
-    val solr7Test = "org.apache.solr" % "solr-test-framework" % solrj7Version % Test exclude ("org.slf4j", "*")
+    val solrj7    = "org.apache.solr" % "solr-solrj"          % solrj7Version excludeAll(ExclusionRule(organization = "org.slf4j" ))
+    val solr7Test = "org.apache.solr" % "solr-test-framework" % solrj7Version % Test excludeAll(ExclusionRule(organization = "org.slf4j" ))
 
     val solr4 = Seq(solrj4, commonsCodec, solr4Test)
     val solr7 = Seq(solrj7, commonsCodec, solr7Test)
@@ -122,7 +122,7 @@ lazy val dependencies =
     val cats           = "org.typelevel" %% "cats-core"      % "1.1.0"
     val monix          = "io.monix"      %% "monix"          % monixVersion
 
-    val common = Seq(scalaLogging, scalaTest, slf4jLogging, commonsLogging, cats)
+    val common = Seq(scalaLogging, scalaTest, slf4jLogging, commonsLogging, cats, logback)
 
     val cli = Seq(scallop, scalaYaml)
     val all = common ++ cli ++ Seq(scalaDockerTest, spotifyDockerTest)
@@ -256,6 +256,6 @@ val junitVersion         = "4.12"
 val javaMailVersion      = "1.4"
 val mockitoVersion       = "1.10.19"
 val powerMockVersion     = "1.6.6"
-val monixVersion         = "2.3.3"
+val monixVersion         = "3.1.0"
 val kuduVersion          = "1.10.0"
 val catsCoreVersion      = "1.6.0"

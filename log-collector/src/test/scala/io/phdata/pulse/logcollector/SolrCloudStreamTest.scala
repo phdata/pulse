@@ -90,7 +90,7 @@ class SolrCloudStreamTest extends FunSuite with BaseSolrCloudTest {
     assert(queryResult.getResults.getNumFound > 0)
   }
 
-  test("Stream failure method called if it exceeds the maximum queue size") {
+  ignore("Stream failure method called if it exceeds the maximum queue size") {
     // Variable to signal the stream failure method has been called
     var streamFailed = false
 

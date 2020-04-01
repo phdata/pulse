@@ -74,35 +74,8 @@ abstract class Stream[EventType](streamParams: StreamParams = StreamParams()) ex
       .map(_.toInt)
       .getOrElse(streamParams.numThreads)
 
-  // This strategy will fail by signalling a function that exits the application. The original `OverflowStrategy.Fail`
-  // doesn't have a clear way get a stream failure message.
-  private val failOverflowStrategy =
-    OverflowStrategy.ClearBufferAndSignal(maxBuffersize, exitingOverflowMessage _)
-
-  private val overflowStrategy =
-    sys.props
-      .get("pulse.collector.stream.overflow.strategy")
-      .map { strategy =>
-        strategy.trim.toLowerCase match {
-          case "fail" =>
-            failOverflowStrategy
-          case "dropold" =>
-            OverflowStrategy.DropOldAndSignal(maxBuffersize, overflowMessage _)
-          case "dropnew" =>
-            OverflowStrategy.DropNewAndSignal(maxBuffersize, overflowMessage _)
-          case "clearbuffer" =>
-            OverflowStrategy.ClearBufferAndSignal(maxBuffersize, overflowMessage _)
-          case "backpressure" =>
-            OverflowStrategy.BackPressure(maxBuffersize)
-          case _ => throw new IllegalArgumentException(s"Unrecogized overflow strategy $strategy")
-        }
-      }
-      .getOrElse {
-        failOverflowStrategy
-      }
-
   logger.info(s"Max buffer size `pulse.collector.stream.buffer.max` is $maxBuffersize")
-  logger.info(s"Overflow stragegy `pulse.collector.stream.overflow.strategy` ${overflowStrategy}")
+  //logger.info(s"Overflow stragegy `pulse.collector.stream.overflow.strategy` ${overflowStrategy}")
   logger.info(s"Batch size `pulse.collector.stream.batch.size`is $solrBatchSize")
   logger.info(s"Batch flush duration `pulse.collector.stream.flush.seconds` is $batchFlushDuration")
   logger.info(
@@ -142,7 +115,7 @@ abstract class Stream[EventType](streamParams: StreamParams = StreamParams()) ex
 
   // Create a subject we can write events to
   private[logcollector] val subject = ConcurrentSubject
-    .publish[(String, EventType)](overflowStrategy.asInstanceOf[Synchronous[Nothing]])
+    .publish[(String, EventType)]
 
   /* Perform the transformation:
  - group the events by their application name, creating multiple streams, one for each application
@@ -155,14 +128,15 @@ abstract class Stream[EventType](streamParams: StreamParams = StreamParams()) ex
     .map { group =>
       group
         .bufferTimedAndCounted(batchFlushDuration, solrBatchSize)
-        .mapAsync(y =>
+        .mapParallelUnordered(numThreads) { y =>
           Task(save(group.key, y.map(_._2))).onErrorRecover {
             case e: Throwable =>
               logger.error(s"Exception writing batch for application ${group.key}", e)
-        })
-        .executeOn(blockingScheduler)
-        .foreach(_ => ())
+          }
+        }
+        .foreach(_ => ());
     }
+    .executeOn(blockingScheduler)
     .subscribe()
 
   private def overflowMessage[A](numEvents: Long): Option[A] = {
