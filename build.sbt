@@ -69,7 +69,7 @@ lazy val dependencies =
     val scalaTest         = "org.scalatest" %% "scalatest"                   % scalaTestVersion     % Test
     val scalaDockerTest   = "com.whisk"     %% "docker-testkit-scalatest"    % dockerTestKitVersion % Test
     val spotifyDockerTest = "com.whisk"     %% "docker-testkit-impl-spotify" % dockerTestKitVersion % Test
-    val slf4jLogging   = "org.slf4j"                  % "slf4j-log4j12"   % "1.7.5"
+    val slf4jLogging   = "org.slf4j"                  % "slf4j-api"   % "1.7.5"
 
     val kudu          = "org.apache.kudu" % "kudu-client"     % kuduVersion
     val kuduTestUtils = "org.apache.kudu" % "kudu-test-utils" % kuduVersion % Test
