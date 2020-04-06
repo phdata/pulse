@@ -57,6 +57,7 @@ lazy val dependencies =
     val scalaLogging   = "com.typesafe.scala-logging" %% "scala-logging"  % scalaLoggingVersion
     val commonsLogging = "commons-logging"            % "commons-logging" % "1.2"
     val commonsCodec   = "commons-codec"              % "commons-codec"   % "1.9"
+    val slf4jApi   = "org.slf4j"                  % "slf4j-api"   % "1.7.5"
 
     // CLI parsing depends
     val scallop   = "org.rogach"    %% "scallop"      % scallopVersion
@@ -69,7 +70,9 @@ lazy val dependencies =
     val scalaTest         = "org.scalatest" %% "scalatest"                   % scalaTestVersion     % Test
     val scalaDockerTest   = "com.whisk"     %% "docker-testkit-scalatest"    % dockerTestKitVersion % Test
     val spotifyDockerTest = "com.whisk"     %% "docker-testkit-impl-spotify" % dockerTestKitVersion % Test
-    val slf4jLogging   = "org.slf4j"                  % "slf4j-log4j12"   % "1.7.5"
+    // Needed for Solr Minicluster tests
+    val slf4jLog4j   = "org.slf4j"                  % "slf4j-log4j12"   % "1.7.5" % Test
+
 
     val kudu          = "org.apache.kudu" % "kudu-client"     % kuduVersion
     val kuduTestUtils = "org.apache.kudu" % "kudu-test-utils" % kuduVersion % Test
@@ -122,7 +125,7 @@ lazy val dependencies =
     val cats           = "org.typelevel" %% "cats-core"      % "1.1.0"
     val monix          = "io.monix"      %% "monix"          % monixVersion
 
-    val common = Seq(scalaLogging, scalaTest, slf4jLogging, commonsLogging, cats)
+    val common = Seq(scalaLogging, scalaTest, slf4jApi, slf4jLog4j, commonsLogging, cats, logback)
 
     val cli = Seq(scallop, scalaYaml)
     val all = common ++ cli ++ Seq(scalaDockerTest, spotifyDockerTest)
